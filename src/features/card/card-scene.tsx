@@ -186,7 +186,7 @@ export function CardDrawScene({
                         opacity: 1,
                       }
                     : isChosen
-                      ? { x: 0, y: 0, rotate: 0, scale: 1.25, opacity: 1 }
+                      ? { x: 0, y: 0, rotate: 0, scale: phase === 'reveal' ? 1.9 : 1.25, opacity: 1 }
                       : { x: fan.x, y: fan.y, rotate: fan.rotate, opacity: 1, scale: 1 }
               }
               transition={

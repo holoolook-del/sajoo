@@ -34,7 +34,7 @@ export function CardPage() {
           <h1 className="mt-2 text-2xl font-bold text-gold">오늘의 운세카드</h1>
           <p className="mt-1 text-sm text-hanji/60">{today} · 오늘 뽑은 카드</p>
         </header>
-        <div className="mx-auto h-44 w-32">
+        <div className="mx-auto h-96 w-64">
           {card ? (
             <CardFront card={card} />
           ) : (
