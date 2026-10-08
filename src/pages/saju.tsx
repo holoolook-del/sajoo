@@ -81,6 +81,29 @@ export function SajuPage() {
         </div>
       </section>
 
+      {/* 내면의 나 — 일지가 읽는 가까운 사이의 모습 */}
+      {reading.dayBranch && (
+        <section className="rounded-xl border border-dancheong/50 bg-night-soft p-5">
+          <h2 className="text-sm text-hanji/60">내면의 나 — 일지(日支)</h2>
+          <p className="mt-2 text-base font-bold text-hanji">
+            {pillars.day.korean.charAt(1)}
+            {reading.dayBranch.hanja} — 「{reading.dayBranch.title}」
+          </p>
+          <p className="text-xs text-hanji/50">{reading.dayBranch.nature}</p>
+          <p className="mt-3 text-sm leading-6 text-hanji/85">{reading.dayBranch.inner}</p>
+          <dl className="mt-3 space-y-2.5 rounded-lg bg-night p-4">
+            <div className="flex gap-3 text-sm leading-6">
+              <dt className="shrink-0 font-bold text-gold-bright">가까워지면</dt>
+              <dd className="text-hanji/85">{reading.dayBranch.bond}</dd>
+            </div>
+            <div className="flex gap-3 text-sm leading-6">
+              <dt className="shrink-0 font-bold text-gold-bright">조심할 점</dt>
+              <dd className="text-hanji/85">{reading.dayBranch.watch}</dd>
+            </div>
+          </dl>
+        </section>
+      )}
+
       {/* 오행 분포 */}
       <section className="rounded-xl border border-gold/30 bg-night-soft p-5">
         <h2 className="text-sm text-hanji/60">오행(五行) 분포</h2>

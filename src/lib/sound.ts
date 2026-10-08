@@ -102,8 +102,28 @@ export function playKnock(): void {
 // 페이지마다 setBgm으로 '원하는 곡'을 선언해 두고, 첫 포인터 입력마다 syncBgm으로
 // 실제 재생을 시도한다(제스처 안에서만 성공). 음소거 시 함께 멈춘다.
 
-const BGM_FILES = { bgm: 'bgm.wav', temple: 'temple.wav' } as const;
+const BGM_FILES = {
+  bgm: 'bgm.wav',
+  temple: 'temple.wav',
+  // 숙면 사운드 라이브러리 (/sleep) — 전부 wraparound로 만든 완전 루프
+  rain: 'sleep/rain.wav',
+  waves: 'sleep/waves.wav',
+  fire: 'sleep/fire.wav',
+  forest: 'sleep/forest.wav',
+  epic: 'sleep/epic.wav',
+} as const;
 export type BgmKey = keyof typeof BGM_FILES;
+
+// 트랙별 볼륨 — 수면 음원은 배경 BGM보다 앞에 들려야 하므로 더 크게
+const BGM_VOLUME: Record<BgmKey, number> = {
+  bgm: 0.3,
+  temple: 0.35,
+  rain: 0.55,
+  waves: 0.55,
+  fire: 0.5,
+  forest: 0.55,
+  epic: 0.5,
+};
 
 let bgmDesired: BgmKey | null = null;
 let bgmEl: HTMLAudioElement | null = null;
@@ -124,7 +144,7 @@ export function syncBgm(): void {
   if (!bgmEl.src.endsWith(url)) {
     bgmEl.src = url;
     bgmEl.loop = true;
-    bgmEl.volume = 0.3;
   }
+  bgmEl.volume = BGM_VOLUME[bgmDesired];
   if (bgmEl.paused) void bgmEl.play().catch(() => {});
 }

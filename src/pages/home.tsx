@@ -15,6 +15,7 @@ const MENUS = [
   // 심심풀이 — 기록 다음에 이어지는 가벼운 놀이 메뉴
   { to: '/moktak', img: 'menu-moktak', title: '공덕 목탁', desc: '두드릴수록 번뇌가 사라지는 소리' },
   { to: 'https://holoolook-del.github.io/necut/', img: 'menu-necut', title: '민화네컷', desc: '내 사진이 민화가 되는 네 컷' },
+  { to: '/sleep', img: 'menu-sleep', title: '숙면 사운드', desc: '잠이 올 때까지 틀어두는 밤의 소리' },
 ];
 
 export function HomePage() {

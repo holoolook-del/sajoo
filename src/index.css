@@ -14,3 +14,15 @@ body {
   background-color: var(--color-night);
   color: var(--color-hanji);
 }
+
+/* 몽환 배경 — 구름 무한 드리프트(이미지 2장 이어붙여 -50%까지 밀면 심리스) */
+@keyframes drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* 달빛이 은은하게 숨 쉬는 효과 */
+@keyframes moonbreathe {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.9; }
+}

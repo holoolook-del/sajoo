@@ -2,6 +2,7 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useEffect, type ReactNode } from 'react';
 import { hasProfile } from './lib/storage.ts';
 import { setBgm, syncBgm } from './lib/sound.ts';
+import { NightBackdrop } from './components/night-backdrop.tsx';
 import { CardPage } from './pages/card.tsx';
 import { CompatPage } from './pages/compat.tsx';
 import { FortunePage } from './pages/fortune.tsx';
@@ -11,6 +12,7 @@ import { LuckPage } from './pages/luck.tsx';
 import { MoktakPage } from './pages/moktak.tsx';
 import { OnboardingPage } from './pages/onboarding.tsx';
 import { SajuPage } from './pages/saju.tsx';
+import { SleepPage } from './pages/sleep.tsx';
 
 function RequireProfile({ children }: { children: ReactNode }) {
   return hasProfile() ? children : <Navigate to="/onboarding" replace />;
@@ -28,6 +30,7 @@ export function App() {
 
   return (
     <HashRouter>
+      <NightBackdrop />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
@@ -76,6 +79,14 @@ export function App() {
           element={
             <RequireProfile>
               <MoktakPage />
+            </RequireProfile>
+          }
+        />
+        <Route
+          path="/sleep"
+          element={
+            <RequireProfile>
+              <SleepPage />
             </RequireProfile>
           }
         />

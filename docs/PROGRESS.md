@@ -154,3 +154,25 @@
 
 ### 검증
 - vitest 42/42, e2e 30/30, build+SW 51개(8.9MB)
+
+## T12 — 몽환 배경 + 메뉴 이미지 재생성 + 일지 해석 + seamless BGM + 숙면 사운드 (완료)
+
+### 한 일
+- `src/components/night-backdrop.tsx`(신규) — 전 페이지 뒤에 깔리는 몽환 밤하늘: 별 트윙클 캔버스(90개, reduced-motion 대응) + 달(screen 블렌드·숨쉬기) + 구름 2층 무한 드리프트(이중 이미지 translateX -50%) + 하단 창가 소녀 실루엣(방사형 마스크로 가장자리 페이드). App에 전역 마운트
+- `scripts/gen-images.ts` — menu-history(달력 스크롤 아카이브), menu-compat(인연의 붉은 실), menu-sleep(창가 잠든 고양이) 재생성 + bg/ 레이어 4장(moon, clouds-a, clouds-b, girl) 신규
+- `scripts/gen-sounds.ts` — bell/noise/pad를 wraparound 인덱스로 바꿔 **루프 끝-시작이 물리적으로 이어지는** 완전 루프 생성(bgm·temple·sleep 전부). 수면 트랙 5종 합성(빗소리·파도·모닥불·밤의 숲·웅장한 밤, 각 28s)
+- `src/lib/sound.ts` — BGM_FILES에 수면 트랙 등록 + 트랙별 볼륨 맵(수면 음원은 0.5~0.55)
+- `src/content/interpret.ts` — DAY_BRANCH_TEXT 신규: 일지 12지지별 내면 해석(nature·title·inner·bond·watch). interpret.ts가 dayBranch로 노출, saju 페이지에 '내면의 나 — 일지' 카드 추가
+- `src/pages/sleep.tsx`(신규) — 숙면 사운드 라이브러리: 6트랙 타일(재생 중 이퀄라이저 표시)·자동 끄기 타이머(15/30/60분, 만료 시 완전 정지)·공유·←홈. 라우트 /sleep, 홈 그리드 민화네컷 다음
+- `vite.config.ts` — 수면 음원 프리캐시 제외 + CacheFirst 런타임 캐시(sleep-audio, max 8)
+- e2e/sleep.spec.ts 3건 — 메뉴 표시·트랙 토글·타이머/홈 복귀
+
+### 새 파일을 만든 이유
+- night-backdrop: 전역 배경 컴포넌트는 App이 1회 마운트 — 페이지에 몰아넣으면 라우트마다 별이 리셋됨
+- sleep.tsx: 독립 미니앱 라우트 — moktak과 같은 패턴
+
+### 검증
+- vitest 42/42, e2e 36/36(수면 3건 신규), build+SW 56항목(9.0MB, 수면 음원 제외 확인), lint 경고 2(기존 card-frame)
+
+### 남은 문제
+- 없음 — 실기기에서 bgm/temple 루프 이음새·수면 타이머 실제 소리 확인 필요(H3)

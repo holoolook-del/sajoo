@@ -58,13 +58,15 @@
 | ShareButton | src/components/share-button.tsx | 공유 버튼 (shareResult 호출 + 복사 피드백) | text,label? → 버튼 |
 | playCardPick / playCardCharge / playCardReveal / playKnock / isSoundEnabled / setSoundEnabled / setBgm / syncBgm | src/lib/sound.ts | WAV 효과음·배경음악 재생 (HTMLAudioElement, 인앱 브라우저 대응 제스처 언락 — 나중에 자동 재생될 사운드만 프라임; BGM은 pointerdown 재시도) + 음소거 설정 (키 sajoo:sound) | track? → void |
 | MoktakPage | src/pages/moktak.tsx | 공덕 목탁 미니앱 — 탭 카운터(오늘/누적, 키 sajoo:moktak)·마일스톤 문구·공유. 라우트 /moktak | — |
+| SleepPage | src/pages/sleep.tsx | 숙면 사운드 라이브러리 — 트랙 선택 재생(배경 BGM 채널 재사용)·수면 타이머(15/30/60분)·공유. 라우트 /sleep | — |
+| NightBackdrop | src/components/night-backdrop.tsx | 몽환 밤하늘 배경 — 별 트윙클 캔버스·흐르는 구름 2층·달·창가 소녀 실루엣. fixed -z-10, App 전역 | — |
 | SoundToggle | src/components/sound-toggle.tsx | 효과음 켜기/끄기 토글 버튼 | → 버튼 |
 
 ## 콘텐츠·풀이문
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
 | --- | --- | --- | --- |
 | ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey | src/content/meta.ts | 오행·십신 공용 메타 (색상·한자·타입) | 오행 → 색상/한자 |
-| DAY_MASTER_TEXT / DayMasterSocial / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT | src/content/interpret.ts | 풀이문 DB (일간 캐릭터·사회적 면모·오행·균형·십신) | 키 → 해석 문장 |
+| DAY_MASTER_TEXT / DayMasterSocial / DAY_BRANCH_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT | src/content/interpret.ts | 풀이문 DB (일간 캐릭터·사회적 면모·일지 12지지 내면 해석·오행·균형·십신) | 키 → 해석 문장 |
 | BRANCH_RELATIONS / DAY_GOD_TEXT / RELATION_TEXT / GRADE_SUMMARY / LUCKY | src/content/fortune.ts | 지지 관계 테이블 + 오늘운세 풀이문 + 행운 색·방향·아이템 | 지지쌍/십신/등급/오행 → 문장 |
 | COMPAT_GRADE_TEXT / COMPAT_RELATION_TEXT / STEM_RELATION_TEXT | src/content/compat.ts | 궁합 풀이문 (일간 관계·지지 관계·등급 요약) | 키 → 해석 문장 |
 

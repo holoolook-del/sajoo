@@ -32,6 +32,15 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2,json,wav}'],
+        // 수면 음원(~6MB)은 프리캐시에서 제외 — 첫 방문 용량을 지키고, 재생할 때 런타임 캐시
+        globIgnores: ['**/assets/audio/sleep/**'],
+        runtimeCaching: [
+          {
+            urlPattern: /\/assets\/audio\/sleep\/.*\.wav$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'sleep-audio', expiration: { maxEntries: 8 } },
+          },
+        ],
       },
     }),
   ],

@@ -116,15 +116,46 @@ const jobs: Job[] = [
   },
   {
     file: 'illust/menu-compat.webp',
-    prompt: `a pair of mandarin ducks floating side by side on a moonlit lotus pond, harmonious and tender${STYLE}`,
+    prompt: `two glowing crimson threads floating through the night air, gently intertwining and tying into a loose knot under a full moon, red thread of fate, romantic and delicate${STYLE}`,
     aspect: '1:1',
     mp: '0.25',
   },
   {
     file: 'illust/menu-history.webp',
-    prompt: `phases of the moon arranged in a gentle arc across the night sky above drifting clouds${STYLE}`,
+    prompt: `an old silk almanac scroll unrolling on a dark wooden desk beside an ink brush and a small brass moon-phase dial, warm candlelight, nostalgic archival mood${STYLE}`,
     aspect: '1:1',
     mp: '0.25',
+  },
+  {
+    file: 'illust/menu-sleep.webp',
+    prompt: `a cozy dark room with a round window showing the moonlit night sky, a small cat sleeping curled on the windowsill, a candle flickering softly, dreamy calm${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  // ── 몽환 배경 레이어 ──
+  {
+    file: 'bg/moon.webp',
+    prompt: `a large luminous full moon with a soft golden halo, centered, surrounded by faint glowing haze, on a pure black background, dreamy ethereal${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
+    file: 'bg/clouds-a.webp',
+    prompt: `a long horizontal band of wispy translucent clouds drifting across a pure black background, thin silver-lit edges, soft and airy, wide seamless composition${STYLE}`,
+    aspect: '21:9',
+    mp: '0.25',
+  },
+  {
+    file: 'bg/clouds-b.webp',
+    prompt: `a long horizontal band of thin scattered cloud wisps and fog drifting across a pure black background, very faint silver glow, sparse and dreamy, wide seamless composition${STYLE}`,
+    aspect: '21:9',
+    mp: '0.25',
+  },
+  {
+    file: 'bg/girl.webp',
+    prompt: `the back-view silhouette of a young girl with long hair sitting by a large open window gazing up at the night sky, deep indigo room, moonlight rim light on her outline, window frame visible, the lower part fading into darkness, quiet wistful mood${STYLE}`,
+    aspect: '9:16',
+    mp: '1',
   },
   {
     file: 'illust/menu-moktak.webp',
@@ -204,6 +235,7 @@ async function main() {
   token = loadKey();
   mkdirSync(join(OUT_DIR, 'cards'), { recursive: true });
   mkdirSync(join(OUT_DIR, 'illust'), { recursive: true });
+  mkdirSync(join(OUT_DIR, 'bg'), { recursive: true });
 
   let done = 0, skipped = 0, failed = 0;
   for (const job of jobs) {

@@ -13,13 +13,12 @@ const TAU = Math.PI * 2;
 
 const sec = (s: number) => Math.floor(s * SR);
 
-/** 종·하프 계열 — 사인 본음 + 옥타브·4옥타브 배음, 어택 후 지수 감쇠 */
+/** 종·하프 계열 — 사인 본음 + 옥타브·4옥타브 배음, 어택 후 지수 감쇠. 인덱스는 루프 wrap */
 function bell(buf: Float32Array, freq: number, at: number, dur: number, gain: number) {
   const start = sec(at);
   const n = sec(dur);
   for (let i = 0; i < n; i++) {
-    const j = start + i;
-    if (j >= buf.length) break;
+    const j = (start + i) % buf.length; // 루프 트랙이 끝에서 시작으로 이어지도록 wrap
     const t = i / SR;
     const env = Math.min(t / 0.006, 1) * Math.exp((-3.6 * t) / dur);
     const v =
@@ -30,14 +29,13 @@ function bell(buf: Float32Array, freq: number, at: number, dur: number, gain: nu
   }
 }
 
-/** 노이즈 — hp=true면 차분으로 고역 반짝임, 아니면 백색소음 감쇠 */
+/** 노이즈 — hp=true면 차분으로 고역 반짝임, 아니면 백색소음 감쇠. 인덱스는 루프 wrap */
 function noise(buf: Float32Array, at: number, dur: number, gain: number, hp: boolean) {
   const start = sec(at);
   const n = sec(dur);
   let prev = 0;
   for (let i = 0; i < n; i++) {
-    const j = start + i;
-    if (j >= buf.length) break;
+    const j = (start + i) % buf.length;
     const t = i / SR;
     const w = Math.random() * 2 - 1;
     const v = hp ? (w - prev) * 0.7 : w * 0.5;
@@ -166,14 +164,13 @@ console.log('효과음 합성 중…');
   writeWav('knock.wav', buf);
 }
 
-/** 패드 화음 — 사인 음색 여러 개를 느린 어택/릴리즈로 깔기 */
+/** 패드 화음 — 사인 음색 여러 개를 느린 어택/릴리즈로 깔기. 인덱스는 루프 wrap */
 function pad(buf: Float32Array, freqs: number[], at: number, dur: number, gain: number) {
   const start = sec(at);
   const n = sec(dur);
   const fade = Math.min(2.2, dur * 0.3);
   for (let i = 0; i < n; i++) {
-    const j = start + i;
-    if (j >= buf.length) break;
+    const j = (start + i) % buf.length; // wrap — 루프 경계에서 무음/끊김 없음
     const t = i / SR;
     const remain = (n - i) / SR;
     const env = Math.min(1, t / fade, remain / fade);
@@ -215,6 +212,99 @@ function pad(buf: Float32Array, freqs: number[], at: number, dur: number, gain: 
   }
   noise(buf, 0, 32, 0.02, false);
   writeWav('temple.wav', buf);
+}
+
+// ── 숙면 사운드 라이브러리 (sleep/) — 28초 완전 루프, 전부 wraparound ──
+mkdirSync(join(OUT_DIR, 'sleep'), { recursive: true });
+const SLEEP_LEN = 28;
+
+/** 잔잔한 노이즈 베드 — 저주파 성분이 섞인 부드러운 배경 */
+function bed(buf: Float32Array, dur: number, gain: number, lpAmt = 0.08) {
+  let lp = 0;
+  for (let i = 0; i < sec(dur); i++) {
+    const w = Math.random() * 2 - 1;
+    lp += lpAmt * (w - lp);
+    buf[i % buf.length] = (buf[i % buf.length] ?? 0) + gain * (w * 0.3 + lp * 0.7);
+  }
+}
+
+/** 짧은 디케이 노이즈 팝(모닥불 파열음 등)을 무작위 시각에 산재 */
+function pops(buf: Float32Array, dur: number, gain: number, density: number) {
+  const total = sec(dur);
+  for (let i = 0; i < total; i++) {
+    if (Math.random() > density) continue;
+    const n = sec(0.015 + Math.random() * 0.05);
+    const base = Math.random() * 2 - 1;
+    for (let k = 0; k < n; k++) {
+      buf[(i + k) % buf.length] =
+        (buf[(i + k) % buf.length] ?? 0) + gain * base * (Math.random() * 2 - 1) * Math.exp(-k / (n * 0.25));
+    }
+    i += n;
+  }
+}
+
+// sleep/rain.wav — 밤비: 노이즈 베드 + 무작위 빗방울 틱
+{
+  const buf = new Float32Array(sec(SLEEP_LEN));
+  bed(buf, SLEEP_LEN, 0.16, 0.05);
+  for (let k = 0; k < 90; k++) {
+    bell(buf, 1100 + Math.random() * 1500, Math.random() * SLEEP_LEN, 0.08, 0.025);
+  }
+  writeWav('sleep/rain.wav', buf);
+}
+
+// sleep/waves.wav — 파도: 노이즈가 7초 주기로 밀려왔다 빠짐 + 저음 울림
+{
+  const buf = new Float32Array(sec(SLEEP_LEN));
+  for (let i = 0; i < sec(SLEEP_LEN); i++) {
+    const t = i / SR;
+    const swell = 0.3 + 0.7 * Math.pow(Math.sin(Math.PI * (t / 7)) ** 2, 1.2);
+    const w = Math.random() * 2 - 1;
+    buf[i] = (buf[i] ?? 0) + 0.2 * swell * w * 0.5 + 0.08 * swell * Math.sin(TAU * 55 * t);
+  }
+  writeWav('sleep/waves.wav', buf);
+}
+
+// sleep/fire.wav — 모닥불: 따뜻한 저음 패드 + 타닥타닥 파열음
+{
+  const buf = new Float32Array(sec(SLEEP_LEN));
+  pad(buf, [98, 146.83, 196], 0, SLEEP_LEN, 0.1);
+  pops(buf, SLEEP_LEN, 0.5, 0.0035);
+  writeWav('sleep/fire.wav', buf);
+}
+
+// sleep/forest.wav — 밤의 숲: 바람에 스치는 잎 + 드문 새 울음 + 나뭇잎 부스럭
+{
+  const buf = new Float32Array(sec(SLEEP_LEN));
+  bed(buf, SLEEP_LEN, 0.1, 0.04);
+  for (let i = 0; i < sec(SLEEP_LEN); i++) {
+    const t = i / SR;
+    buf[i] = (buf[i] ?? 0) + 0.05 * Math.sin(TAU * (0.11 * t)) * (Math.random() * 2 - 1); // 바람의 느린 기복
+  }
+  // 드문 새 울음 — 올라가는 주파수 스윕 3~4회
+  for (const at of [3.4, 12.1, 19.8, 26.0]) {
+    const start = sec(at);
+    const n = sec(0.5);
+    let ph = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / SR;
+      const f = 2400 + 900 * (t / 0.5);
+      ph += (TAU * f) / SR;
+      buf[(start + i) % buf.length] =
+        (buf[(start + i) % buf.length] ?? 0) + 0.05 * Math.min(t / 0.08, 1) * Math.exp(-t / 0.4) * Math.sin(ph);
+    }
+  }
+  pops(buf, SLEEP_LEN, 0.05, 0.0015); // 희박한 잎 부스럭
+  writeWav('sleep/forest.wav', buf);
+}
+
+// sleep/epic.wav — 웅장한 밤: 낮은 옥타브 패드 + 깊은 종
+{
+  const buf = new Float32Array(sec(SLEEP_LEN));
+  pad(buf, [55, 82.41, 110, 164.81], 0, SLEEP_LEN, 0.24);
+  pad(buf, [65.41, 98, 130.81], 14, SLEEP_LEN, 0.2); // 후반 다른 화음
+  for (const t of [4, 13, 22]) bell(buf, 98, t, 5, 0.3);
+  writeWav('sleep/epic.wav', buf);
 }
 
 console.log('완료 — public/assets/audio/');

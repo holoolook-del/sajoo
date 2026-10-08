@@ -1,4 +1,4 @@
-import { DAY_MASTER_TEXT, ELEMENT_BALANCE, TEN_GOD_TEXT } from '../content/interpret.ts';
+import { DAY_BRANCH_TEXT, DAY_MASTER_TEXT, ELEMENT_BALANCE, TEN_GOD_TEXT } from '../content/interpret.ts';
 import type { DayMasterSocial } from '../content/interpret.ts';
 import { ELEMENT_KEYS, type ElementKey, type TenGodKey } from '../content/meta.ts';
 import type { SajuResult } from './engine.ts';
@@ -12,6 +12,8 @@ export interface SajuReading {
     text: string;
     social: DayMasterSocial;
   };
+  /** 일지(日支) — 겉 일간 뒤의 내면·친밀한 관계 스타일 */
+  dayBranch: { hanja: string; nature: string; title: string; inner: string; bond: string; watch: string } | null;
   elementCounts: { element: ElementKey; count: number }[];
   dominant: ElementKey;
   lacking: ElementKey[];
@@ -76,6 +78,11 @@ export function interpretSaju(saju: SajuResult): SajuReading {
           text: '',
           social: { seen: '', good: '', watch: '', bond: '' },
         },
+    dayBranch: (() => {
+      const hanja = saju.pillars.day.branchHanja;
+      const db = DAY_BRANCH_TEXT[hanja];
+      return db ? { hanja, ...db } : null;
+    })(),
     elementCounts,
     dominant,
     lacking,
