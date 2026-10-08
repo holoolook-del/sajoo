@@ -89,6 +89,49 @@ const jobs: Job[] = [
     aspect: '21:9',
     mp: '1',
   },
+  // ── 홈 메뉴 썸네일 ──
+  {
+    file: 'illust/menu-card.webp',
+    prompt: `several ornate golden fortune cards lying face-down fanned out on dark silk, glowing golden backs with lotus emblem, magical particles${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/menu-fortune.webp',
+    prompt: `a golden sunrise breaking over mountain ridges, warm rays piercing morning mist and clouds${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/menu-saju.webp',
+    prompt: `four glowing stone pillars of different heights standing in a row under stars, cosmic symbols floating above${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/menu-luck.webp',
+    prompt: `a long winding river of molten gold seen from above, flowing through dark mountain valleys at night${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/menu-compat.webp',
+    prompt: `a pair of mandarin ducks floating side by side on a moonlit lotus pond, harmonious and tender${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/menu-history.webp',
+    prompt: `phases of the moon arranged in a gentle arc across the night sky above drifting clouds${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/onboarding.webp',
+    prompt: `a mystical night scene with a glowing eight-trigram cosmic wheel floating above clouds and a distant mountain, welcoming and wondrous${STYLE}`,
+    aspect: '4:3',
+    mp: '1',
+  },
 ];
 
 function loadKey(): string {

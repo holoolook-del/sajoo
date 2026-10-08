@@ -3,6 +3,16 @@ import { todaysDraw } from '../features/card/draw.ts';
 import { todayKST } from '../lib/date.ts';
 import { hasProfile } from '../lib/storage.ts';
 
+const A = import.meta.env.BASE_URL;
+
+const MENUS = [
+  { to: '/fortune', img: 'menu-fortune', title: '오늘의 운세 보기', desc: '일진이 들려주는 하루의 기운' },
+  { to: '/saju', img: 'menu-saju', title: '내 사주팔자', desc: '네 개의 기둥으로 읽는 타고난 나' },
+  { to: '/luck', img: 'menu-luck', title: '대운 · 세운 · 월운', desc: '10년의 흐름과 올해의 운세' },
+  { to: '/compat', img: 'menu-compat', title: '궁합 보기', desc: '두 사람의 기운이 만나는 점' },
+  { to: '/history', img: 'menu-history', title: '지난 30일의 기록', desc: '지나온 하루하루의 운과 카드' },
+];
+
 export function HomePage() {
   if (!hasProfile()) {
     return <Navigate to="/onboarding" replace />;
@@ -10,60 +20,74 @@ export function HomePage() {
   const hasCardDrawn = todaysDraw() !== null;
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
-      <header className="pt-8 text-center">
-        <div className="relative mb-4 overflow-hidden rounded-xl border border-gold/30">
-          <img
-            src={`${import.meta.env.BASE_URL}assets/illust/hero.webp`}
-            alt=""
-            className="h-36 w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-night/80 to-transparent" />
-          <h1 className="absolute bottom-2 left-0 right-0 text-4xl font-bold text-gold">SAJOO</h1>
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 p-5 pb-8">
+      <header className="relative overflow-hidden rounded-2xl border border-gold/30">
+        <img
+          src={`${A}assets/illust/hero.webp`}
+          alt=""
+          className="h-48 w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-night via-night/40 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 p-4 text-center">
+          <h1 className="text-3xl font-bold tracking-wide text-gold drop-shadow-[0_0_12px_rgba(201,162,39,0.4)]">
+            SAJOO
+          </h1>
+          <p className="mt-1 text-xs text-hanji/70">밤하늘 아래 펼쳐지는 나만의 운세 이야기</p>
         </div>
-        <p className="text-sm text-hanji/50">{todayKST()}</p>
       </header>
-      <nav className="flex flex-col gap-3">
-        <Link
-          to="/card"
-          className="rounded-lg border border-gold/50 bg-night-soft p-4 text-center font-bold text-gold-bright shadow-[0_0_16px_rgba(201,162,39,0.15)]"
-        >
-          {hasCardDrawn ? '오늘의 카드 다시 보기' : '오늘의 운세카드 뽑기'}
-        </Link>
-        <Link
-          to="/fortune"
-          className="rounded-lg border border-gold/30 bg-night-soft p-4 text-center text-hanji"
-        >
-          오늘의 운세 보기
-        </Link>
-        <Link
-          to="/saju"
-          className="rounded-lg border border-gold/30 bg-night-soft p-4 text-center text-hanji"
-        >
-          내 사주팔자 보기
-        </Link>
-        <Link
-          to="/luck"
-          className="rounded-lg border border-gold/30 bg-night-soft p-4 text-center text-hanji"
-        >
-          대운 · 세운 · 월운
-        </Link>
-        <Link
-          to="/compat"
-          className="rounded-lg border border-gold/30 bg-night-soft p-4 text-center text-hanji"
-        >
-          궁합 보기
-        </Link>
-        <Link
-          to="/history"
-          className="rounded-lg border border-gold/30 bg-night-soft p-4 text-center text-hanji"
-        >
-          지난 30일의 기록
-        </Link>
-        <Link to="/onboarding" className="py-1 text-center text-sm text-hanji/40 underline">
+
+      <p className="text-center text-xs text-hanji/50">{todayKST()}</p>
+
+      <Link
+        to="/card"
+        className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-gold/50 bg-night-soft p-4 shadow-[0_0_24px_rgba(201,162,39,0.18)] transition-shadow hover:shadow-[0_0_32px_rgba(201,162,39,0.3)]"
+      >
+        <img
+          src={`${A}assets/illust/menu-card.webp`}
+          alt=""
+          className="h-20 w-20 shrink-0 rounded-xl border border-gold/40 object-cover"
+        />
+        <div className="min-w-0 flex-1">
+          <p className="text-base font-bold text-gold-bright">
+            {hasCardDrawn ? '오늘의 카드 다시 보기' : '오늘의 운세카드 뽑기'}
+          </p>
+          <p className="mt-1 text-xs leading-5 text-hanji/60">
+            {hasCardDrawn
+              ? '오늘 뽑은 카드의 메시지를 다시 확인하세요'
+              : '매일 자정에 새로워지는 24장의 운명 카드'}
+          </p>
+        </div>
+        <span className="shrink-0 text-gold/60 transition-transform group-hover:translate-x-1">→</span>
+      </Link>
+
+      <nav className="grid grid-cols-2 gap-3">
+        {MENUS.map((m) => (
+          <Link
+            key={m.to}
+            to={m.to}
+            className="group overflow-hidden rounded-xl border border-gold/30 bg-night-soft transition-colors hover:border-gold/60"
+          >
+            <div className="relative">
+              <img
+                src={`${A}assets/illust/${m.img}.webp`}
+                alt=""
+                className="h-24 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-night/60 to-transparent" />
+            </div>
+            <div className="p-3">
+              <p className="text-sm font-bold text-hanji">{m.title}</p>
+              <p className="mt-0.5 text-[11px] leading-4 text-hanji/50">{m.desc}</p>
+            </div>
+          </Link>
+        ))}
+      </nav>
+
+      <footer className="mt-1 text-center">
+        <Link to="/onboarding" className="text-xs text-hanji/40 underline">
           내 정보 수정
         </Link>
-      </nav>
+      </footer>
     </main>
   );
 }
