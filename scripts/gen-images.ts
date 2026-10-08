@@ -10,7 +10,7 @@ import { CARD_DECK } from '../src/content/cards.ts';
 
 const MODEL = 'black-forest-labs/flux-schnell';
 const OUT_DIR = 'public/assets';
-const CALL_GAP_MS = 11_000; // 크레딧 $5 미만 계정 레이트리밋(6/min·버스트1) 회피
+const CALL_GAP_MS = 2_000; // 크레딧 $5 이상 계정은 상위 레이트리밋 — 최소 간격만 두고 429는 retry_after로 처리
 const POLL_MS = 1500;
 const TIMEOUT_MS = 120_000;
 
