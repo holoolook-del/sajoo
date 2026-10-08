@@ -56,7 +56,7 @@
 | StateView | src/components/state-view.tsx | 에러/빈 상태 공용 화면 |
 | shareResult | src/lib/share.ts | 결과 공유 — navigator.share(카톡 포함 OS 시트) → 미지원·실패 시 클립보드 폴백 | text,title? → 'shared'\|'copied'\|'canceled'\|'failed' |
 | ShareButton | src/components/share-button.tsx | 공유 버튼 (shareResult 호출 + 복사 피드백) | text,label? → 버튼 |
-| playCardPick / playCardCharge / playCardReveal / playKnock / isSoundEnabled / setSoundEnabled | src/lib/sound.ts | WAV 파일 효과음 재생 (HTMLAudioElement, 인앱 브라우저 대응 제스처 언락 — 나중에 자동 재생될 사운드만 프라임) + 음소거 설정 (키 sajoo:sound) | |
+| playCardPick / playCardCharge / playCardReveal / playKnock / isSoundEnabled / setSoundEnabled / setBgm / syncBgm | src/lib/sound.ts | WAV 효과음·배경음악 재생 (HTMLAudioElement, 인앱 브라우저 대응 제스처 언락 — 나중에 자동 재생될 사운드만 프라임; BGM은 pointerdown 재시도) + 음소거 설정 (키 sajoo:sound) | track? → void |
 | MoktakPage | src/pages/moktak.tsx | 공덕 목탁 미니앱 — 탭 카운터(오늘/누적, 키 sajoo:moktak)·마일스톤 문구·공유. 라우트 /moktak | — |
 | SoundToggle | src/components/sound-toggle.tsx | 효과음 켜기/끄기 토글 버튼 | → 버튼 |
 
