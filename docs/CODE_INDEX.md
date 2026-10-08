@@ -59,7 +59,7 @@
 | playCardPick / playCardCharge / playCardReveal / playKnock / isSoundEnabled / setSoundEnabled / setBgm / syncBgm | src/lib/sound.ts | WAV 효과음·배경음악 재생 (HTMLAudioElement, 인앱 브라우저 대응 제스처 언락 — 나중에 자동 재생될 사운드만 프라임; BGM은 pointerdown 재시도) + 음소거 설정 (키 sajoo:sound) | track? → void |
 | MoktakPage | src/pages/moktak.tsx | 공덕 목탁 미니앱 — 탭 카운터(오늘/누적, 키 sajoo:moktak)·마일스톤 문구·공유. 라우트 /moktak | — |
 | SleepPage | src/pages/sleep.tsx | 숙면 사운드 라이브러리 — 트랙 선택 재생(배경 BGM 채널 재사용)·수면 타이머(15/30/60분)·공유. 라우트 /sleep | — |
-| NightBackdrop | src/components/night-backdrop.tsx | 몽환 밤하늘 배경 — 별 트윙클 캔버스·같은 구름 이미지 2층 드리프트·달·창가 소녀 실루엣. fixed -z-10, App 전역 | — |
+| NightBackdrop | src/components/night-backdrop.tsx | 몽환 밤하늘 배경 — 별 트윙클 캔버스·같은 구름 이미지 2층 드리프트만 (달·인물 제외). fixed -z-10, App 전역 | — |
 | BackHome | src/components/back-home.tsx | 상단 홈 복귀 필 버튼 (골드 테두리, 모든 서브페이지 공용) | → Link |
 | SoundToggle | src/components/sound-toggle.tsx | 효과음 켜기/끄기 토글 버튼 | → 버튼 |
 

@@ -132,30 +132,12 @@ const jobs: Job[] = [
     aspect: '16:9',
     mp: '0.25',
   },
-  // ── 몽환 배경 레이어 ──
-  {
-    file: 'bg/moon.webp',
-    prompt: `a large luminous full moon with a soft golden halo, centered, surrounded by faint glowing haze, on a pure black background, dreamy ethereal${STYLE}`,
-    aspect: '1:1',
-    mp: '0.25',
-  },
+  // ── 몽환 배경 레이어 — 별(캔버스)과 이 구름만 쓴다. 달·인물 레이어는 화면이 산만해져 제외됨 ──
   {
     file: 'bg/clouds-a.webp',
     prompt: `a long horizontal band of wispy translucent clouds drifting across a pure black background, thin silver-lit edges, soft and airy, wide seamless composition${STYLE}`,
     aspect: '21:9',
     mp: '0.25',
-  },
-  {
-    file: 'bg/clouds-b.webp',
-    prompt: `a long horizontal band of thin scattered cloud wisps and fog drifting across a pure black background, very faint silver glow, sparse and dreamy, wide seamless composition${STYLE}`,
-    aspect: '21:9',
-    mp: '0.25',
-  },
-  {
-    file: 'bg/girl.webp',
-    prompt: `the back-view silhouette of a young girl with long hair sitting by a large open window gazing up at the night sky, deep indigo room, moonlight rim light on her outline, window frame visible, the lower part fading into darkness, quiet wistful mood${STYLE}`,
-    aspect: '9:16',
-    mp: '1',
   },
   {
     file: 'illust/menu-moktak.webp',

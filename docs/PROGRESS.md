@@ -188,3 +188,12 @@
 
 ### 검증
 - vitest 42/42, e2e 36/36, build+SW 56항목(수면 음원은 여전히 런타임 캐시)
+
+
+## T12-follow2 — 배경 레이어 축소 (완료)
+
+### 한 일
+- 달·창가 소녀 레이어 제거: "헤더에 이미 달 있음·소녀가 조잡" 피드백 → NightBackdrop을 별 트윙클+구름 2층만으로 축소. 미사용 `moonbreathe` 키프레임·bg 이미지 3장(moon/girl/clouds-b) 삭제, gen-images 잡에서도 제외. 프리캐시 56→53
+
+### 검증
+- pnpm verify 통과

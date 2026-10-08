@@ -74,7 +74,7 @@ function CloudLayer({ img, top, opacity, seconds, flip }: { img: string; top: st
 
 /**
  * 몽환 밤하늘 배경 — 모든 페이지 뒤에 깔리는 고정 레이어.
- * 검정 배경 위에 screen 블렌드로 달·구름을 띄우고, 하단에는 창가 소녀 실루엣.
+ * 별 트윙클 + 두 층의 구름 드리프트만 띄운다 (달·인물은 화면이 산만해져 제외).
  * pointer-events-none + -z-10이라 어떤 콘텐츠도 가리지 않는다.
  */
 export function NightBackdrop() {
@@ -84,20 +84,10 @@ export function NightBackdrop() {
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gradient-to-b from-[#07060d] via-[#12101d] to-night"
     >
       <Stars />
-      <img
-        src={`${A}assets/bg/moon.webp`}
-        alt=""
-        className="absolute right-[2%] top-[3%] w-44 animate-[moonbreathe_9s_ease-in-out_infinite] opacity-80 mix-blend-screen motion-reduce:animate-none md:w-56"
-      />
       {/* 같은 구름 이미지를 두 층으로 — 좌우 색이 다른 이미지 2개를 섞으면 톤이 깨진다.
           아래층은 좌우반전+느린 속도+낮은 투명도로 원근감만 준다 */}
       <CloudLayer img="clouds-a" top="12%" opacity={0.55} seconds={90} />
       <CloudLayer img="clouds-a" top="30%" opacity={0.28} seconds={150} flip />
-      <img
-        src={`${A}assets/bg/girl.webp`}
-        alt=""
-        className="absolute bottom-0 left-1/2 h-[42vh] w-auto -translate-x-1/2 object-cover opacity-50 [mask-image:radial-gradient(ellipse_75%_75%_at_50%_100%,black_35%,transparent_78%)]"
-      />
     </div>
   );
 }
