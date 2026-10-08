@@ -220,3 +220,24 @@
 
 ### 검증
 - vitest 43/43 (고민별 해석 테스트 신규), e2e 36/36, build+SW 53항목
+
+
+## T14 — 기능 확장 팩 (신살·월운·생시유추·행운시간·이미지공유·초대링크·도감·제비뽑기)
+
+### 한 일
+- 신살(lib/sinsal.ts): 일지 삼합 표준표로 도화·역마·화개 + 양인·괴강 판정 → 사주 페이지「별자리 기호」섹션 (발견 위치 표시)
+- 이번 달 운세 상세: MONTH_GOD_READING(십신별 돈/일/연애/건강 4줄) + 월운 지지 십신 계산 → luck 페이지
+- 생시 유추: 생시 미입력 시 12시간대 기질(HOUR_GUESS)에서 골라 시주 재계산 → 사주 페이지
+- 오늘의 행운 시간대: 일지 삼합 2개 시간대 칩 → fortune 페이지
+- 결과 이미지 공유(lib/share-image.ts + ShareImageButton): 1080×1350 캔버스 합성 → 파일 공유/저장 — 카드·사주 캐릭터·궁합 3곳 연결
+- 궁합 초대 링크(lib/invite.ts): 이름+8글자 한자만 base64 (생년월일 미포함, 프라이버시) → ?with= 수신자는 자기 정보만 입력. /compat 라우트 프로필 가드 해제
+- 버그 수정: 초대 코드 도입 시 일반 궁합이 나×나를 비교하던 회귀(b=saju→rb.data)
+- 카드 도감: history 페이지에 24장 수집 그리드 (뽑은 것만 표시)
+- 제비뽑기 /lots: 2~8명·당첨 수 설정→섞인 제비 탭 공개→결과 공유. 홈 심심풀이 메뉴+menu-lots 이미지
+- necut: sajoo 팔레트로 디자인 통일 (night 그라데이션·골드 버튼·필 홈링크)
+
+### 새 공용 코드
+- findSinsal / encodeInvite·decodeInvite·sajuFromHanjaPillars / renderShareImage / ShareImageButton / LotsPage → CODE_INDEX 등록
+
+### 검증
+- vitest 43/43, e2e 38/38 (제비뽑기·초대링크 신규 2종), build+SW 54항목

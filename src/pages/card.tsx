@@ -3,6 +3,8 @@ import { BackHome } from '../components/back-home.tsx';
 import { getCardById } from '../content/cards.ts';
 import { CardFront, GRADE_COLOR } from '../features/card/card-frame.tsx';
 import { ShareButton } from '../components/share-button.tsx';
+import { ShareImageButton } from '../components/share-image-button.tsx';
+import { ELEMENT_COLOR, type ElementKey } from '../content/meta.ts';
 import { SoundToggle } from '../components/sound-toggle.tsx';
 
 import { dailyCard, drawToday, todaysDraw } from '../features/card/draw.ts';
@@ -49,10 +51,20 @@ export function CardPage() {
             </p>
             <p className="mt-3 text-sm leading-6 text-hanji/80">{card.message}</p>
             <p className="mt-2 rounded-lg bg-gold/10 p-3 text-sm text-gold-bright">{card.advice}</p>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
               <ShareButton
                 label="오늘의 카드 공유하기"
                 text={`${today} 내가 뽑은 운세카드는 「${card.name} ${card.hanja}」(${card.grade})\n${card.message}\n너도 오늘의 카드를 뽑아봐!`}
+              />
+              <ShareImageButton
+                data={{
+                  label: `${today} · 오늘의 운세카드`,
+                  imageUrl: `${import.meta.env.BASE_URL}assets/cards/${card.id}.webp`,
+                  title: `${card.name} ${card.hanja}`,
+                  grade: card.grade,
+                  accent: ELEMENT_COLOR[card.element as ElementKey],
+                  lines: [card.message],
+                }}
               />
             </div>
             <p className="mt-3 text-xs text-hanji/40">카드는 매일 자정(한국 시간)에 새로 뽑을 수 있습니다.</p>

@@ -8,6 +8,7 @@ import { CompatPage } from './pages/compat.tsx';
 import { FortunePage } from './pages/fortune.tsx';
 import { HistoryPage } from './pages/history.tsx';
 import { HomePage } from './pages/home.tsx';
+import { LotsPage } from './pages/lots.tsx';
 import { LuckPage } from './pages/luck.tsx';
 import { MoktakPage } from './pages/moktak.tsx';
 import { OnboardingPage } from './pages/onboarding.tsx';
@@ -60,9 +61,13 @@ export function App() {
         />
         <Route
           path="/compat"
+          element={<CompatPage />}
+        />
+        <Route
+          path="/lots"
           element={
             <RequireProfile>
-              <CompatPage />
+              <LotsPage />
             </RequireProfile>
           }
         />

@@ -1,14 +1,17 @@
 import { useMemo } from 'react';
 import { BackHome } from '../components/back-home.tsx';
-import { getCardById } from '../content/cards.ts';
+import { CARD_DECK, getCardById } from '../content/cards.ts';
 import { ELEMENT_COLOR } from '../content/meta.ts';
 import { GRADE_COLOR } from '../features/card/card-frame.tsx';
 import { buildHistory } from '../features/history/history.ts';
 import { StateView } from '../components/state-view.tsx';
 import { todayKST } from '../lib/date.ts';
+import { listCardDraws } from '../lib/storage.ts';
 
 export function HistoryPage() {
   const history = useMemo(() => buildHistory(), []);
+  // 카드 도감 — 지금까지 뽑은 카드 id 집합
+  const collected = useMemo(() => new Set(listCardDraws().map((d) => d.cardId)), []);
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
@@ -25,6 +28,33 @@ export function HistoryPage() {
           linkLabel="오늘의 운세 보기"
         />
       )}
+
+      {/* 카드 도감 — 24장 수집 현황 */}
+      <section className="rounded-xl border border-gold/30 bg-night-soft p-5">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-sm text-hanji/60">카드 도감</h2>
+          <p className="text-xs text-gold-bright">{collected.size}/{CARD_DECK.length}</p>
+        </div>
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {CARD_DECK.map((c) => {
+            const got = collected.has(c.id);
+            return (
+              <div
+                key={c.id}
+                className={`flex flex-col items-center rounded-lg border p-2 text-center ${
+                  got ? 'border-gold/40 bg-night' : 'border-hanji/10 opacity-40'
+                }`}
+                title={got ? `${c.name} ${c.hanja} — ${c.grade}` : '아직 뽑지 못한 카드'}
+              >
+                <span className="text-[10px] font-bold" style={{ color: got ? ELEMENT_COLOR[c.element] : undefined }}>
+                  {got ? c.name : '？'}
+                </span>
+                <span className="text-[9px] text-hanji/40">{got ? c.hanja : '미수집'}</span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       <ul className="flex flex-col gap-3">
         {history.map((entry) => {

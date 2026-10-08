@@ -43,6 +43,9 @@
 | buildLuckView | src/features/luck/luck.ts | 대운 타임라인+세운+월운 12개월 (현재 표시·십신) | SajuResult,Profile,date → LuckView |
 | compatScore | src/features/compat/compat.ts | 두 사주 궁합 (일간 관계+일지 관계+십신 역할+오행 보완) | SajuResult,SajuResult → CompatResult |
 | buildHistory | src/features/history/history.ts | 최근 30일 운세·카드 기록 날짜별 병합+옛 기록 정리 | today?,days → HistoryEntry[] |
+| findSinsal | src/lib/sinsal.ts | 신살 판정 (도화·역마·화개·양인·괴강 — 일지 삼합 표준표 기준) | SajuResult → Sinsal[] |
+| encodeInvite / decodeInvite / sajuFromHanjaPillars | src/lib/invite.ts | 궁합 초대 링크 — 8글자 한자만 base64 URL 인코딩·복원 (생년월일 미포함) | name,SajuResult ↔ token / token → 최소 SajuResult |
+| renderShareImage | src/lib/share-image.ts | 결과 공유 이미지 캔버스 합성 (제목·등급·이미지·풀이문 → 1080×1350 PNG blob) | ShareImageData → Blob |
 
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |
@@ -56,6 +59,8 @@
 | StateView | src/components/state-view.tsx | 에러/빈 상태 공용 화면 |
 | shareResult | src/lib/share.ts | 결과 공유 — navigator.share(카톡 포함 OS 시트) → 미지원·실패 시 클립보드 폴백 | text,title? → 'shared'\|'copied'\|'canceled'\|'failed' |
 | ShareButton | src/components/share-button.tsx | 공유 버튼 (shareResult 호출 + 복사 피드백) | text,label? → 버튼 |
+| ShareImageButton | src/components/share-image-button.tsx | 결과 이미지 생성→파일 공유(미지원 시 PNG 저장 폴백) 버튼 | ShareImageData → 버튼 |
+| LotsPage | src/pages/lots.tsx | 제비뽑기 — 인원·당첨 수 설정→섞인 제비를 탭으로 공개·결과 공유 (미저장). 라우트 /lots | — |
 | playCardPick / playCardCharge / playCardReveal / playKnock / isSoundEnabled / setSoundEnabled / setBgm / syncBgm | src/lib/sound.ts | WAV 효과음·배경음악 재생 (HTMLAudioElement, 인앱 브라우저 대응 제스처 언락 — 나중에 자동 재생될 사운드만 프라임; BGM은 pointerdown 재시도) + 음소거 설정 (키 sajoo:sound) | track? → void |
 | MoktakPage | src/pages/moktak.tsx | 공덕 목탁 미니앱 — 탭 카운터(오늘/누적, 키 sajoo:moktak)·마일스톤 문구·공유. 라우트 /moktak | — |
 | SleepPage | src/pages/sleep.tsx | 숙면 사운드 라이브러리 — 트랙 선택 재생(배경 BGM 채널 재사용)·수면 타이머(15/30/60분)·공유. 라우트 /sleep | — |
@@ -67,10 +72,6 @@
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
 | --- | --- | --- | --- |
 | ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey | src/content/meta.ts | 오행·십신 공용 메타 (색상·한자·타입) | 오행 → 색상/한자 |
-| DAY_MASTER_TEXT / DayMasterSocial / DAY_BRANCH_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT / CONCERN_TEXT / ELEMENT_HEALTH / GLOSSARY | src/content/interpret.ts | 풀이문 DB (일간 캐릭터·사회적 면모·일지 12지지·오행·균형·십신·고민 6종·건강 보완·용어 평어) | 키 → 해석 문장 |
-| BRANCH_RELATIONS / DAY_GOD_TEXT / RELATION_TEXT / GRADE_SUMMARY / LUCKY | src/content/fortune.ts | 지지 관계 테이블 + 오늘운세 풀이문 + 행운 색·방향·아이템 | 지지쌍/십신/등급/오행 → 문장 |
+| DAY_MASTER_TEXT / DayMasterSocial / DAY_BRANCH_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT / CONCERN_TEXT / ELEMENT_HEALTH / HOUR_GUESS / GLOSSARY | src/content/interpret.ts | 풀이문 DB (일간 캐릭터·사회적 면모·일지 12지지·오행·균형·십신·고민 6종·건강 보완·생시 유추·용어 평어) | 키 → 해석 문장 |
+| BRANCH_RELATIONS / DAY_GOD_TEXT / RELATION_TEXT / GRADE_SUMMARY / LUCKY / MONTH_GOD_READING | src/content/fortune.ts | 지지 관계 테이블 + 오늘운세·이번 달 풀이문 + 행운 색·방향·아이템 | 지지쌍/십신/등급/오행 → 문장 |
 | COMPAT_GRADE_TEXT / COMPAT_RELATION_TEXT / STEM_RELATION_TEXT | src/content/compat.ts | 궁합 풀이문 (일간 관계·지지 관계·등급 요약) | 키 → 해석 문장 |
-
-## 화면 공용 요소 (컴포넌트, 훅)
-| 이름 | 경로 | 하는 일 |
-| --- | --- | --- |

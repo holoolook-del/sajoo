@@ -1,16 +1,20 @@
 import { BackHome } from '../components/back-home.tsx';
 import { ELEMENT_COLOR, ELEMENT_HANJA, type ElementKey } from '../content/meta.ts';
-import { ELEMENT_TEXT, GLOSSARY } from '../content/interpret.ts';
+import { ELEMENT_TEXT, GLOSSARY, HOUR_GUESS } from '../content/interpret.ts';
 import { interpretSaju } from '../lib/interpret.ts';
+import { findSinsal } from '../lib/sinsal.ts';
+import { saveProfile } from '../lib/storage.ts';
 import { PillarTable } from '../features/saju/pillar-table.tsx';
 import { useSaju } from '../features/saju/use-saju.ts';
 import { StateView } from '../components/state-view.tsx';
 import { ShareButton } from '../components/share-button.tsx';
+import { ShareImageButton } from '../components/share-image-button.tsx';
 import { useMemo } from 'react';
 
 export function SajuPage() {
   const { profile, saju } = useSaju();
   const reading = useMemo(() => (saju ? interpretSaju(saju) : null), [saju]);
+  const sinsal = useMemo(() => (saju ? findSinsal(saju) : []), [saju]);
 
   if (!saju || !reading) {
     return <StateView message="사주를 계산할 수 없습니다." linkTo="/onboarding" linkLabel="정보 다시 입력" />;
@@ -73,10 +77,21 @@ export function SajuPage() {
             </div>
           ))}
         </dl>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
           <ShareButton
             label="내 사주 캐릭터 공유하기"
             text={`${profile?.name ?? '나'}의 사주 캐릭터는 「${reading.dayMaster.title}」(${dayMaster.korean}${dayMaster.hanja}) — ${reading.dayMaster.keywords.map((k) => '#' + k).join(' ')}\n너의 사주 캐릭터도 확인해봐!`}
+          />
+          <ShareImageButton
+            data={{
+              label: `${profile?.name ?? '나'}의 사주 캐릭터`,
+              big: dayMaster.hanja,
+              accent: ELEMENT_COLOR[dayMaster.element as ElementKey],
+              title: `「${reading.dayMaster.title}」`,
+              subtitle: `${dayMaster.korean} — ${reading.dayMaster.nature}`,
+              keywords: reading.dayMaster.keywords,
+              lines: [],
+            }}
           />
         </div>
       </section>
@@ -101,6 +116,34 @@ export function SajuPage() {
               <dd className="text-hanji/85">{reading.dayBranch.watch}</dd>
             </div>
           </dl>
+        </section>
+      )}
+
+      {/* 생시 유추 — 시주 미입력일 때만 */}
+      {!hourIncluded && profile && (
+        <section className="rounded-xl border border-hanji/15 bg-night-soft p-5">
+          <h2 className="text-sm text-hanji/60">태어난 시간을 모르시나요?</h2>
+          <p className="mt-1 text-xs leading-5 text-hanji/50">
+            시주는 성향의 뒷면을 만듭니다. 나에게 맞는 기질을 골라보세요 — 고르면 그 시간으로 저장되고 사주가 다시 계산됩니다.
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {HOUR_GUESS.map((h) => (
+              <button
+                key={h.hanja}
+                type="button"
+                onClick={() => {
+                  saveProfile({ ...profile, hour: h.hour, minute: 0 });
+                  location.reload();
+                }}
+                className="rounded-lg border border-hanji/15 p-2.5 text-left transition-colors hover:border-gold/50"
+              >
+                <p className="text-xs font-bold text-hanji">
+                  {h.hanja}({h.branch})시 <span className="font-normal text-hanji/50">{h.hours}</span>
+                </p>
+                <p className="mt-0.5 text-[11px] leading-4 text-hanji/60">{h.trait}</p>
+              </button>
+            ))}
+          </div>
         </section>
       )}
 
@@ -144,6 +187,24 @@ export function SajuPage() {
           ))}
         </ul>
       </section>
+
+      {/* 신살 — 사주에 박힌 별자리 */}
+      {sinsal.length > 0 && (
+        <section className="rounded-xl border border-dancheong/50 bg-night-soft p-5">
+          <h2 className="text-sm text-hanji/60">내 사주에 박힌 별 — 신살(神殺)</h2>
+          <ul className="mt-3 space-y-3">
+            {sinsal.map((s) => (
+              <li key={s.key}>
+                <p className="text-sm font-bold text-hanji">
+                  {s.name} <span className="text-hanji/50">{s.hanja}</span>
+                  <span className="ml-2 rounded-full border border-gold/40 px-2 py-0.5 text-[10px] text-gold-bright">{s.where}</span>
+                </p>
+                <p className="mt-1 text-sm leading-6 text-hanji/80">{s.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* 고민별 해석 — 점집을 찾는 실제 이유들 */}
       <section className="rounded-xl border border-gold/30 bg-night-soft p-5">

@@ -140,6 +140,12 @@ const jobs: Job[] = [
     mp: '0.25',
   },
   {
+    file: 'illust/menu-lots.webp',
+    prompt: `several small folded paper fortune lots tied with red string, scattered on dark silk beside an open lot showing a golden mark, warm candlelight, playful${STYLE}`,
+    aspect: '16:9',
+    mp: '0.25',
+  },
+  {
     file: 'illust/menu-moktak.webp',
     prompt: `a round wooden fish drum (moktak) resting on a silk cushion, warm polished wood with carved scales, golden glow, temple stillness${STYLE}`,
     aspect: '1:1',

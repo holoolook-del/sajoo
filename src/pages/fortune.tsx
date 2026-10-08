@@ -71,6 +71,11 @@ export function FortunePage() {
         <span className="rounded-full border border-gold/40 px-3 py-1 text-xs text-hanji/80">
           행운 아이템 <b className="text-gold-bright">{fortune.lucky.item}</b>
         </span>
+        {fortune.luckyHours.map((h) => (
+          <span key={h.branch} className="rounded-full border border-gold/40 px-3 py-1 text-xs text-hanji/80">
+            좋은 시간 <b className="text-gold-bright">{h.branch}시 {h.hours}</b>
+          </span>
+        ))}
       </section>
 
       <p className="rounded-lg bg-gold/10 p-4 text-sm font-bold leading-6 text-gold-bright">

@@ -32,7 +32,7 @@ export interface LuckView {
     stemGod: TenGodKey; branchGod: TenGodKey; current: boolean;
   }[];
   seun: { year: number; korean: string; hanja: string; stemGod: TenGodKey; branchGod: TenGodKey };
-  wolun: { month: number; korean: string; hanja: string; stemGod: TenGodKey; current: boolean }[];
+  wolun: { month: number; korean: string; hanja: string; stemGod: TenGodKey; branchGod: TenGodKey; current: boolean }[];
 }
 
 /** 대운·세운·월운 뷰를 만든다. 대운이 없으면(생시 미입력 등) null. */
@@ -61,7 +61,7 @@ export function buildLuckView(saju: SajuResult, profile: Profile, today: string)
     return {
       month: i + 1,
       ...mp,
-      stemGod: getTenGod(myStem as HeavenlyStem, mp.korean.charAt(0) as HeavenlyStem) as TenGodKey,
+      ...godsOf(myStem, mp.korean),
       current: i + 1 === month,
     };
   });

@@ -266,6 +266,22 @@ export const ELEMENT_HEALTH: Record<ElementKey, { organ: string; tip: string }> 
   수: { organ: '신장·방광·허리·귀', tip: '수분 섭취와 허리 스트레칭, 충분한 수면이 보완이 됩니다' },
 };
 
+/** 생시 유추 — 시주(時支)별 기질. 태어난 시간을 모를 때 "나에게 맞는 것"을 고르는 재미 콘텐츠 */
+export const HOUR_GUESS: { branch: string; hanja: string; hours: string; hour: number; trait: string }[] = [
+  { branch: '자', hanja: '子', hours: '밤 11시~새벽 1시', hour: 0, trait: '밤의 물 — 생각이 깊고 조용히 집중하는 기질' },
+  { branch: '축', hanja: '丑', hours: '새벽 1~3시', hour: 2, trait: '묵직한 새벽 — 우직함과 꾸준함이 더해지는 기질' },
+  { branch: '인', hanja: '寅', hours: '새벽 3~5시', hour: 4, trait: '호랑이가 일어나는 시간 — 추진력·독립심' },
+  { branch: '묘', hanja: '卯', hours: '새벽 5~7시', hour: 6, trait: '해 뜨는 새벽 — 부드러운 감성과 새벽형 기질' },
+  { branch: '진', hanja: '辰', hours: '아침 7~9시', hour: 8, trait: '안개 걷히는 아침 — 야망과 변화의 힘' },
+  { branch: '사', hanja: '巳', hours: '오전 9~11시', hour: 10, trait: '태양 오르는 시간 — 집중력과 집요한 실행력' },
+  { branch: '오', hanja: '午', hours: '낮 11시~1시', hour: 12, trait: '정오의 태양 — 활발함과 표현력' },
+  { branch: '미', hanja: '未', hours: '오후 1~3시', hour: 14, trait: '따뜻한 오후 — 포용력과 다정함' },
+  { branch: '신', hanja: '申', hours: '오후 3~5시', hour: 16, trait: '재주 많은 오후 — 영리함·재치·행동력' },
+  { branch: '유', hanja: '酉', hours: '저녁 5~7시', hour: 18, trait: '해 지는 저녁 — 섬세함과 완성도 추구' },
+  { branch: '술', hanja: '戌', hours: '저녁 7~9시', hour: 20, trait: '개가 지키는 밤 — 의리와 책임감' },
+  { branch: '해', hanja: '亥', hours: '밤 9~11시', hour: 22, trait: '깊어지는 밤 — 관대함과 낭만' },
+];
+
 /** 용어 설명 — 어려운 명리 용어를 한 줄 평어로 */
 export const GLOSSARY: { term: string; desc: string }[] = [
   { term: '사주팔자', desc: '태어난 연·월·일·시 네 기둥 × 글자 2개 = 8글자' },

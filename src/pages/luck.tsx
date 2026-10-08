@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { BackHome } from '../components/back-home.tsx';
 import { buildLuckView } from '../features/luck/luck.ts';
+import { MONTH_GOD_READING } from '../content/fortune.ts';
 import { useSaju } from '../features/saju/use-saju.ts';
 import { StateView } from '../components/state-view.tsx';
 import { todayKST } from '../lib/date.ts';
@@ -59,6 +60,33 @@ export function LuckPage() {
           </p>
         </div>
       </section>
+
+      {/* 이번 달 해석 — 월운 십신 기준 */}
+      {(() => {
+        const cur = view.wolun.find((w) => w.current);
+        const reading = cur ? MONTH_GOD_READING[cur.stemGod] : null;
+        return cur && reading ? (
+          <section className="rounded-xl border border-gold/50 bg-night-soft p-5">
+            <h2 className="text-sm text-hanji/60">
+              이번 달 해석 — {cur.month}월 {cur.korean}({cur.hanja})
+            </h2>
+            <p className="mt-2 text-base font-bold text-gold-bright">
+              「{reading.title}」 — {cur.stemGod}의 기운
+            </p>
+            {cur.branchGod !== cur.stemGod && (
+              <p className="mt-1 text-xs text-hanji/50">속으로는 {cur.branchGod}의 기운도 함께 흐릅니다</p>
+            )}
+            <dl className="mt-3 space-y-2.5 rounded-lg bg-night p-4">
+              {reading.lines.map((l) => (
+                <div key={l.label} className="flex gap-3 text-sm leading-6">
+                  <dt className="shrink-0 font-bold text-gold-bright">{l.label}</dt>
+                  <dd className="text-hanji/85">{l.text}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ) : null;
+      })()}
 
       {/* 월운 12개월 */}
       <section className="rounded-xl border border-gold/30 bg-night-soft p-5">

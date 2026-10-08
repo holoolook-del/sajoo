@@ -26,7 +26,26 @@ export interface DailyFortune {
   luckIndex: number;
   /** 행운 색·방향·아이템 (일진 오행 기준) */
   lucky: { color: string; direction: string; item: string };
+  /** 오늘 기운이 잘 통하는 시간대 — 일진 지지와 삼합되는 두 시진 */
+  luckyHours: { branch: string; hours: string }[];
 }
+
+/** 시진별 시간대 */
+const BRANCH_HOURS: Record<string, string> = {
+  子: '밤 11시~1시', 丑: '새벽 1~3시', 寅: '새벽 3~5시', 卯: '새벽 5~7시',
+  辰: '아침 7~9시', 巳: '오전 9~11시', 午: '낮 11시~1시', 未: '오후 1~3시',
+  申: '오후 3~5시', 酉: '저녁 5~7시', 戌: '저녁 7~9시', 亥: '밤 9~11시',
+};
+
+/** 삼합 그룹 — 일진 지지와 호흡이 맞는 시간대를 찾는 기준 */
+const SAMHAP_GROUPS = [
+  ['申', '子', '辰'], ['巳', '酉', '丑'], ['寅', '午', '戌'], ['亥', '卯', '未'],
+];
+
+const BRANCH_KOREAN: Record<string, string> = {
+  子: '자', 丑: '축', 寅: '인', 卯: '묘', 辰: '진', 巳: '사',
+  午: '오', 未: '미', 申: '신', 酉: '유', 戌: '술', 亥: '해',
+};
 
 const GOD_SCORE: Record<TenGodKey, number> = {
   정관: 2, 정재: 2, 정인: 2, 식신: 2,
@@ -103,6 +122,9 @@ export function dailyFortune(saju: SajuResult, date: string): DailyFortune {
     detail,
     luckIndex: Math.min(97, Math.max(23, 62 + score * 5)),
     lucky: LUCKY[iljin.stemElement] ?? LUCKY['토']!,
+    luckyHours: (SAMHAP_GROUPS.find((g) => g.includes(iljin.branchHanja)) ?? [])
+      .filter((b) => b !== iljin.branchHanja)
+      .map((b) => ({ branch: BRANCH_KOREAN[b] ?? b, hours: BRANCH_HOURS[b] ?? '' })),
   };
 }
 
