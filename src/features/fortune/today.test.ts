@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { iljinOf } from '../../lib/engine.ts';
 import { calcSaju } from '../../lib/engine.ts';
-import { branchRelation, dailyFortune, saveTodaysFortune } from './today.ts';
+import { branchRelation } from '../../lib/relations.ts';
+import { dailyFortune, saveTodaysFortune } from './today.ts';
 import { loadFortune } from '../../lib/storage.ts';
 import type { Profile } from '../../lib/types.ts';
 

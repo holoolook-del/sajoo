@@ -1,6 +1,6 @@
-import { DAY_MASTER_TEXT, ELEMENT_BALANCE, TEN_GOD_TEXT } from '../../content/interpret.ts';
-import { ELEMENT_KEYS, type ElementKey, type TenGodKey } from '../../content/meta.ts';
-import type { SajuResult } from '../../lib/engine.ts';
+import { DAY_MASTER_TEXT, ELEMENT_BALANCE, TEN_GOD_TEXT } from '../content/interpret.ts';
+import { ELEMENT_KEYS, type ElementKey, type TenGodKey } from '../content/meta.ts';
+import type { SajuResult } from './engine.ts';
 
 export interface SajuReading {
   dayMaster: { hanja: string; nature: string; text: string };

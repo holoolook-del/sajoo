@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { calcSaju } from '../../lib/engine.ts';
+import { calcSaju } from './engine.ts';
 import { interpretSaju } from './interpret.ts';
-import { ELEMENT_KEYS } from '../../content/meta.ts';
+import { ELEMENT_KEYS } from '../content/meta.ts';
 
 const input = {
   year: 1992, month: 10, day: 24, hour: 5, minute: 30,

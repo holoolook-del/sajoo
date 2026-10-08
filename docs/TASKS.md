@@ -18,7 +18,7 @@
   - AC: AC4
 - [x] T5 대운·세운·월운
   - AC: AC9
-- [ ] T6 궁합 (상대 정보 그때그때 입력·미저장)
+- [x] T6 궁합 (상대 정보 그때그때 입력·미저장)
   - AC: AC8
 - [ ] T7 히스토리 30일
   - AC: AC10
@@ -27,6 +27,6 @@
 - [ ] T-last 마감: 빈/에러/로딩 상태, AC12(360px), 오프라인 최종(AC7), README, 실기기 체크리스트
 
 ## 사람이 할 일 (H)
-- [ ] H1 Google AI Studio에서 Gemini API 키 발급 → 프로젝트 `.env`에 `GEMINI_API_KEY=` 입력 (필요 시점: T8, 빠를수록 좋음)
-- [ ] H2 GitHub 공개 저장소 `sajoo` 생성 + remote 연결 + Pages 활성화 (필요 시점: T0 배포 확인 때)
+- [x] H1 Google AI Studio에서 Gemini API 키 발급 → 프로젝트 `.env`에 `GEMINI_API_KEY=` 입력 (필요 시점: T8, 빠를수록 좋음)
+- [ ] H2 GitHub 공개 저장소 `sajoo` 생성 + remote 연결 + Pages 활성화 (저장소 생성·push 완료 — Settings→Pages에서 GitHub Actions 선택만 남음)
 - [ ] H3 폰에서 배포 URL 열어 홈화면에 추가, 오프라인·카드 뽑기 직접 확인 (필요 시점: T-last)

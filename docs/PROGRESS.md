@@ -1,11 +1,20 @@
 # PROGRESS
 
 ## 현재 상태
-- 완료: Phase 0~4, T0~T5 (엔진·프로필·카드·풀이·오늘운세·대운세운월운)
-- 진행 중: 없음 — T6 대기
-- 다음: T6 궁합(상대 정보 그때그때 입력·미저장). H2 Pages 활성화는 사용자 작업 대기
+- 완료: Phase 0~4, T0~T6 (엔진·프로필·카드·풀이·오늘운세·대운세운월운·궁합)
+- 진행 중: 없음 — T7 대기
+- 다음: T7 히스토리 30일. H2 Pages 활성화(Settings→Pages→GitHub Actions)만 사용자 작업으로 남음
 
 ## 태스크별 기록
+### T6
+- 한 일: content/compat.ts(궁합 풀이문: 일간 상생·비화·상극, 지지 관계, 등급 요약), features/compat/compat.ts(compatScore: 일간 오행 관계+일지 지지 관계+십신 역할+오행 보완→0~100 점수·등급·해석), /compat 페이지(ProfileForm 재사용, 상대 정보는 React state만 — 미저장 명시). 아키텍처 수정: interpretSaju→lib/interpret.ts, branchRelation→lib/relations.ts 이동(features 간 import 금지 규칙 준수)
+- 바꾼 파일: src/lib/{interpret,interpret.test,relations}.ts(신규·이동), src/features/{compat/compat.ts,compat.test.ts}, src/features/fortune/today{,.test}.ts, src/features/saju/profile-form.tsx(submitLabel prop), src/pages/{compat,home,saju}.tsx, src/App.tsx, e2e/compat.spec.ts, src/content/compat.ts
+- 새 공용 코드: interpretSaju(lib), branchRelation(lib), compatScore, CompatPage
+- 남은 문제: 없음
+- 다음 할 일: T7 히스토리 30일 (listRecordDates 복원 필요)
+- 증거: vitest 36/36, e2e 20/20, verify 통과, audit:code 클린(knip 클린·jscpd 0)
+- 배운 점: features 간 import 금지 규칙 — 공유 도메인 로직은 lib/로. ProfileForm은 submitLabel prop으로 다른 맥락에서 재사용 가능
+
 ### T5
 - 한 일: engine에 yearPillarOf/monthPillarOf(세운·월주 — 절기 경계 피해 중순 기준), features/luck/luck.ts(buildLuckView: 대운 타임라인+현재 대운 표시·세운·월운 12개월+십신), /luck 페이지. 리팩터링: use-saju.ts(프로필→사주 공용 훅 — 3개 페이지 중복 제거), components/state-view.tsx(공용 에러/빈 상태). e2e helpers.ts 추출(registerProfile 중복 제거)
 - 바꾼 파일: src/lib/engine.ts, src/features/luck/{luck,luck.test}.ts, src/features/saju/use-saju.ts, src/components/state-view.tsx, src/pages/{luck,fortune,saju}.tsx, src/lib/storage.ts, e2e/{helpers,luck.spec,card.spec,fortune.spec}.ts

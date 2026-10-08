@@ -6,6 +6,7 @@ import type { Profile } from '../../lib/types.ts';
 interface Props {
   initial?: Profile;
   onSubmit: (profile: Profile) => void;
+  submitLabel?: string;
 }
 
 const inputCls =
@@ -13,7 +14,7 @@ const inputCls =
 const labelCls = 'mb-1 block text-sm text-hanji/70';
 const errCls = 'mt-1 text-sm text-vermilion';
 
-export function ProfileForm({ initial, onSubmit }: Props) {
+export function ProfileForm({ initial, onSubmit, submitLabel = '저장하고 사주 보기' }: Props) {
   const [name, setName] = useState(initial?.name ?? '');
   const [calendar, setCalendar] = useState<'solar' | 'lunar'>(initial?.calendar ?? 'solar');
   const [isLeapMonth, setIsLeapMonth] = useState(initial?.isLeapMonth ?? false);
@@ -141,7 +142,7 @@ export function ProfileForm({ initial, onSubmit }: Props) {
       {errors.form && <p role="alert" className={errCls}>{errors.form}</p>}
 
       <button type="submit" className="mt-2 rounded-lg bg-gold px-4 py-3 font-bold text-night">
-        저장하고 사주 보기
+        {submitLabel}
       </button>
     </form>
   );

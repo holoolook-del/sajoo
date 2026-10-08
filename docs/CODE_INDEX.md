@@ -34,10 +34,12 @@
 | CARD_DECK / getCardById | src/content/cards.ts | 운세카드 24장 정의(등급·오행·해석·조언) + id 조회 | id → CardDef |
 | dailyCard | src/features/card/draw.ts | 날짜+사주 시드로 그날의 카드 결정적 선택 | Profile,date → CardDef |
 | drawToday / canDrawOn / todaysDraw | src/features/card/draw.ts | 하루 1장 뽑기 기록·조회 (멱등) | Profile,date? → CardDraw |
-| interpretSaju | src/features/saju/interpret.ts | SajuResult → 일간·오행 분포·과다/부족·십신 해석 조합 | SajuResult → SajuReading |
-| dailyFortune / branchRelation | src/features/fortune/today.ts | 일진×사주 조합(십신·관계·상생상극)→등급·해석 | SajuResult,date → DailyFortune |
+| interpretSaju | src/lib/interpret.ts | SajuResult → 일간·오행 분포·과다/부족·십신 해석 조합 | SajuResult → SajuReading |
+| branchRelation | src/lib/relations.ts | 지지 두 글자의 관계 (육합→삼합→충→형→해→원진→파) | 지지,지지 → BranchRelation\|null |
+| dailyFortune | src/features/fortune/today.ts | 일진×사주 조합(십신·관계·상생상극)→등급·해석 | SajuResult,date → DailyFortune |
 | saveTodaysFortune | src/features/fortune/today.ts | 오늘 운세를 FortuneRecord로 기록 (멱등) | SajuResult,date → FortuneRecord |
 | buildLuckView | src/features/luck/luck.ts | 대운 타임라인+세운+월운 12개월 (현재 표시·십신) | SajuResult,Profile,date → LuckView |
+| compatScore | src/features/compat/compat.ts | 두 사주 궁합 (일간 관계+일지 관계+십신 역할+오행 보완) | SajuResult,SajuResult → CompatResult |
 
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |
@@ -56,6 +58,7 @@
 | ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey | src/content/meta.ts | 오행·십신 공용 메타 (색상·한자·타입) | 오행 → 색상/한자 |
 | DAY_MASTER_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT | src/content/interpret.ts | 풀이문 DB (일간·오행·균형·십신) | 키 → 해석 문장 |
 | BRANCH_RELATIONS / DAY_GOD_TEXT / RELATION_TEXT / GRADE_SUMMARY | src/content/fortune.ts | 지지 관계 테이블 + 오늘운세 풀이문 | 지지쌍/십신/등급 → 문장 |
+| COMPAT_GRADE_TEXT / COMPAT_RELATION_TEXT / STEM_RELATION_TEXT | src/content/compat.ts | 궁합 풀이문 (일간 관계·지지 관계·등급 요약) | 키 → 해석 문장 |
 
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |

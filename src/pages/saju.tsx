@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ELEMENT_COLOR, ELEMENT_HANJA, type ElementKey } from '../content/meta.ts';
 import { ELEMENT_TEXT } from '../content/interpret.ts';
-import { interpretSaju } from '../features/saju/interpret.ts';
+import { interpretSaju } from '../lib/interpret.ts';
 import { PillarTable } from '../features/saju/pillar-table.tsx';
 import { useSaju } from '../features/saju/use-saju.ts';
 import { StateView } from '../components/state-view.tsx';

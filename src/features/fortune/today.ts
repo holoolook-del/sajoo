@@ -1,12 +1,7 @@
 import { getBranchTenGod, getTenGod } from 'manseryeok';
 import type { EarthlyBranch, HeavenlyStem } from 'manseryeok';
-import {
-  BRANCH_RELATIONS,
-  DAY_GOD_TEXT,
-  GRADE_SUMMARY,
-  RELATION_TEXT,
-  type BranchRelation,
-} from '../../content/fortune.ts';
+import { DAY_GOD_TEXT, GRADE_SUMMARY, RELATION_TEXT } from '../../content/fortune.ts';
+import { branchRelation, type BranchRelation } from '../../lib/relations.ts';
 import {
   ELEMENT_CONTROLS,
   ELEMENT_GENERATES,
@@ -27,16 +22,6 @@ export interface DailyFortune {
   relation: BranchRelation | null;
   summary: string;
   detail: string[];
-}
-
-/** 지지 두 글자의 관계 — 우선순위: 육합→삼합→충→형→해→원진→파 */
-export function branchRelation(a: string, b: string): BranchRelation | null {
-  for (const { kind, pairs } of BRANCH_RELATIONS) {
-    if (pairs.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) {
-      return kind;
-    }
-  }
-  return null;
 }
 
 const GOD_SCORE: Record<TenGodKey, number> = {
