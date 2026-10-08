@@ -31,6 +31,7 @@
 | CARD_DECK / getCardById | src/content/cards.ts | 운세카드 24장 정의(등급·오행·해석·조언) + id 조회 | id → CardDef |
 | dailyCard | src/features/card/draw.ts | 날짜+사주 시드로 그날의 카드 결정적 선택 | Profile,date → CardDef |
 | drawToday / canDrawOn / todaysDraw | src/features/card/draw.ts | 하루 1장 뽑기 기록·조회 (멱등) | Profile,date? → CardDraw |
+| interpretSaju | src/features/saju/interpret.ts | SajuResult → 일간·오행 분포·과다/부족·십신 해석 조합 | SajuResult → SajuReading |
 
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |
@@ -39,10 +40,13 @@
 | useProfile | src/features/saju/use-profile.ts | 프로필 읽기·저장 훅 |
 | CardDrawScene | src/features/card/card-scene.tsx | 카드 팬아웃→선택→플립→폭발 뽑기 연출 |
 | CardFront / CardBack | src/features/card/card-frame.tsx | 카드 앞·뒷면 비주얼 (오행색 테두리) |
+| PillarTable | src/features/saju/pillar-table.tsx | 만세력식 팔자표 (십신·천간·지지·주명 행, 오행색) |
 
 ## 콘텐츠·풀이문
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
 | --- | --- | --- | --- |
+| ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey | src/content/meta.ts | 오행·십신 공용 메타 (색상·한자·타입) | 오행 → 색상/한자 |
+| DAY_MASTER_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT | src/content/interpret.ts | 풀이문 DB (일간·오행·균형·십신) | 키 → 해석 문장 |
 
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |

@@ -18,6 +18,8 @@ test('AC1·AC2: 프로필 입력 후 사주팔자가 보인다', async ({ page }
   await expect(page.getByText('경술')).toBeVisible();
   await expect(page.getByText('계유')).toBeVisible();
   await expect(page.getByText('을묘')).toBeVisible();
+  await expect(page.getByText('오행(五行) 분포')).toBeVisible();
+  await expect(page.getByText('십신(十神)')).toBeVisible();
 });
 
 test('AC3: 생시 모름이면 3주로 계산한다', async ({ page }) => {
@@ -31,7 +33,7 @@ test('AC3: 생시 모름이면 3주로 계산한다', async ({ page }) => {
   await page.getByRole('button', { name: /사주 보기/ }).click();
 
   await expect(page.getByText('시주 미입력')).toBeVisible();
-  await expect(page.getByText('미입력', { exact: true })).toBeVisible();
+  await expect(page.getByText('미입력', { exact: true }).first()).toBeVisible();
 });
 
 test('AC11: 존재하지 않는 날짜는 저장되지 않는다', async ({ page }) => {

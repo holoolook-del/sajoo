@@ -1,14 +1,6 @@
-import type { CardDef, CardElement } from '../../content/cards.ts';
+import type { CardDef } from '../../content/cards.ts';
+import { ELEMENT_COLOR, type ElementKey } from '../../content/meta.ts';
 import type { Grade } from '../../lib/types.ts';
-
-/** 오행 전통색 — 카드 테두리·광원에 사용 */
-const ELEMENT_COLOR: Record<CardElement, string> = {
-  목: '#2f8f6e',
-  화: '#c8402a',
-  토: '#c9a227',
-  금: '#d9d4c4',
-  수: '#34516e',
-};
 
 export const GRADE_COLOR: Record<Grade, string> = {
   대길: 'text-gold-bright',
@@ -18,7 +10,7 @@ export const GRADE_COLOR: Record<Grade, string> = {
   대흉: 'text-vermilion',
 };
 
-export function cardElementColor(element: CardElement): string {
+export function cardElementColor(element: ElementKey): string {
   return ELEMENT_COLOR[element];
 }
 

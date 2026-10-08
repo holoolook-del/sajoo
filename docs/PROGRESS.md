@@ -1,11 +1,20 @@
 # PROGRESS
 
 ## 현재 상태
-- 완료: Phase 0~4, T0 스캐폴드, T1 만세력 엔진+프로필, T2 운세카드 뽑기
-- 진행 중: 없음 — T3 대기
-- 다음: T3 사주 풀이 화면(팔자표·오행·십신·풀이문 조합). H2 Pages 활성화는 사용자 작업 대기
+- 완료: Phase 0~4, T0 스캐폴드, T1 엔진+프로필, T2 운세카드, T3 사주 풀이 화면
+- 진행 중: 없음 — T4 대기
+- 다음: T4 오늘의 운세(일진×사주 조합). H2 Pages 활성화는 사용자 작업 대기
 
 ## 태스크별 기록
+### T3
+- 한 일: content/meta.ts(오행색·한자·십신 키 공용 메타 — card-frame 오행색을 여기로 통합), content/interpret.ts(일간 10천간·오행·십신·균형 풀이문 DB), features/saju/interpret.ts(오행 분포·과다/부족·십신 분포 조합), pillar-table.tsx(만세력식 표: 십신·천간·십신·지지·주명 행, 오행색 글자), saju 페이지 확장(표+일간 해석+오행 차트+십신 해석+공망)
+- 바꾼 파일: src/content/{meta,interpret,cards}.ts, src/features/saju/{interpret,interpret.test,pillar-table}, src/pages/saju.tsx, src/features/card/card-frame.tsx
+- 새 공용 코드: CODE_INDEX 참조
+- 남은 문제: 없음
+- 다음 할 일: T4 오늘의 운세
+- 증거: vitest 22/22, e2e 12/12, audit:code 클린(복제 0%)
+- 배운 점: jscpd가 같은 파일 내 반복 JSX도 잡음 — 표 행은 데이터로 돌리는 게 정석
+
 ### T2
 - 한 일: 운세카드 덱 24장(content/cards.ts, 대길~대흉·오행·해석·조언 실제 콘텐츠), features/card/draw.ts(날짜+사주 시드 결정적 뽑기, 하루 1장), storage 카드 기록 저장/조회, card-frame(카드 앞·뒷면, 오행색), card-scene(motion 팬아웃→선택→3D플립→금빛 폭발 연출, reduced-motion 대응), /card 페이지, 홈 CTA, e2e AC5·AC6
 - 바꾼 파일: src/lib/{types,storage}.ts, src/content/cards.ts, src/features/card/{draw,draw.test,card-frame,card-scene}.tsx, src/pages/{card,home}.tsx, src/App.tsx, e2e/card.spec.ts

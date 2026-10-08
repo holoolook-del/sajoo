@@ -1,13 +1,12 @@
 import type { Grade } from '../lib/types.ts';
-
-export type CardElement = '목' | '화' | '토' | '금' | '수';
+import type { ElementKey } from './meta.ts';
 
 export interface CardDef {
   id: string;
   name: string;
   hanja: string;
   grade: Grade;
-  element: CardElement;
+  element: ElementKey;
   /** 그날의 운세 해석 — 1~2문장 */
   message: string;
   /** 행동 조언 — 1문장 */

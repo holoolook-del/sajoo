@@ -1,14 +1,11 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { ELEMENT_COLOR, ELEMENT_HANJA } from '../content/meta.ts';
+import { ELEMENT_TEXT } from '../content/interpret.ts';
 import { calcSaju } from '../lib/engine.ts';
 import { loadProfile } from '../lib/storage.ts';
-
-const PILLAR_LABELS = [
-  { key: 'hour', label: '시주' },
-  { key: 'day', label: '일주' },
-  { key: 'month', label: '월주' },
-  { key: 'year', label: '연주' },
-] as const;
+import { interpretSaju } from '../features/saju/interpret.ts';
+import { PillarTable } from '../features/saju/pillar-table.tsx';
 
 export function SajuPage() {
   const profile = loadProfile();
@@ -29,7 +26,12 @@ export function SajuPage() {
     [profile],
   );
 
-  if (!result || !result.ok) {
+  const reading = useMemo(
+    () => (result?.ok ? interpretSaju(result.data) : null),
+    [result],
+  );
+
+  if (!result || !result.ok || !reading) {
     return (
       <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6">
         <p className="text-hanji/70">사주를 계산할 수 없습니다.</p>
@@ -38,7 +40,8 @@ export function SajuPage() {
     );
   }
 
-  const { pillars, dayMaster, lunar, hourIncluded } = result.data;
+  const { pillars, dayMaster, lunar, hourIncluded, voidBranches } = result.data;
+  const maxEl = Math.max(...reading.elementCounts.map((e) => e.count), 1);
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
@@ -51,32 +54,86 @@ export function SajuPage() {
         </p>
       </header>
 
-      <section className="grid grid-cols-4 gap-2">
-        {PILLAR_LABELS.map(({ key, label }) => {
-          const p = pillars[key];
-          return (
-            <div key={key} className="rounded-lg border border-gold/30 bg-night-soft p-3 text-center">
-              <div className="text-xs text-hanji/50">{label}</div>
-              {p ? (
-                <>
-                  <div className="mt-1 text-2xl font-bold text-hanji">{p.hanja}</div>
-                  <div className="mt-1 text-sm text-gold-bright">{p.korean}</div>
-                </>
-              ) : (
-                <div className="mt-1 text-sm text-hanji/40">미입력</div>
-              )}
-            </div>
-          );
-        })}
+      {/* 만세력식 팔자표 */}
+      <section className="overflow-hidden rounded-xl border border-gold/30 bg-night-soft">
+        <PillarTable pillars={pillars} />
+        <p className="border-t border-hanji/10 px-3 py-2 text-xs text-hanji/50">
+          공망(空亡): {voidBranches.join('·')} — 해당 지지의 기운이 비어 있어 그 자리의 십신이 약해집니다.
+        </p>
       </section>
 
-      <section className="rounded-lg border border-hanji/15 bg-night-soft p-4">
-        <h2 className="text-sm text-hanji/60">일간(나를 나타내는 글자)</h2>
-        <p className="mt-1 text-lg">
-          <span className="text-2xl font-bold text-gold-bright">{dayMaster.hanja}</span>{' '}
+      {/* 일간 해석 */}
+      <section className="rounded-xl border border-gold/30 bg-night-soft p-5">
+        <h2 className="text-sm text-hanji/60">일간(日干) — 나를 나타내는 글자</h2>
+        <p className="mt-2 text-lg">
+          <span className="text-3xl font-bold" style={{ color: ELEMENT_COLOR[dayMaster.element as keyof typeof ELEMENT_COLOR] }}>
+            {dayMaster.hanja}
+          </span>{' '}
           <span className="text-hanji">{dayMaster.korean}</span>{' '}
-          <span className="text-hanji/60">— {dayMaster.element}의 {dayMaster.yinYang} 기운</span>
+          <span className="text-hanji/60">— {reading.dayMaster.nature}, {dayMaster.element}의 {dayMaster.yinYang} 기운</span>
         </p>
+        <p className="mt-3 text-sm leading-6 text-hanji/85">{reading.dayMaster.text}</p>
+      </section>
+
+      {/* 오행 분포 */}
+      <section className="rounded-xl border border-gold/30 bg-night-soft p-5">
+        <h2 className="text-sm text-hanji/60">오행(五行) 분포</h2>
+        <div className="mt-3 flex items-end gap-3">
+          {reading.elementCounts.map(({ element, count }) => (
+            <div key={element} className="flex flex-1 flex-col items-center gap-1">
+              <div className="flex h-24 w-full items-end">
+                <div
+                  className="w-full rounded-t"
+                  style={{
+                    height: `${(count / maxEl) * 100}%`,
+                    backgroundColor: ELEMENT_COLOR[element],
+                    minHeight: count > 0 ? '6px' : '2px',
+                    opacity: count > 0 ? 1 : 0.25,
+                  }}
+                />
+              </div>
+              <span className="text-xs font-bold text-hanji">{ELEMENT_HANJA[element]}</span>
+              <span className="text-[10px] text-hanji/50">{element} {count}</span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-sm leading-6 text-hanji/85">{reading.balanceText}</p>
+      </section>
+
+      {/* 오행별 의미 */}
+      <section className="rounded-xl border border-hanji/15 bg-night-soft p-5">
+        <h2 className="text-sm text-hanji/60">오행의 의미</h2>
+        <ul className="mt-3 space-y-2">
+          {reading.elementCounts.map(({ element }) => (
+            <li key={element} className="text-sm leading-6">
+              <span className="font-bold" style={{ color: ELEMENT_COLOR[element] }}>
+                {element}({ELEMENT_HANJA[element]})
+              </span>
+              <span className="text-hanji/50"> {ELEMENT_TEXT[element].virtue}</span>
+              <span className="text-hanji/80"> — {ELEMENT_TEXT[element].text}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* 십신 해석 */}
+      <section className="rounded-xl border border-gold/30 bg-night-soft p-5">
+        <h2 className="text-sm text-hanji/60">십신(十神) — 사주에 드러난 성향</h2>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {reading.tenGodCounts.map(({ god, count }) => (
+            <span
+              key={god}
+              className="rounded-full border border-gold/40 px-3 py-1 text-xs text-hanji/80"
+            >
+              {god} {count}
+            </span>
+          ))}
+        </div>
+        {reading.tenGodTexts.map(({ god, text }) => (
+          <p key={god} className="mt-3 text-sm leading-6 text-hanji/85">
+            <span className="font-bold text-gold-bright">{god}</span> — {text}
+          </p>
+        ))}
       </section>
     </main>
   );
