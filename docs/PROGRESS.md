@@ -252,3 +252,15 @@
 
 ### 검증
 - pnpm verify 통과 (테스트 43)
+
+
+## T16 — 카드 덱 원형 회전 + 홈 미뽑기 배지
+
+### 한 일
+- 카드 덱을 평면 나열 → 원호 회전(커버플로우)으로 재구현: sin 곡선 배치, 옆 카드는 rotateY·translateZ로 뒤로 휘어짐, 멀면 페이드. 카드가 화면 밖으로 나가지 않음
+- 드래그 버그 수정: 트랙이 translateX로 히트박스가 화면 밖으로 나가 드래그가 안 먹던 문제 — useDragControls + dragListener=false + 컨테이너 onPointerDown으로 시작하도록 변경. 모멘텀·스냅 유지
+- 홈 카드 CTA에 "오늘 아직 안 뽑음" 배지(펄스 도트) — 미뽑기 시에만 표시
+
+### 검증
+- typecheck·lint 통과, vitest 43/43, card e2e 4/4, 빌드+SW 54항목
+- 수동 검증(Playwright 스크립트): 드래그 시 카드 위치 변화 + 릴리즈 후 스냅 확인

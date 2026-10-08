@@ -56,6 +56,12 @@ export function HomePage() {
           alt=""
           className="h-20 w-20 shrink-0 rounded-xl border border-gold/40 object-cover"
         />
+        {!hasCardDrawn && (
+          <span className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-gold/60 bg-night/80 px-2.5 py-1 text-[10px] font-bold text-gold-bright">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-bright" />
+            오늘 아직 안 뽑음
+          </span>
+        )}
         <div className="min-w-0 flex-1">
           <p className="text-base font-bold text-gold-bright">
             {hasCardDrawn ? '오늘의 카드 다시 보기' : '오늘의 운세카드 뽑기'}
