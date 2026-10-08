@@ -1,11 +1,21 @@
 # PROGRESS
 
 ## 현재 상태
-- 완료: Phase 0~4 (환경 점검·인터뷰·설계·문서·부트스트랩), T0 스캐폴드+verify+e2e 통과
-- 진행 중: 없음 — T1 대기
-- 다음: T1 만세력 엔진 래퍼 + 프로필 입력·저장 (H2: GitHub 저장소/Pages는 배포 확인 시 필요)
+- 완료: Phase 0~4, T0 스캐폴드, T1 만세력 엔진+프로필 (GitHub push됨)
+- 진행 중: 없음 — T2 대기
+- 다음: T2 운세카드 뽑기 (핵심 흐름). H2 Pages 활성화는 사용자 작업 대기
 
 ## 태스크별 기록
+### T1
+- 한 일: 만세력 엔진 래퍼(calcSaju·validateBirthInput, 자시 관법, 생시 null→3주), types.ts(Profile), storage.ts(프로필 저장·조회), zod 폼 스키마, ProfileForm, useProfile, /onboarding+/saju 페이지, 프로필 가드, e2e 3건 추가
+- 바꾼 파일: src/lib/{engine,engine.test,storage,storage.test,types}.ts, src/features/saju/{profile-schema,profile-form,use-profile}, src/pages/{onboarding,saju,home}.tsx, src/App.tsx, e2e/{smoke,onboarding}.spec.ts
+- 새 공용 코드: CODE_INDEX 참조 (calcSaju, validateBirthInput, storage 프로필 함수, ProfileForm, useProfile, profileFormSchema)
+- 새 파일을 만든 이유: DECISIONS 폴더 구조대로 기능·계층 분리 (lib=엔진/저장, features=saju 폼, pages=화면)
+- 남은 문제: knip이 motion(T2 예정), SajuPillar(공용 반환 타입) 보고 — 의도된 잔여. H2(GitHub Pages 활성화) 사용자 작업 대기 중 — 완료되면 push로 자동 배포
+- 다음 할 일: T2 운세카드 뽑기
+- 증거: vitest 13/13 통과(engine 10 + storage 2 + date 2), e2e 8/8(desktop+mobile: AC1·AC2·AC3·AC11), verify 통과
+- 배운 점: Playwright는 준비 URL이 404면 타임아웃(vite base 경로 끝 슬래시 필요), Windows에서 vite는 ::1에만 바인딩될 수 있어 --host 127.0.0.1 명시
+
 ### Phase 4 부트스트랩 / T0
 - 한 일: git init(main), .gitignore, .githooks/pre-commit(.env 차단), 전 설정 파일+스캐폴드, pnpm install, verify 첫 통과, e2e 스모크 통과, 첫 커밋. HANBANGCUT-AUTO.md → docs/reference/ 이동
 - 바꾼 파일: package.json, vite.config.ts, tsconfig.json, eslint.config.js, playwright.config.ts, knip.json, .jscpd.json, deploy.yml, index.html, src/(main·App·index.css·lib/date·lib/date.test·lib/result·pages/home), e2e/smoke.spec.ts, public/favicon.svg, .env.example

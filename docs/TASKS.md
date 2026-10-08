@@ -6,7 +6,7 @@
 
 ## 목록
 - [ ] T0 스캐폴드, 환경 설정, verify 첫 통과, Actions→GitHub Pages 빈 화면 배포 확인
-- [ ] T1 만세력 엔진 래퍼 + 프로필 입력·저장
+- [x] T1 만세력 엔진 래퍼 + 프로필 입력·저장
   - AC: AC1, AC2(계산부), AC3, AC11
   - 예상 파일: lib/engine.ts, lib/storage.ts, lib/date.ts, content/meta.ts, features/saju/, pages/onboarding.tsx
 - [ ] T2 운세카드 뽑기 — 존재 이유가 되는 핵심 흐름 (덱 정의→하루 1장 규칙→화려한 연출→결과, 오프라인)

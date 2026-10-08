@@ -1,11 +1,26 @@
+import { Link, Navigate } from 'react-router-dom';
 import { todayKST } from '../lib/date.ts';
+import { hasProfile } from '../lib/storage.ts';
 
 export function HomePage() {
+  if (!hasProfile()) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-3 p-6 text-center">
-      <h1 className="text-4xl font-bold text-gold">SAJOO</h1>
-      <p className="text-hanji/70">나의 한국식 사주 · 오늘의 운세카드</p>
-      <p className="text-sm text-hanji/50">{todayKST()}</p>
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
+      <header className="pt-8 text-center">
+        <h1 className="text-4xl font-bold text-gold">SAJOO</h1>
+        <p className="mt-1 text-sm text-hanji/50">{todayKST()}</p>
+      </header>
+      <nav className="flex flex-col gap-3">
+        <Link
+          to="/saju"
+          className="rounded-lg border border-gold/30 bg-night-soft p-4 text-center text-hanji"
+        >
+          내 사주팔자 보기
+        </Link>
+      </nav>
     </main>
   );
 }
