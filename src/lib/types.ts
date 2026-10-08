@@ -25,3 +25,11 @@ export interface CardDraw {
   cardId: string;
   drawnAt: string; // ISO
 }
+
+export interface FortuneRecord {
+  v: 1;
+  date: string; // KST 'YYYY-MM-DD'
+  iljin: string; // 일진 한글 '계유'
+  grade: Grade;
+  summary: string;
+}

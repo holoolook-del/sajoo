@@ -52,6 +52,34 @@ export interface SajuResult {
 const SOLAR_MIN_YEAR = 1800;
 const SOLAR_MAX_YEAR = 2300;
 
+export interface Iljin {
+  korean: string; // '계유'
+  hanja: string; // '癸酉'
+  stem: string; // '계' — 천간 한글
+  branch: string; // '유' — 지지 한글
+  stemHanja: string;
+  branchHanja: string;
+  stemElement: string;
+  branchElement: string;
+}
+
+/** 특정 양력 날짜의 일진(그날의 일주)을 계산한다. */
+export function iljinOf(year: number, month: number, day: number): Iljin {
+  const d = calculateFourPillars({
+    year, month, day, hour: 12, minute: 0, dayBoundary: 'jasi',
+  });
+  return {
+    korean: d.dayString,
+    hanja: d.dayHanja,
+    stem: d.dayString.charAt(0),
+    branch: d.dayString.charAt(1),
+    stemHanja: d.dayHanja.charAt(0),
+    branchHanja: d.dayHanja.charAt(1),
+    stemElement: d.dayElement.stem,
+    branchElement: d.dayElement.branch,
+  };
+}
+
 /** 입력을 검증한다. 실패 시 사용자에게 보여줄 한국어 문구를 돌려준다. */
 export function validateBirthInput(input: SajuBirthInput): Result<true> {
   const { year, month, day, calendar } = input;

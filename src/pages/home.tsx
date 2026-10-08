@@ -23,6 +23,12 @@ export function HomePage() {
           {hasCardDrawn ? '오늘의 카드 다시 보기' : '오늘의 운세카드 뽑기'}
         </Link>
         <Link
+          to="/fortune"
+          className="rounded-lg border border-gold/30 bg-night-soft p-4 text-center text-hanji"
+        >
+          오늘의 운세 보기
+        </Link>
+        <Link
           to="/saju"
           className="rounded-lg border border-gold/30 bg-night-soft p-4 text-center text-hanji"
         >

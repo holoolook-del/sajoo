@@ -10,6 +10,7 @@
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
 | --- | --- | --- | --- |
 | calcSaju | src/lib/engine.ts | 생년월일시→사주팔자·십신·대운·공망 (자시 관법, 생시 null→3주) | SajuBirthInput → Result\<SajuResult\> |
+| iljinOf | src/lib/engine.ts | 날짜→일진(그날의 일주) | y,m,d → Iljin |
 | validateBirthInput | src/lib/engine.ts | 생년월일시 입력 검증 (범위·미래·존재 날짜) | SajuBirthInput → Result\<true\> |
 
 ## 검증·포맷
@@ -24,6 +25,7 @@
 | --- | --- | --- | --- |
 | saveProfile / loadProfile / hasProfile | src/lib/storage.ts | 프로필 로컬 저장·조회 (키 sajoo:profile) | Profile ↔ 저장소 |
 | saveCardDraw / loadCardDraw | src/lib/storage.ts | 날짜별 카드 뽑기 기록 (키 sajoo:card:YYYY-MM-DD) | CardDraw ↔ 저장소 |
+| saveFortune / loadFortune / listRecordDates | src/lib/storage.ts | 날짜별 운세 기록 (sajoo:fortune:날짜), 날짜 키 나열 | FortuneRecord ↔ 저장소 |
 
 ## 카드·운세
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
@@ -32,6 +34,8 @@
 | dailyCard | src/features/card/draw.ts | 날짜+사주 시드로 그날의 카드 결정적 선택 | Profile,date → CardDef |
 | drawToday / canDrawOn / todaysDraw | src/features/card/draw.ts | 하루 1장 뽑기 기록·조회 (멱등) | Profile,date? → CardDraw |
 | interpretSaju | src/features/saju/interpret.ts | SajuResult → 일간·오행 분포·과다/부족·십신 해석 조합 | SajuResult → SajuReading |
+| dailyFortune / branchRelation | src/features/fortune/today.ts | 일진×사주 조합(십신·관계·상생상극)→등급·해석 | SajuResult,date → DailyFortune |
+| saveTodaysFortune | src/features/fortune/today.ts | 오늘 운세를 FortuneRecord로 기록 (멱등) | SajuResult,date → FortuneRecord |
 
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |
@@ -47,6 +51,7 @@
 | --- | --- | --- | --- |
 | ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey | src/content/meta.ts | 오행·십신 공용 메타 (색상·한자·타입) | 오행 → 색상/한자 |
 | DAY_MASTER_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT | src/content/interpret.ts | 풀이문 DB (일간·오행·균형·십신) | 키 → 해석 문장 |
+| BRANCH_RELATIONS / DAY_GOD_TEXT / RELATION_TEXT / GRADE_SUMMARY | src/content/fortune.ts | 지지 관계 테이블 + 오늘운세 풀이문 | 지지쌍/십신/등급 → 문장 |
 
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |
