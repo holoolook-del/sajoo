@@ -117,8 +117,8 @@ export type BgmKey = keyof typeof BGM_FILES;
 
 // 트랙별 볼륨 — 수면 음원은 배경 BGM보다 앞에 들려야 하므로 더 크게
 const BGM_VOLUME: Record<BgmKey, number> = {
-  bgm: 0.3,
-  temple: 0.35,
+  bgm: 0.15,
+  temple: 0.22,
   rain: 0.6,
   waves: 0.55,
   fire: 0.55,

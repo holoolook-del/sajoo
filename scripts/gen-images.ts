@@ -116,13 +116,13 @@ const jobs: Job[] = [
   },
   {
     file: 'illust/menu-compat.webp',
-    prompt: `two glowing crimson threads floating through the night air, gently intertwining and tying into a loose knot under a full moon, red thread of fate, romantic and delicate${STYLE}`,
+    prompt: `two magpies perched facing each other on a plum blossom branch under a bright full moon, a thin glowing red thread tied between them, romantic Korean folklore mood${STYLE}`,
     aspect: '16:9',
     mp: '0.25',
   },
   {
     file: 'illust/menu-history.webp',
-    prompt: `an old silk almanac scroll unrolling on a dark wooden desk beside an ink brush and a small brass moon-phase dial, warm candlelight, nostalgic archival mood${STYLE}`,
+    prompt: `an open old Korean diary with handwritten calligraphy pages on a dark wooden desk, an ink brush resting beside, soft moonlight falling across the pages through a lattice window, quiet nostalgic mood${STYLE}`,
     aspect: '16:9',
     mp: '0.25',
   },
