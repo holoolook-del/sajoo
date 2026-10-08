@@ -148,7 +148,7 @@ console.log('효과음 합성 중…');
   writeWav('reveal.wav', buf);
 }
 
-// knock.wav — 목탁 "톡": 속 빈 나무 공명(600Hz 본음+배음, 매우 빠른 감쇠) + 타격 클릭
+// knock.wav — 목탁 "톡": 속 빈 나무 공명(620Hz 본음+배음, 매우 빠른 감쇠) + 타격 클릭
 {
   const buf = new Float32Array(sec(0.5));
   const start = 0;
@@ -164,6 +164,57 @@ console.log('효과음 합성 중…');
   }
   noise(buf, 0, 0.03, 0.5, true); // 막대가 닿는 클릭
   writeWav('knock.wav', buf);
+}
+
+/** 패드 화음 — 사인 음색 여러 개를 느린 어택/릴리즈로 깔기 */
+function pad(buf: Float32Array, freqs: number[], at: number, dur: number, gain: number) {
+  const start = sec(at);
+  const n = sec(dur);
+  const fade = Math.min(2.2, dur * 0.3);
+  for (let i = 0; i < n; i++) {
+    const j = start + i;
+    if (j >= buf.length) break;
+    const t = i / SR;
+    const remain = (n - i) / SR;
+    const env = Math.min(1, t / fade, remain / fade);
+    let v = 0;
+    for (const f of freqs) {
+      v += Math.sin(TAU * f * t) + 0.35 * Math.sin(TAU * f * 2 * t);
+    }
+    buf[j] = (buf[j] ?? 0) + (gain * env * v) / freqs.length;
+  }
+}
+
+// bgm.wav — 32초 앰비언트 루프: Am→F→C→G 패드 크로스페이드 + 드문 오음계 종
+{
+  const buf = new Float32Array(sec(32));
+  const chords: number[][] = [
+    [110, 130.81, 164.81], // Am
+    [87.31, 110, 130.81], // F
+    [98, 130.81, 164.81], // C/G feel
+    [87.31, 123.47, 146.83], // G add9
+  ];
+  chords.forEach((c, i) => pad(buf, c, i * 8, 10, 0.32)); // 2초씩 겹쳐 끊김 없음
+  // 드문 종 — 오음계 고음이 아주 약하게
+  const bells: [number, number][] = [
+    [880, 2.2], [1318.5, 9.8], [1046.5, 17.4], [1174.7, 25.1],
+  ];
+  for (const [f, t] of bells) bell(buf, f, t, 3.2, 0.05);
+  noise(buf, 0, 32, 0.012, false); // 아주 얕은 공기감
+  writeWav('bgm.wav', buf);
+}
+
+// temple.wav — 32초 경내 분위기: 저음 드론 + 멀리서 울리는 큰 종(8초마다) + 얕은 바람
+{
+  const buf = new Float32Array(sec(32));
+  pad(buf, [82.41, 123.47, 164.81], 0, 32, 0.3); // E 저음 드론
+  // 멀리 울리는 범종 — 낮은 본음 + 긴 여운
+  for (const t of [0.5, 8.5, 16.5, 24.5]) {
+    bell(buf, 196, t, 5.5, 0.4);
+    bell(buf, 98, t, 6.5, 0.25);
+  }
+  noise(buf, 0, 32, 0.02, false);
+  writeWav('temple.wav', buf);
 }
 
 console.log('완료 — public/assets/audio/');

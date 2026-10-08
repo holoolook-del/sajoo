@@ -32,6 +32,7 @@ export function setSoundEnabled(on: boolean): void {
   } catch {
     /* 저장 불가 시 무시 */
   }
+  syncBgm();
 }
 
 function el(key: SoundKey): HTMLAudioElement {
@@ -94,4 +95,36 @@ export function playCardReveal(): void {
 /** 목탁 타격 — 짧은 나무 노크. 탭 제스처 안에서 재생되므로 프라임 불필요 */
 export function playKnock(): void {
   play('knock');
+}
+
+// ── 배경음악 ──────────────────────────────────────────────
+// 브라우저 자동재생 정책상 사용자 제스처 없이는 재생이 안 된다.
+// 페이지마다 setBgm으로 '원하는 곡'을 선언해 두고, 첫 포인터 입력마다 syncBgm으로
+// 실제 재생을 시도한다(제스처 안에서만 성공). 음소거 시 함께 멈춘다.
+
+const BGM_FILES = { bgm: 'bgm.wav', temple: 'temple.wav' } as const;
+export type BgmKey = keyof typeof BGM_FILES;
+
+let bgmDesired: BgmKey | null = null;
+let bgmEl: HTMLAudioElement | null = null;
+
+export function setBgm(track: BgmKey | null): void {
+  bgmDesired = track;
+  syncBgm();
+}
+
+/** 원하는 BGM과 실제 재생 상태를 동기화 — 제스처/토글 때마다 호출 */
+export function syncBgm(): void {
+  if (!bgmDesired || !isSoundEnabled()) {
+    bgmEl?.pause();
+    return;
+  }
+  if (!bgmEl) bgmEl = new Audio();
+  const url = `${BASE}assets/audio/${BGM_FILES[bgmDesired]}`;
+  if (!bgmEl.src.endsWith(url)) {
+    bgmEl.src = url;
+    bgmEl.loop = true;
+    bgmEl.volume = 0.3;
+  }
+  if (bgmEl.paused) void bgmEl.play().catch(() => {});
 }

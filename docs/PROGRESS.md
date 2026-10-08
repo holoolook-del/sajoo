@@ -141,3 +141,16 @@
 
 ### 검증
 - vitest 42/42, e2e 30/30, lint 경고 2(기존), build+SW 49개
+
+## T11 — 배경음악 + 심심풀이 메뉴 통합 수정 (완료)
+
+### 한 일
+- `scripts/gen-sounds.ts` — `pad()` 화음 합성 추가. bgm.wav(32s Am→F→C→G 패드+드문 종), temple.wav(32s 저음 드론+범종 8초 간격) 생성 (~1.4MB 각각)
+- `src/lib/sound.ts` — BGM 매니저: setBgm/track 선언 + syncBgm(실제 재생 동기화). 자동재생 정책상 제스처 필요 → App에서 pointerdown마다 syncBgm 재시도. 음소거와 연동
+- `src/App.tsx` — 마운트 시 setBgm('bgm') + pointerdown 리스너
+- `moktak.tsx` — 페이지에 있을 때 setBgm('temple'), 나가면 'bgm' 복귀
+- `home.tsx` — 심심풀이를 별도 섹션이 아니라 MENUS 그리드에 통합('지난 30일의 기록' 다음). 외부 링크는 a 태그 분기
+- e2e 갱신 — 그리드 기준으로 변경, 30/30 통과
+
+### 검증
+- vitest 42/42, e2e 30/30, build+SW 51개(8.9MB)

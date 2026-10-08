@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShareButton } from '../components/share-button.tsx';
 import { SoundToggle } from '../components/sound-toggle.tsx';
-import { playKnock } from '../lib/sound.ts';
+import { playKnock, setBgm } from '../lib/sound.ts';
 import { todayKST } from '../lib/date.ts';
 
 const A = import.meta.env.BASE_URL;
@@ -59,6 +59,12 @@ export function MoktakPage() {
       /* 저장 실패는 무시 */
     }
   }, [count]);
+
+  // 이 페이지에 있는 동안 경내 분위기 BGM — 나가면 기본 곡으로 복귀
+  useEffect(() => {
+    setBgm('temple');
+    return () => setBgm('bgm');
+  }, []);
 
   const tap = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
