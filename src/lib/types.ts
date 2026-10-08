@@ -1,5 +1,5 @@
 /** 영속화되는 레코드 타입 — 저장소는 lib/storage.ts 경유. 모든 레코드에 v 버전 필드.
- * 나머지 레코드(CardDraw/FortuneRecord 등)는 각 기능 태스크에서 추가한다. */
+ * 나머지 레코드(FortuneRecord 등)는 각 기능 태스크에서 추가한다. */
 export type Gender = 'male' | 'female';
 export type CalendarKind = 'solar' | 'lunar';
 
@@ -15,4 +15,13 @@ export interface Profile {
   minute: number | null;
   gender: Gender; // 대운 순/역행에 필수
   createdAt: string; // ISO
+}
+
+export type Grade = '대길' | '길' | '평' | '흉' | '대흉';
+
+export interface CardDraw {
+  v: 1;
+  date: string; // KST 'YYYY-MM-DD', 하루 1장 유일키
+  cardId: string;
+  drawnAt: string; // ISO
 }

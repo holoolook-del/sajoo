@@ -1,6 +1,7 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { hasProfile } from './lib/storage.ts';
+import { CardPage } from './pages/card.tsx';
 import { HomePage } from './pages/home.tsx';
 import { OnboardingPage } from './pages/onboarding.tsx';
 import { SajuPage } from './pages/saju.tsx';
@@ -20,6 +21,14 @@ export function App() {
           element={
             <RequireProfile>
               <SajuPage />
+            </RequireProfile>
+          }
+        />
+        <Route
+          path="/card"
+          element={
+            <RequireProfile>
+              <CardPage />
             </RequireProfile>
           }
         />

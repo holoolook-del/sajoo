@@ -9,7 +9,7 @@
 - [x] T1 만세력 엔진 래퍼 + 프로필 입력·저장
   - AC: AC1, AC2(계산부), AC3, AC11
   - 예상 파일: lib/engine.ts, lib/storage.ts, lib/date.ts, content/meta.ts, features/saju/, pages/onboarding.tsx
-- [ ] T2 운세카드 뽑기 — 존재 이유가 되는 핵심 흐름 (덱 정의→하루 1장 규칙→화려한 연출→결과, 오프라인)
+- [x] T2 운세카드 뽑기 — 존재 이유가 되는 핵심 흐름 (덱 정의→하루 1장 규칙→화려한 연출→결과, 오프라인)
   - AC: AC5, AC6, AC7
   - 위험 등급: 중간(연출 성능). 독립 검토 대상
 - [ ] T3 사주 풀이 화면 (팔자표·오행·십신·풀이문 조합)

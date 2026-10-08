@@ -23,12 +23,22 @@
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
 | --- | --- | --- | --- |
 | saveProfile / loadProfile / hasProfile | src/lib/storage.ts | 프로필 로컬 저장·조회 (키 sajoo:profile) | Profile ↔ 저장소 |
+| saveCardDraw / loadCardDraw | src/lib/storage.ts | 날짜별 카드 뽑기 기록 (키 sajoo:card:YYYY-MM-DD) | CardDraw ↔ 저장소 |
+
+## 카드·운세
+| 이름 | 경로 | 하는 일 | 입력 → 출력 |
+| --- | --- | --- | --- |
+| CARD_DECK / getCardById | src/content/cards.ts | 운세카드 24장 정의(등급·오행·해석·조언) + id 조회 | id → CardDef |
+| dailyCard | src/features/card/draw.ts | 날짜+사주 시드로 그날의 카드 결정적 선택 | Profile,date → CardDef |
+| drawToday / canDrawOn / todaysDraw | src/features/card/draw.ts | 하루 1장 뽑기 기록·조회 (멱등) | Profile,date? → CardDraw |
 
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |
 | --- | --- | --- |
 | ProfileForm | src/features/saju/profile-form.tsx | 프로필 입력 폼 (검증·에러 표시 포함) |
 | useProfile | src/features/saju/use-profile.ts | 프로필 읽기·저장 훅 |
+| CardDrawScene | src/features/card/card-scene.tsx | 카드 팬아웃→선택→플립→폭발 뽑기 연출 |
+| CardFront / CardBack | src/features/card/card-frame.tsx | 카드 앞·뒷면 비주얼 (오행색 테두리) |
 
 ## 콘텐츠·풀이문
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |

@@ -1,11 +1,21 @@
 # PROGRESS
 
 ## 현재 상태
-- 완료: Phase 0~4, T0 스캐폴드, T1 만세력 엔진+프로필 (GitHub push됨)
-- 진행 중: 없음 — T2 대기
-- 다음: T2 운세카드 뽑기 (핵심 흐름). H2 Pages 활성화는 사용자 작업 대기
+- 완료: Phase 0~4, T0 스캐폴드, T1 만세력 엔진+프로필, T2 운세카드 뽑기
+- 진행 중: 없음 — T3 대기
+- 다음: T3 사주 풀이 화면(팔자표·오행·십신·풀이문 조합). H2 Pages 활성화는 사용자 작업 대기
 
 ## 태스크별 기록
+### T2
+- 한 일: 운세카드 덱 24장(content/cards.ts, 대길~대흉·오행·해석·조언 실제 콘텐츠), features/card/draw.ts(날짜+사주 시드 결정적 뽑기, 하루 1장), storage 카드 기록 저장/조회, card-frame(카드 앞·뒷면, 오행색), card-scene(motion 팬아웃→선택→3D플립→금빛 폭발 연출, reduced-motion 대응), /card 페이지, 홈 CTA, e2e AC5·AC6
+- 바꾼 파일: src/lib/{types,storage}.ts, src/content/cards.ts, src/features/card/{draw,draw.test,card-frame,card-scene}.tsx, src/pages/{card,home}.tsx, src/App.tsx, e2e/card.spec.ts
+- 새 공용 코드: CODE_INDEX 참조
+- 새 파일을 만든 이유: DECISIONS 구조 — content=카드 정의 데이터, features/card=뽑기 규칙+연출, pages=화면
+- 남은 문제: 청크 >500kB 경고(motion) — T-last에 코드스플릿 검토. knip 잔여 SajuPillar는 의도된 공용 타입
+- 다음 할 일: T3 사주 풀이 화면
+- 증거: vitest 18/18, e2e 12/12(desktop+mobile: AC5·AC6 포함), verify 통과
+- 배운 점: 부채꼴 카드는 앞 카드가 뒤 카드 클릭 영역을 가림 — e2e는 최상위 카드를 클릭
+
 ### T1
 - 한 일: 만세력 엔진 래퍼(calcSaju·validateBirthInput, 자시 관법, 생시 null→3주), types.ts(Profile), storage.ts(프로필 저장·조회), zod 폼 스키마, ProfileForm, useProfile, /onboarding+/saju 페이지, 프로필 가드, e2e 3건 추가
 - 바꾼 파일: src/lib/{engine,engine.test,storage,storage.test,types}.ts, src/features/saju/{profile-schema,profile-form,use-profile}, src/pages/{onboarding,saju,home}.tsx, src/App.tsx, e2e/{smoke,onboarding}.spec.ts

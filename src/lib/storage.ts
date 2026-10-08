@@ -1,4 +1,4 @@
-import type { Profile } from './types.ts';
+import type { CardDraw, Profile } from './types.ts';
 
 const PREFIX = 'sajoo:';
 
@@ -23,4 +23,11 @@ export function loadProfile(): Profile | null {
 }
 export function hasProfile(): boolean {
   return loadProfile() !== null;
+}
+
+export function saveCardDraw(draw: CardDraw): void {
+  writeRecord(`card:${draw.date}`, draw);
+}
+export function loadCardDraw(date: string): CardDraw | null {
+  return readRecord<CardDraw>(`card:${date}`);
 }
