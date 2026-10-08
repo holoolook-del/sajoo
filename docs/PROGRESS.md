@@ -14,11 +14,13 @@
 - 증거: vitest 41/41(신규 2건 — 캐릭터 필드·운세 지수 범위), e2e 24/24, e2e:preview AC7 통과, verify 통과, audit:code 클린
 - 배운 점: 공유 텍스트에 이름·캐릭터만 넣고 생년월일시는 절대 제외 — URL도 앱 루트만
 
-### 효과음 (T9 후속)
-- 한 일: Web Audio API 합성 효과음(파일·비용·라이선스 0) — 카드 선택 종소리(playCardPick), 공개 휙+오음계 팡파레(playCardReveal), AudioContext는 첫 클릭 제스처 안에서 lazy 생성해 자동재생 정책 회피. sajoo:sound 키로 음소거 유지, SoundToggle을 홈·카드 헤더에 배치
-- 바꾼 파일: src/lib/sound.ts(신규), src/lib/sound.test.ts(신규), src/components/sound-toggle.tsx(신규), src/features/card/card-scene.tsx, src/pages/{card,home}.tsx
-- 새 공용 코드: playCardPick, playCardReveal, isSoundEnabled, setSoundEnabled, SoundToggle (CODE_INDEX 등록)
-- 증거: vitest 42/42, e2e 24/24, verify 통과, audit 클린
+### 효과음 (T9 후속 → 가챠 연출 + 파일 재생으로 리워크)
+- 한 일: ① 카드 씬을 가챠식 3단계로 재작성 — 팬 → 기모으기(소환진 2개 반대회전·카드 떨림·충전 오라·"기가 모이는 중…") → 공개(화면 플래시·회전 광선·화면 진동·발광 파티클 20~30개, 대길/길 확대). ② 사운드를 Web Audio 런타임 합성에서 **미리 렌더한 WAV 파일 재생**(HTMLAudioElement)으로 전환 — 인앱 브라우저(카톡 웹뷰)에서 AudioContext가 잠겨 무음이 되는 문제 해결. scripts/gen-sounds.ts가 pick/charge/reveal 3개 WAV를 PCM 합성(총 ~170KB). 첫 클릭 제스처 안에서 나머지 사운드를 muted play→pause로 언락해 setTimeout 뒤 재생도 동작. sajoo:sound 음소거 유지, SoundToggle 홈·카드 헤더
+- 바꾼 파일: scripts/gen-sounds.ts(신규), public/assets/audio/{pick,charge,reveal}.wav(신규), src/lib/sound.ts(재작성), src/components/sound-toggle.tsx(신규), src/features/card/card-scene.tsx(재작성), src/pages/{card,home}.tsx, vite.config.ts(glob에 wav), package.json(gen:sounds)
+- 새 공용 코드: playCardPick/Charge/Reveal, isSoundEnabled, setSoundEnabled, SoundToggle (CODE_INDEX 등록)
+- 남은 문제: 없음
+- 증거: vitest 42/42, e2e 24/24, verify 통과(프리캐시 45개), audit 클린
+- 배운 점: 인앱 웹뷰에서 Web Audio API는 resume()이 안 풀리는 경우가 있음 → 파일+HTMLAudioElement+제스처 언락이 정석. WAV 합성은 Node에서 PCM16 직접 렌더링 가능(외부 다운로드·라이선스 불필요)
 
 ### 배포·홈 리디자인 (커밋 a8ebc20·968b2ef)
 - pnpm/action-setup version 필드가 packageManager와 충돌 → 워크플로우에서 제거. Pages 활성화·Actions 권한은 GitHub API로 직접 설정 완료

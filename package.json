@@ -15,6 +15,7 @@
     "e2e:preview": "pnpm build && playwright test -c playwright.preview.config.ts",
     "audit:code": "knip && jscpd src e2e",
     "gen:images": "tsx scripts/gen-images.ts",
+    "gen:sounds": "tsx scripts/gen-sounds.ts",
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {
