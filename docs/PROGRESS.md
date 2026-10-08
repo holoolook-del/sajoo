@@ -176,3 +176,15 @@
 
 ### 남은 문제
 - 없음 — 실기기에서 bgm/temple 루프 이음새·수면 타이머 실제 소리 확인 필요(H3)
+
+## T12-follow — 피드백 반영 (완료)
+
+### 한 일
+- 수면 음원을 합성에서 **실제 무료 음원 다운로드**로 교체: 비=Ylmir(OGA CC0)·파도=Wikimedia Commons(CC BY-SA 4.0)·모닥불=qubodup(OGA CC BY 3.0)·숲=Wolfgang_(OGA CC0)·몽환 멜로디=Kevin MacLeod Dreamy Flashback(CC BY 3.0)·웅장한 밤=Kevin MacLeod Ossuary 6 – Air(CC BY 3.0). sleep 페이지 하단에 출처·라이선스 표기. gen-sounds.ts의 수면 합성 블록 제거
+- 구름 톤 불일치: clouds-b가 거의 검정 이미지로 생성되어 두 층 색이 달랐음 → clouds-a 하나로 2층 구성(아래층 좌우반전+느림+낮은 투명도)
+- 민화네컷 링크 target=_blank 제거 → 같은 창 이동
+- `src/components/back-home.tsx`(신규) — 희미한 '← 홈' 텍스트 링크를 골드 필 버튼으로 교체, 8개 페이지 일괄 적용
+- 메뉴 썸네일 3장(history·compat·sleep)을 16:9로 재생성 — 1:1 정사각이 가로 카드에서 좌우 크롭되던 문제 해소
+
+### 검증
+- vitest 42/42, e2e 36/36, build+SW 56항목(수면 음원은 여전히 런타임 캐시)

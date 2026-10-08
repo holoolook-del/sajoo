@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { BackHome } from '../components/back-home.tsx';
 import { ShareButton } from '../components/share-button.tsx';
 import { SoundToggle } from '../components/sound-toggle.tsx';
 import { setBgm, type BgmKey } from '../lib/sound.ts';
@@ -13,12 +13,12 @@ interface Track {
 }
 
 const TRACKS: Track[] = [
-  { key: 'rain', name: '밤비', desc: '창가에 부딪히는 잔잔한 빗소리', hue: 'from-[#1c2a4a] to-night-soft' },
-  { key: 'waves', name: '파도', desc: '멀리서 밀려왔다 빠지는 물결', hue: 'from-[#14303c] to-night-soft' },
+  { key: 'rain', name: '밤비', desc: '창가에 내리는 잔잔한 빗소리', hue: 'from-[#1c2a4a] to-night-soft' },
+  { key: 'waves', name: '파도', desc: '해변에 밀려오는 진짜 물결', hue: 'from-[#14303c] to-night-soft' },
   { key: 'fire', name: '모닥불', desc: '타닥타닥 타는 장작 소리', hue: 'from-[#3a1e10] to-night-soft' },
-  { key: 'forest', name: '밤의 숲', desc: '바람에 스치는 잎과 드문 새 울음', hue: 'from-[#12261e] to-night-soft' },
-  { key: 'epic', name: '웅장한 밤', desc: '깊고 넓게 울리는 저음의 울림', hue: 'from-[#241a38] to-night-soft' },
-  { key: 'bgm', name: '몽환 멜로디', desc: '잠을 부르는 은은한 패드 선율', hue: 'from-[#2c2440] to-night-soft' },
+  { key: 'forest', name: '밤의 숲', desc: '귀뚜라미 우는 한여름 밤', hue: 'from-[#12261e] to-night-soft' },
+  { key: 'dream', name: '몽환 멜로디', desc: 'Kevin MacLeod — Dreamy Flashback', hue: 'from-[#2c2440] to-night-soft' },
+  { key: 'epic', name: '웅장한 밤', desc: 'Kevin MacLeod — Ossuary 6: Air', hue: 'from-[#241a38] to-night-soft' },
 ];
 
 /** 수면 타이머 선택지(분) — 0은 타이머 없음 */
@@ -91,7 +91,7 @@ export function SleepPage() {
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 p-6">
       <header className="pt-6">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+          <BackHome />
           <SoundToggle />
         </div>
         <h1 className="mt-2 text-2xl font-bold text-gold">숙면 사운드</h1>
@@ -173,6 +173,11 @@ export function SleepPage() {
         label="친구에게 추천하기"
         text="잠 안 올 때 듣는 밤의 소리 모음 — 빗소리·파도·모닥불·몽환 멜로디\n사주 앱인데 수면음악까지 있어"
       />
+
+      <footer className="text-center text-[10px] leading-4 text-hanji/30">
+        음원 출처 — 비: Ylmir(CC0) · 파도: Wikimedia Commons(CC BY-SA 4.0) · 모닥불: qubodup(CC BY 3.0)
+        · 숲: Wolfgang_(CC0) · 음악: Kevin MacLeod incompetech.com(CC BY 3.0)
+      </footer>
     </main>
   );
 }

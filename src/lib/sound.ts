@@ -105,12 +105,13 @@ export function playKnock(): void {
 const BGM_FILES = {
   bgm: 'bgm.wav',
   temple: 'temple.wav',
-  // 숙면 사운드 라이브러리 (/sleep) — 전부 wraparound로 만든 완전 루프
-  rain: 'sleep/rain.wav',
-  waves: 'sleep/waves.wav',
-  fire: 'sleep/fire.wav',
-  forest: 'sleep/forest.wav',
-  epic: 'sleep/epic.wav',
+  // 숙면 사운드 라이브러리 (/sleep) — 실제 녹음/곡 파일 (출처는 sleep 페이지에 표기)
+  rain: 'sleep/rain.ogg', // Ylmir — OpenGameArt, CC0
+  waves: 'sleep/waves.wav', // Wikimedia Commons 'Sea waves', CC BY-SA 4.0
+  fire: 'sleep/fire.ogg', // qubodup — OpenGameArt, CC BY 3.0
+  forest: 'sleep/forest.mp3', // Wolfgang_ — OpenGameArt, CC0
+  dream: 'sleep/dream.mp3', // Kevin MacLeod 'Dreamy Flashback', CC BY 3.0
+  epic: 'sleep/epic.mp3', // Kevin MacLeod 'Ossuary 6 – Air', CC BY 3.0
 } as const;
 export type BgmKey = keyof typeof BGM_FILES;
 
@@ -118,10 +119,11 @@ export type BgmKey = keyof typeof BGM_FILES;
 const BGM_VOLUME: Record<BgmKey, number> = {
   bgm: 0.3,
   temple: 0.35,
-  rain: 0.55,
+  rain: 0.6,
   waves: 0.55,
-  fire: 0.5,
-  forest: 0.55,
+  fire: 0.55,
+  forest: 0.6,
+  dream: 0.45,
   epic: 0.5,
 };
 

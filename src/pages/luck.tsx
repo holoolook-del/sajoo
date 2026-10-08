@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { BackHome } from '../components/back-home.tsx';
 import { buildLuckView } from '../features/luck/luck.ts';
 import { useSaju } from '../features/saju/use-saju.ts';
 import { StateView } from '../components/state-view.tsx';
@@ -24,7 +24,7 @@ export function LuckPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
       <header className="pt-6">
-        <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+        <BackHome />
         <h1 className="mt-2 text-2xl font-bold text-gold">대운 · 세운 · 월운</h1>
         <p className="mt-1 text-sm text-hanji/60">
           {profile?.name}님 — 대운 {view.directionLabel}, {view.startAge}세부터 시작

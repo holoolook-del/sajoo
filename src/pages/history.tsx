@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { BackHome } from '../components/back-home.tsx';
 import { getCardById } from '../content/cards.ts';
 import { ELEMENT_COLOR } from '../content/meta.ts';
 import { GRADE_COLOR } from '../features/card/card-frame.tsx';
@@ -13,7 +13,7 @@ export function HistoryPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
       <header className="pt-6">
-        <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+        <BackHome />
         <h1 className="mt-2 text-2xl font-bold text-gold">지난 30일의 기록</h1>
         <p className="mt-1 text-sm text-hanji/60">오늘은 {todayKST()}</p>
       </header>

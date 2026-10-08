@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { BackHome } from '../components/back-home.tsx';
 import { Link } from 'react-router-dom';
 import { getCardById } from '../content/cards.ts';
 import { ELEMENT_COLOR } from '../content/meta.ts';
@@ -30,7 +31,7 @@ export function FortunePage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
       <header className="pt-6">
-        <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+        <BackHome />
         <h1 className="mt-2 text-2xl font-bold text-gold">오늘의 운세</h1>
         <p className="mt-1 text-sm text-hanji/60">{today}</p>
       </header>

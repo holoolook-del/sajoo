@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { BackHome } from '../components/back-home.tsx';
 import { compatScore } from '../features/compat/compat.ts';
 import { GRADE_COLOR } from '../features/card/card-frame.tsx';
 import { ProfileForm } from '../features/saju/profile-form.tsx';
@@ -31,7 +31,7 @@ export function CompatPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
       <header className="pt-6">
-        <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+        <BackHome />
         <h1 className="mt-2 text-2xl font-bold text-gold">궁합 보기</h1>
         <p className="mt-1 text-sm text-hanji/60">
           {profile.name}님과 상대방의 인연을 봅니다. 상대 정보는 저장되지 않습니다.

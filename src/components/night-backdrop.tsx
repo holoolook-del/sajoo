@@ -59,14 +59,15 @@ function Stars() {
  * 구름 레이어 — 같은 이미지 2장을 가로로 이어 붙이고 translateX(-50%)까지 밀면
  * 끝과 시작이 맞물려 무한 드리프트가 된다 (일반적인 이중-텍스처 스크롤 기법).
  */
-function CloudLayer({ img, top, opacity, seconds }: { img: string; top: string; opacity: number; seconds: number }) {
+function CloudLayer({ img, top, opacity, seconds, flip }: { img: string; top: string; opacity: number; seconds: number; flip?: boolean }) {
+  const imgCls = `w-1/2 object-cover${flip ? ' -scale-x-100' : ''}`;
   return (
     <div
       className="absolute flex w-[200%] animate-[drift_linear_infinite] mix-blend-screen motion-reduce:animate-none"
       style={{ top, opacity, animationDuration: `${seconds}s` }}
     >
-      <img src={`${A}assets/bg/${img}.webp`} alt="" className="w-1/2 object-cover" />
-      <img src={`${A}assets/bg/${img}.webp`} alt="" className="w-1/2 object-cover" />
+      <img src={`${A}assets/bg/${img}.webp`} alt="" className={imgCls} />
+      <img src={`${A}assets/bg/${img}.webp`} alt="" className={imgCls} />
     </div>
   );
 }
@@ -88,8 +89,10 @@ export function NightBackdrop() {
         alt=""
         className="absolute right-[2%] top-[3%] w-44 animate-[moonbreathe_9s_ease-in-out_infinite] opacity-80 mix-blend-screen motion-reduce:animate-none md:w-56"
       />
+      {/* 같은 구름 이미지를 두 층으로 — 좌우 색이 다른 이미지 2개를 섞으면 톤이 깨진다.
+          아래층은 좌우반전+느린 속도+낮은 투명도로 원근감만 준다 */}
       <CloudLayer img="clouds-a" top="12%" opacity={0.55} seconds={90} />
-      <CloudLayer img="clouds-b" top="30%" opacity={0.3} seconds={150} />
+      <CloudLayer img="clouds-a" top="30%" opacity={0.28} seconds={150} flip />
       <img
         src={`${A}assets/bg/girl.webp`}
         alt=""

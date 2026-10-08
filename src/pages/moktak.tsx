@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { BackHome } from '../components/back-home.tsx';
 import { ShareButton } from '../components/share-button.tsx';
 import { SoundToggle } from '../components/sound-toggle.tsx';
 import { playKnock, setBgm } from '../lib/sound.ts';
@@ -94,7 +94,7 @@ export function MoktakPage() {
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 p-6">
       <header className="pt-6">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+          <BackHome />
           <SoundToggle />
         </div>
         <h1 className="mt-2 text-2xl font-bold text-gold">공덕 목탁</h1>

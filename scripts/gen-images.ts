@@ -117,19 +117,19 @@ const jobs: Job[] = [
   {
     file: 'illust/menu-compat.webp',
     prompt: `two glowing crimson threads floating through the night air, gently intertwining and tying into a loose knot under a full moon, red thread of fate, romantic and delicate${STYLE}`,
-    aspect: '1:1',
+    aspect: '16:9',
     mp: '0.25',
   },
   {
     file: 'illust/menu-history.webp',
     prompt: `an old silk almanac scroll unrolling on a dark wooden desk beside an ink brush and a small brass moon-phase dial, warm candlelight, nostalgic archival mood${STYLE}`,
-    aspect: '1:1',
+    aspect: '16:9',
     mp: '0.25',
   },
   {
     file: 'illust/menu-sleep.webp',
     prompt: `a cozy dark room with a round window showing the moonlit night sky, a small cat sleeping curled on the windowsill, a candle flickering softly, dreamy calm${STYLE}`,
-    aspect: '1:1',
+    aspect: '16:9',
     mp: '0.25',
   },
   // ── 몽환 배경 레이어 ──

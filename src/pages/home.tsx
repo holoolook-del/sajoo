@@ -89,7 +89,7 @@ export function HomePage() {
           const cls =
             'group overflow-hidden rounded-xl border border-gold/30 bg-night-soft transition-colors hover:border-gold/60';
           return m.to.startsWith('http') ? (
-            <a key={m.to} href={m.to} target="_blank" rel="noreferrer" className={cls}>
+            <a key={m.to} href={m.to} className={cls}>
               {card}
             </a>
           ) : (

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { BackHome } from '../components/back-home.tsx';
 import { ELEMENT_COLOR, ELEMENT_HANJA, type ElementKey } from '../content/meta.ts';
 import { ELEMENT_TEXT } from '../content/interpret.ts';
 import { interpretSaju } from '../lib/interpret.ts';
@@ -22,7 +22,7 @@ export function SajuPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
       <header className="pt-6">
-        <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+        <BackHome />
         <h1 className="mt-2 text-2xl font-bold text-gold">{profile?.name}님의 사주팔자</h1>
         <p className="mt-1 text-sm text-hanji/60">
           음력 {lunar.year}년 {lunar.month}월 {lunar.day}일{lunar.isLeapMonth ? ' (윤달)' : ''}
