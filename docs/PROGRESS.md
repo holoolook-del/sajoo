@@ -1,11 +1,19 @@
 # PROGRESS
 
 ## 현재 상태
-- 완료: Phase 0~4, T0~T8 (엔진·프로필·카드·풀이·오늘운세·대운세운월운·궁합·히스토리·이미지)
-- 진행 중: 없음 — T-last 대기
-- 다음: T-last 마감(빈/에러/로딩, 360px, 오프라인 점검, README). H2 Pages 활성화만 사용자 작업으로 남음
+- 완료: Phase 0~4, T0~T-last 전부 (엔진·프로필·카드·풀이·오늘운세·대운세운월운·궁합·히스토리·이미지·마감)
+- 진행 중: 없음 — 모든 개발 태스크 완료
+- 다음: 사용자 작업만 남음 — H2 GitHub Pages 활성화(Settings→Pages→GitHub Actions), H3 폰 설치+오프라인 실기기 확인
 
 ## 태스크별 기록
+### T-last (마감)
+- 한 일: 온보딩 수정 모드(기존 프로필 프리필)+홈 '내 정보 수정' 링크, 카드 씬 lazy 분리(motion 125KB 청크), AC12 360px e2e, AC7 오프라인 e2e, README 작성. **치명 버그 발견·수정**: vite-plugin-pwa의 includeManifestIcons(기본 true)가 assets/icon.png를 revision付き로 추가하고 globPatterns가 같은 파일을 revision:null로 잡아 프리캐시 중복 → workbox `add-to-cache-list-conflicting-entries` throw → install 리스너 미등록 → SW가 캐시 0개로 활성화되는 결함. includeManifestIcons:false로 해결(아이콘은 glob이 담당)
+- 바꾼 파일: vite.config.ts, e2e/offline.spec.ts, e2e/viewport.spec.ts(신규), playwright.preview.config.ts(신규), playwright.config.ts, src/pages/onboarding.tsx, src/pages/home.tsx, README.md(신규), docs/*
+- 새 공용 코드: 없음
+- 남은 문제: card-frame.tsx react-refresh 경고 2건(컴포넌트+상수 혼합 export, 경고 수준으로 수용)
+- 증거: vitest 39/39, e2e 24/24, e2e:preview AC7 통과(서버 프로세스 kill로 진짜 오프라인 생성 — SW 프리캐시 34항목으로 운세·카드뽑기·콜드리로드 전부 동작), verify 통과, audit:code 클린
+- 배운 점: ① Playwright setOffline/route abort는 SW보다 먼저 요청을 끊어 PWA 오프라인 검증 불가 → 스펙이 vite preview를 spawn+kill해 진짜 오프라인 구현. ② 이미 죽은 프로세스 kill 시 'error' 이벤트가 리스너 없으면 워커를 죽임 → on('error') 필수. ③ SW activated≠오프라인 준비 — 프리캐시 캐시 존재를 직접 검증해야 함
+
 ### T8
 - 한 일: scripts/gen-images.ts(Replicate flux-schnell — fetch만, Prefer:wait=60 동기, 11초 간격·429 retry_after 재시도, 파일 있으면 스킵), 카드 24장+뒷면+아이콘+히어로 27장 생성→public/assets 번들, card-frame에 생성 이미지 적용(앞면 일러스트+그라데이션 오버레이+scale 1.12 크롭, 뒷면 단청 문양+SVG 폴백), 홈 히어로 배너, PWA 매니페스트 icon.png, workbox glob에 webp 추가, @google/genai 제거
 - 바꾼 파일: scripts/gen-images.ts(신규), src/features/card/card-frame.tsx, src/pages/home.tsx, vite.config.ts, .env.example, docs/DECISIONS.md, package.json

@@ -23,7 +23,7 @@
 - [x] T7 히스토리 30일
   - AC: AC10
 - [x] T8 이미지 전량 생성+적용, 한국 전통 디자인 마감 (Gemini → Replicate flux-schnell로 교체)
-- [ ] T-last 마감: 빈/에러/로딩 상태, AC12(360px), 오프라인 최종(AC7), README, 실기기 체크리스트
+- [x] T-last 마감: 빈/에러/로딩 상태, AC12(360px), 오프라인 최종(AC7), README, 실기기 체크리스트
 
 ## 사람이 할 일 (H)
 - [x] H1 Google AI Studio에서 Gemini API 키 발급 → 프로젝트 `.env`에 `GEMINI_API_KEY=` 입력 (필요 시점: T8, 빠를수록 좋음)

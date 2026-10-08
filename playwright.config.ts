@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: 'offline.spec.ts', // 오프라인 AC7은 playwright.preview.config.ts(빌드 프리뷰)로 실행
   fullyParallel: true,
   reporter: 'list',
   use: {

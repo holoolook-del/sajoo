@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCardById } from '../content/cards.ts';
-import { CardDrawScene } from '../features/card/card-scene.tsx';
 import { CardFront, GRADE_COLOR } from '../features/card/card-frame.tsx';
+
 import { dailyCard, drawToday, todaysDraw } from '../features/card/draw.ts';
 import { todayKST } from '../lib/date.ts';
 import { loadProfile } from '../lib/storage.ts';
+
+// motion 번들이 커서 카드 뽑기 연출만 지연 로딩 (청크 분리)
+const CardDrawScene = lazy(() =>
+  import('../features/card/card-scene.tsx').then((m) => ({ default: m.CardDrawScene })),
+);
 
 export function CardPage() {
   const profile = loadProfile();
@@ -55,13 +60,15 @@ export function CardPage() {
         <h1 className="mt-2 text-2xl font-bold text-gold">오늘의 운세카드</h1>
         <p className="mt-1 text-sm text-hanji/60">{today}</p>
       </header>
-      <CardDrawScene
-        card={card}
-        onPick={() => {
-          drawToday(profile, today);
-        }}
-        onDone={() => setDrawn(todaysDraw(today))}
-      />
+      <Suspense fallback={<div className="flex h-72 items-center justify-center text-sm text-hanji/50">카드를 준비하는 중…</div>}>
+        <CardDrawScene
+          card={card}
+          onPick={() => {
+            drawToday(profile, today);
+          }}
+          onDone={() => setDrawn(todaysDraw(today))}
+        />
+      </Suspense>
     </main>
   );
 }

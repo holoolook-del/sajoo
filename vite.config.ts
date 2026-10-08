@@ -12,6 +12,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
+      // manifest 아이콘을 프리캐시에 자동 추가하면 globPatterns 결과와 같은 URL이 다른 revision으로
+      // 중복돼 workbox가 'add-to-cache-list-conflicting-entries'로 통째로 실패한다 → 끈다(아이콘은 glob이 담당)
+      includeManifestIcons: false,
       manifest: {
         name: 'SAJOO - 나의 사주',
         short_name: 'SAJOO',

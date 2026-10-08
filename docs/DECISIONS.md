@@ -70,3 +70,7 @@ type FortuneRecord = { v: 1; date: string; iljin: string; grade: Grade; summary:
 - Gemini 무료 티어는 이미지 모델 쿼터가 0 — 사용 불가로 판명 (모든 이미지 모델 429/limit 0 실측)
 - Replicate `black-forest-labs/flux-schnell`로 전환 (장당 ~$0.003, 크레딧 기충전 계정 재사용)
 - 함정: 레이트리밋(6/min·버스트1 → 호출 간격 11초), 동아시아 화풍은 도장·현판 형태의 가짜 문자가 이미지에 새어나옴 → 건축물 소재 회피 + 'no text/seals' 강화 + 카드 앞면 CSS 크롭(scale 1.12)으로 모서리 낙관 제거
+
+## PWA 함정 기록 (T-last)
+- `includeManifestIcons`(vite-plugin-pwa 기본 true)는 manifest 아이콘을 프리캐시에 revision付き로 추가한다. 같은 파일이 `globPatterns`로도 잡히면(revision:null) 같은 URL에 두 revision이 등록돼 workbox가 `add-to-cache-list-conflicting-entries`를 던지고 **install 리스너 등록 전에 죽는다 → SW는 활성화되지만 캐시 0개의 빈 껍데기가 된다**. `includeManifestIcons: false`로 해결. SW가 activated 상태인 것만으로는 오프라인 준비가 안 된 것 — `caches.keys()`에 `workbox-precache-*`가 있는지 직접 검증해야 한다.
+- 오프라인 e2e: Playwright `context.setOffline`과 `route.abort`는 서비스워커보다 먼저 요청을 차단해 프리캐시 검증에 쓸 수 없다. `e2e/offline.spec.ts`가 `vite preview`를 직접 spawn하고 테스트 중간에 kill해서 진짜 오프라인을 만든다. (playwright.preview.config.ts에는 webServer가 없다 — 스펙이 서버 수명주기를 소유)

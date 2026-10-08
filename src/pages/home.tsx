@@ -60,6 +60,9 @@ export function HomePage() {
         >
           지난 30일의 기록
         </Link>
+        <Link to="/onboarding" className="py-1 text-center text-sm text-hanji/40 underline">
+          내 정보 수정
+        </Link>
       </nav>
     </main>
   );

@@ -12,6 +12,7 @@
     "test": "vitest run",
     "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "e2e": "playwright test",
+    "e2e:preview": "pnpm build && playwright test -c playwright.preview.config.ts",
     "audit:code": "knip && jscpd src e2e",
     "gen:images": "tsx scripts/gen-images.ts",
     "prepare": "git config core.hooksPath .githooks || true"
