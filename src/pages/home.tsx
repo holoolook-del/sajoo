@@ -12,6 +12,9 @@ const MENUS = [
   { to: '/luck', img: 'menu-luck', title: '대운 · 세운 · 월운', desc: '10년의 흐름과 올해의 운세' },
   { to: '/compat', img: 'menu-compat', title: '궁합 보기', desc: '두 사람의 기운이 만나는 점' },
   { to: '/history', img: 'menu-history', title: '지난 30일의 기록', desc: '지나온 하루하루의 운과 카드' },
+  // 심심풀이 — 기록 다음에 이어지는 가벼운 놀이 메뉴
+  { to: '/moktak', img: 'menu-moktak', title: '공덕 목탁', desc: '두드릴수록 번뇌가 사라지는 소리' },
+  { to: 'https://holoolook-del.github.io/necut/', img: 'menu-necut', title: '민화네컷', desc: '내 사진이 민화가 되는 네 컷' },
 ];
 
 export function HomePage() {
@@ -65,74 +68,36 @@ export function HomePage() {
       </Link>
 
       <nav className="grid grid-cols-2 gap-3" aria-label="운세 메뉴">
-        {MENUS.map((m) => (
-          <Link
-            key={m.to}
-            to={m.to}
-            className="group overflow-hidden rounded-xl border border-gold/30 bg-night-soft transition-colors hover:border-gold/60"
-          >
-            <div className="relative">
-              <img
-                src={`${A}assets/illust/${m.img}.webp`}
-                alt=""
-                className="h-24 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-night/60 to-transparent" />
-            </div>
-            <div className="p-3">
-              <p className="text-sm font-bold text-hanji">{m.title}</p>
-              <p className="mt-0.5 text-[11px] leading-4 text-hanji/50">{m.desc}</p>
-            </div>
-          </Link>
-        ))}
+        {MENUS.map((m) => {
+          const card = (
+            <>
+              <div className="relative">
+                <img
+                  src={`${A}assets/illust/${m.img}.webp`}
+                  alt=""
+                  className="h-24 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-night/60 to-transparent" />
+              </div>
+              <div className="p-3">
+                <p className="text-sm font-bold text-hanji">{m.title}</p>
+                <p className="mt-0.5 text-[11px] leading-4 text-hanji/50">{m.desc}</p>
+              </div>
+            </>
+          );
+          const cls =
+            'group overflow-hidden rounded-xl border border-gold/30 bg-night-soft transition-colors hover:border-gold/60';
+          return m.to.startsWith('http') ? (
+            <a key={m.to} href={m.to} target="_blank" rel="noreferrer" className={cls}>
+              {card}
+            </a>
+          ) : (
+            <Link key={m.to} to={m.to} className={cls}>
+              {card}
+            </Link>
+          );
+        })}
       </nav>
-
-      {/* 심심풀이 — 가볍게 노는 미니 기능들 */}
-      <section aria-label="심심풀이">
-        <div className="mb-2 flex items-center gap-2">
-          <span className="h-px flex-1 bg-gold/20" />
-          <h2 className="text-xs font-bold tracking-widest text-gold/70">심심풀이</h2>
-          <span className="h-px flex-1 bg-gold/20" />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Link
-            to="/moktak"
-            className="group overflow-hidden rounded-xl border border-gold/30 bg-night-soft transition-colors hover:border-gold/60"
-          >
-            <div className="relative">
-              <img
-                src={`${A}assets/illust/menu-moktak.webp`}
-                alt=""
-                className="h-24 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-night/60 to-transparent" />
-            </div>
-            <div className="p-3">
-              <p className="text-sm font-bold text-hanji">공덕 목탁</p>
-              <p className="mt-0.5 text-[11px] leading-4 text-hanji/50">두드릴수록 번뇌가 사라지는 소리</p>
-            </div>
-          </Link>
-          <a
-            href="https://holoolook-del.github.io/necut/"
-            target="_blank"
-            rel="noreferrer"
-            className="group overflow-hidden rounded-xl border border-gold/30 bg-night-soft transition-colors hover:border-gold/60"
-          >
-            <div className="relative">
-              <img
-                src={`${A}assets/illust/menu-necut.webp`}
-                alt=""
-                className="h-24 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-night/60 to-transparent" />
-            </div>
-            <div className="p-3">
-              <p className="text-sm font-bold text-hanji">민화네컷</p>
-              <p className="mt-0.5 text-[11px] leading-4 text-hanji/50">내 사진이 민화가 되는 네 컷</p>
-            </div>
-          </a>
-        </div>
-      </section>
 
       <footer className="mt-1 text-center">
         <Link to="/onboarding" className="text-xs text-hanji/40 underline">

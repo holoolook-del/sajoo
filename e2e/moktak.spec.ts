@@ -7,10 +7,11 @@ test.describe('심심풀이 · 공덕 목탁', () => {
     await page.goto('./#/');
   });
 
-  test('홈에 심심풀이 섹션과 목탁 링크가 보인다', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: '심심풀이' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /공덕 목탁/ })).toBeVisible();
-    await expect(page.getByRole('link', { name: /민화네컷/ })).toBeVisible();
+  test('홈 메뉴 그리드 끝에 심심풀이 메뉴가 보인다', async ({ page }) => {
+    const nav = page.getByRole('navigation', { name: '운세 메뉴' });
+    await expect(nav.getByRole('link', { name: /지난 30일의 기록/ })).toBeVisible();
+    await expect(nav.getByRole('link', { name: /공덕 목탁/ })).toBeVisible();
+    await expect(nav.getByRole('link', { name: /민화네컷/ })).toBeVisible();
   });
 
   test('목탁을 두드리면 오늘의 공덕이 오르고 홈으로 돌아온다', async ({ page }) => {
@@ -24,7 +25,7 @@ test.describe('심심풀이 · 공덕 목탁', () => {
 
     // 홈 복귀
     await page.getByRole('link', { name: '← 홈' }).click();
-    await expect(page.getByRole('heading', { name: '심심풀이' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /공덕 목탁/ })).toBeVisible();
   });
 
   test('공덕 카운트가 새로고침 후에도 유지된다', async ({ page }) => {
