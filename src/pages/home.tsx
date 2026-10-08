@@ -12,8 +12,16 @@ export function HomePage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
       <header className="pt-8 text-center">
-        <h1 className="text-4xl font-bold text-gold">SAJOO</h1>
-        <p className="mt-1 text-sm text-hanji/50">{todayKST()}</p>
+        <div className="relative mb-4 overflow-hidden rounded-xl border border-gold/30">
+          <img
+            src={`${import.meta.env.BASE_URL}assets/illust/hero.webp`}
+            alt=""
+            className="h-36 w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-night/80 to-transparent" />
+          <h1 className="absolute bottom-2 left-0 right-0 text-4xl font-bold text-gold">SAJOO</h1>
+        </div>
+        <p className="text-sm text-hanji/50">{todayKST()}</p>
       </header>
       <nav className="flex flex-col gap-3">
         <Link

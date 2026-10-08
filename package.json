@@ -13,6 +13,7 @@
     "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "e2e": "playwright test",
     "audit:code": "knip && jscpd src e2e",
+    "gen:images": "tsx scripts/gen-images.ts",
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {

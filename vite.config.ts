@@ -23,10 +23,12 @@ export default defineConfig({
         start_url: '.',
         icons: [
           { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'assets/icon.png', sizes: '1024x1024', type: 'image/png', purpose: 'any' },
+          { src: 'assets/icon.png', sizes: '1024x1024', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2,json}'],
       },
     }),
   ],

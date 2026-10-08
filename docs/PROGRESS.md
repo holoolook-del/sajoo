@@ -1,11 +1,20 @@
 # PROGRESS
 
 ## 현재 상태
-- 완료: Phase 0~4, T0~T7 (엔진·프로필·카드·풀이·오늘운세·대운세운월운·궁합·히스토리)
-- 진행 중: 없음 — T8 대기 (H1 Gemini 키 확보됨)
-- 다음: T8 Gemini 이미지 전량 생성+적용, 한국 전통 디자인 마감
+- 완료: Phase 0~4, T0~T8 (엔진·프로필·카드·풀이·오늘운세·대운세운월운·궁합·히스토리·이미지)
+- 진행 중: 없음 — T-last 대기
+- 다음: T-last 마감(빈/에러/로딩, 360px, 오프라인 점검, README). H2 Pages 활성화만 사용자 작업으로 남음
 
 ## 태스크별 기록
+### T8
+- 한 일: scripts/gen-images.ts(Replicate flux-schnell — fetch만, Prefer:wait=60 동기, 11초 간격·429 retry_after 재시도, 파일 있으면 스킵), 카드 24장+뒷면+아이콘+히어로 27장 생성→public/assets 번들, card-frame에 생성 이미지 적용(앞면 일러스트+그라데이션 오버레이+scale 1.12 크롭, 뒷면 단청 문양+SVG 폴백), 홈 히어로 배너, PWA 매니페스트 icon.png, workbox glob에 webp 추가, @google/genai 제거
+- 바꾼 파일: scripts/gen-images.ts(신규), src/features/card/card-frame.tsx, src/pages/home.tsx, vite.config.ts, .env.example, docs/DECISIONS.md, package.json
+- 새 공용 코드: 없음 (스크립트는 개발 도구)
+- 남은 문제: 카드 일부에 작은 낙관 도장 잔존 — 민화 양식상 자연스러워 수용 (중앙 텍스트 패널은 전부 제거 확인). 프리캐시 5.3MB
+- 다음 할 일: T-last
+- 증거: 27장 생성 성공(0 실패, 총 ~$0.08), vitest 39/39, e2e 22/22, verify 통과, audit:code 클린
+- 배운 점: flux는 동아시아 화풍+건축물 조합에 현판 글자를 거의 무조건 넣음 — 소재를 비건축 상징으로 바꾸는 게 프롬프트 금지어보다 효과적
+
 ### T7
 - 한 일: storage에 listFortunes/listCardDraws(날짜 내림차순 목록)·pruneHistory(cutoff 이전 기록 삭제), features/history/history.ts(buildHistory: 운세·카드 기록을 날짜별 병합, 30일 창, 경계 밖 prune), /history 페이지(날짜·일진·등급·요약·뽑은 카드명), e2e AC10
 - 바꾼 파일: src/lib/storage.ts, src/features/history/{history,history.test}.ts, src/pages/{history,home}.tsx, src/App.tsx, e2e/history.spec.ts

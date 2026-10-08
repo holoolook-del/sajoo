@@ -8,13 +8,13 @@
 - 만세력: `manseryeok` (KASI 정본, 의존성 0, ~40KB / 직접 구현 — 절기 정확도 불가)
 - DB: localStorage `lib/storage.ts` 래퍼 (≪1MB, 동기·단순 / IndexedDB — 이 규모엔 과함)
 - 인증: 없음 (개인 로컬 앱 / —)
-- 콘텐츠: 번들된 풀이문 DB+조합 규칙, Gemini 생성 이미지 번들 (오프라인·무료 / 런타임 API — 사용자 거부)
+- 콘텐츠: 번들된 풀이문 DB+조합 규칙, Replicate 생성 이미지 번들 (오프라인·무료 / 런타임 API — 사용자 거부)
 - PWA: vite-plugin-pwa Workbox precache (완전 오프라인 표준 / 수동 SW — 검증 비용)
 - 배포: GitHub Actions → GitHub Pages, base `/sajoo/` (push 자동 배포, 공개 저장소 확인됨 / Vercel — 사용자가 Pages 선택)
 - 패키지 매니저: pnpm 10, lockfile로 버전 고정, package.json 정확한 버전
 - 테스트: Vitest(단위: 계산·규칙·검증) + Playwright(e2e: 카드 뽑기 등 핵심 AC만)
 - 코드 검사: ESLint + knip(미사용) + jscpd(중복)
-- 이미지: `scripts/gen-images.ts`가 Gemini 호출→`public/assets/` 저장→커밋 (개발 중 1회, 비용 1만원 이하)
+- 이미지: `scripts/gen-images.ts`가 Replicate flux-schnell 호출→`public/assets/` 저장→커밋 (개발 중 1회, 비용 1만원 이하)
 
 ## 폴더 구조와 책임
 ```
@@ -48,7 +48,7 @@ sajoo/
 ## 명령어
 - dev: `pnpm dev` / verify: `pnpm verify` (typecheck+lint+test+build) / e2e: `pnpm e2e`
 - 단일 테스트: `pnpm vitest run <파일>` / audit:code: `pnpm audit:code` (knip + jscpd)
-- 이미지 생성: `pnpm gen:images` (GEMINI_API_KEY 필요)
+- 이미지 생성: `pnpm gen:images` (REPLICATE_API_TOKEN 필요)
 
 ## 데이터 모델
 ```ts
@@ -65,3 +65,8 @@ type FortuneRecord = { v: 1; date: string; iljin: string; grade: Grade; summary:
 // 궁합 상대: 메모리만, 저장 안 함. 히스토리: date 인덱스, 30일 초과분 정리.
 ```
 - 변경은 추가 위주. `v`를 올리고 storage에서 마이그레이션.
+
+## 이미지 생성 교체 기록 (T8)
+- Gemini 무료 티어는 이미지 모델 쿼터가 0 — 사용 불가로 판명 (모든 이미지 모델 429/limit 0 실측)
+- Replicate `black-forest-labs/flux-schnell`로 전환 (장당 ~$0.003, 크레딧 기충전 계정 재사용)
+- 함정: 레이트리밋(6/min·버스트1 → 호출 간격 11초), 동아시아 화풍은 도장·현판 형태의 가짜 문자가 이미지에 새어나옴 → 건축물 소재 회피 + 'no text/seals' 강화 + 카드 앞면 CSS 크롭(scale 1.12)으로 모서리 낙관 제거

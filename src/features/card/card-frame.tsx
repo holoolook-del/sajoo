@@ -14,33 +14,49 @@ export function cardElementColor(element: ElementKey): string {
   return ELEMENT_COLOR[element];
 }
 
-/** 카드 뒷면 — 금색 문양 */
+const ASSET = (p: string) => `${import.meta.env.BASE_URL}assets/${p}`;
+
+/** 카드 뒷면 — 생성된 단청 문양 이미지 (없으면 금색 命 문양으로 대체) */
 export function CardBack({ className = '' }: { className?: string }) {
   return (
     <div
-      className={`flex h-full w-full items-center justify-center rounded-xl border-2 border-gold/70 bg-night-soft shadow-[0_0_24px_rgba(201,162,39,0.25)] ${className}`}
+      className={`relative h-full w-full overflow-hidden rounded-xl border-2 border-gold/70 bg-night-soft shadow-[0_0_24px_rgba(201,162,39,0.25)] ${className}`}
     >
-      <div className="flex h-4/5 w-4/5 items-center justify-center rounded-lg border border-gold/40 bg-[radial-gradient(circle_at_center,rgba(201,162,39,0.14),transparent_70%)]">
-        <span className="text-3xl font-bold text-gold/80">命</span>
-      </div>
+      <img
+        src={ASSET('card-back.webp')}
+        alt=""
+        className="h-full w-full object-cover"
+        onError={(e) => {
+          e.currentTarget.style.display = 'none';
+          e.currentTarget.parentElement!.classList.add('flex', 'items-center', 'justify-center');
+        }}
+      />
+      <span className="absolute inset-0 -z-10 flex items-center justify-center text-3xl font-bold text-gold/80">命</span>
     </div>
   );
 }
 
-/** 카드 앞면 — 한자 + 이름 + 오행색 테두리 */
+/** 카드 앞면 — 생성된 민화 일러스트 + 이름·등급·오행 오버레이 */
 export function CardFront({ card, className = '' }: { card: CardDef; className?: string }) {
   const c = cardElementColor(card.element);
   return (
     <div
-      className={`flex h-full w-full flex-col items-center justify-between rounded-xl border-2 bg-night-soft p-3 ${className}`}
+      className={`relative h-full w-full overflow-hidden rounded-xl border-2 bg-night-soft ${className}`}
       style={{ borderColor: c, boxShadow: `0 0 32px ${c}55, inset 0 0 24px ${c}22` }}
     >
-      <span className={`text-xs font-bold ${GRADE_COLOR[card.grade]}`}>{card.grade}</span>
-      <div className="flex flex-col items-center gap-1">
-        <span className="text-4xl font-bold text-hanji">{card.hanja.slice(0, 2)}</span>
-        <span className="text-sm text-hanji/70">{card.name}</span>
+      <img
+        src={ASSET(`cards/${card.id}.webp`)}
+        alt={card.name}
+        className="absolute inset-0 h-full w-full scale-[1.12] object-cover"
+      />
+      <div className="absolute inset-0 flex flex-col items-center justify-between bg-gradient-to-b from-night/70 via-transparent to-night/80 p-3">
+        <span className={`text-xs font-bold ${GRADE_COLOR[card.grade]}`}>{card.grade}</span>
+        <div className="flex flex-col items-center">
+          <span className="text-sm font-bold text-hanji drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">{card.name}</span>
+          <span className="text-[10px] text-hanji/80">{card.hanja}</span>
+        </div>
+        <span className="text-[10px]" style={{ color: c }}>{card.element}의 기운</span>
       </div>
-      <span className="text-[10px]" style={{ color: c }}>{card.element}의 기운</span>
     </div>
   );
 }
