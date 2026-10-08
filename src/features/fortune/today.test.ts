@@ -50,6 +50,19 @@ describe('dailyFortune — 일진×내 사주 조합', () => {
     expect(f.summary.length).toBeGreaterThan(5);
   });
 
+  it('운세 지수(23~97%)와 행운 요소를 만든다', () => {
+    const saju = calcSaju({ ...profile });
+    if (!saju.ok) throw new Error('calc 실패');
+    for (const date of ['2026-10-08', '2026-10-09', '2026-10-10']) {
+      const f = dailyFortune(saju.data, date);
+      expect(f.luckIndex).toBeGreaterThanOrEqual(23);
+      expect(f.luckIndex).toBeLessThanOrEqual(97);
+      expect(f.lucky.color.length).toBeGreaterThan(0);
+      expect(f.lucky.direction.length).toBeGreaterThan(0);
+      expect(f.lucky.item.length).toBeGreaterThan(0);
+    }
+  });
+
   it('saveTodaysFortune은 FortuneRecord를 저장하고 다시 읽는다', () => {
     const saju = calcSaju({ ...profile });
     if (!saju.ok) throw new Error('calc 실패');

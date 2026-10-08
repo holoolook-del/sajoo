@@ -1,6 +1,6 @@
 import { getBranchTenGod, getTenGod } from 'manseryeok';
 import type { EarthlyBranch, HeavenlyStem } from 'manseryeok';
-import { DAY_GOD_TEXT, GRADE_SUMMARY, RELATION_TEXT } from '../../content/fortune.ts';
+import { DAY_GOD_TEXT, GRADE_SUMMARY, LUCKY, RELATION_TEXT } from '../../content/fortune.ts';
 import { branchRelation, type BranchRelation } from '../../lib/relations.ts';
 import {
   ELEMENT_CONTROLS,
@@ -22,6 +22,10 @@ export interface DailyFortune {
   relation: BranchRelation | null;
   summary: string;
   detail: string[];
+  /** 운세 지수 0~100 — score를 사람 친화적인 퍼센트로 환산 */
+  luckIndex: number;
+  /** 행운 색·방향·아이템 (일진 오행 기준) */
+  lucky: { color: string; direction: string; item: string };
 }
 
 const GOD_SCORE: Record<TenGodKey, number> = {
@@ -97,6 +101,8 @@ export function dailyFortune(saju: SajuResult, date: string): DailyFortune {
     relation,
     summary: GRADE_SUMMARY[grade],
     detail,
+    luckIndex: Math.min(97, Math.max(23, 62 + score * 5)),
+    lucky: LUCKY[iljin.stemElement] ?? LUCKY['토']!,
   };
 }
 

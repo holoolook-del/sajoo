@@ -7,6 +7,7 @@ import { todaysDraw } from '../features/card/draw.ts';
 import { dailyFortune, saveTodaysFortune } from '../features/fortune/today.ts';
 import { useSaju } from '../features/saju/use-saju.ts';
 import { StateView } from '../components/state-view.tsx';
+import { ShareButton } from '../components/share-button.tsx';
 import { todayKST } from '../lib/date.ts';
 
 export function FortunePage() {
@@ -40,11 +41,35 @@ export function FortunePage() {
           <span className="text-2xl font-bold text-hanji">{fortune.iljin.hanja}</span>
           <span className="mt-0.5 text-xs text-gold-bright">{fortune.iljin.korean}</span>
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <p className="text-xs text-hanji/50">오늘의 일진(日辰)</p>
           <p className={`mt-1 text-3xl font-bold ${GRADE_COLOR[fortune.grade]}`}>{fortune.grade}</p>
-          <p className="mt-1 text-xs text-hanji/60">운세 점수 {fortune.score}</p>
+          <div className="mt-2">
+            <div className="flex items-baseline justify-between">
+              <span className="text-xs text-hanji/50">운세 지수</span>
+              <span className="text-sm font-bold text-gold-bright">{fortune.luckIndex}%</span>
+            </div>
+            <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-night">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-gold/60 to-gold-bright"
+                style={{ width: `${fortune.luckIndex}%` }}
+              />
+            </div>
+          </div>
         </div>
+      </section>
+
+      {/* 오늘의 행운 요소 */}
+      <section className="flex flex-wrap justify-center gap-2 rounded-xl border border-hanji/15 bg-night-soft p-4">
+        <span className="rounded-full border border-gold/40 px-3 py-1 text-xs text-hanji/80">
+          행운의 색 <b className="text-gold-bright">{fortune.lucky.color}</b>
+        </span>
+        <span className="rounded-full border border-gold/40 px-3 py-1 text-xs text-hanji/80">
+          행운의 방향 <b className="text-gold-bright">{fortune.lucky.direction}</b>
+        </span>
+        <span className="rounded-full border border-gold/40 px-3 py-1 text-xs text-hanji/80">
+          행운 아이템 <b className="text-gold-bright">{fortune.lucky.item}</b>
+        </span>
       </section>
 
       <p className="rounded-lg bg-gold/10 p-4 text-sm font-bold leading-6 text-gold-bright">
@@ -60,6 +85,13 @@ export function FortunePage() {
           ))}
         </ul>
       </section>
+
+      <div className="flex justify-center">
+        <ShareButton
+          label="오늘의 운세 공유하기"
+          text={`${today} 나의 운세 「${fortune.grade}」 — 운세 지수 ${fortune.luckIndex}%\n${fortune.summary}\n행운의 색 ${fortune.lucky.color} · 방향 ${fortune.lucky.direction}`}
+        />
+      </div>
 
       {/* 운세카드 연동 */}
       <section className="rounded-xl border border-gold/30 bg-night-soft p-5 text-center">

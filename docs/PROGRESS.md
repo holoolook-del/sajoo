@@ -1,11 +1,23 @@
 # PROGRESS
 
 ## 현재 상태
-- 완료: Phase 0~4, T0~T-last 전부 (엔진·프로필·카드·풀이·오늘운세·대운세운월운·궁합·히스토리·이미지·마감)
+- 완료: Phase 0~4, T0~T-last 전부 + 배포·홈 리디자인 + T9 공유성 강화
 - 진행 중: 없음 — 모든 개발 태스크 완료
-- 다음: 사용자 작업만 남음 — H2 GitHub Pages 활성화(Settings→Pages→GitHub Actions), H3 폰 설치+오프라인 실기기 확인
+- 다음: H3 폰 설치+오프라인 실기기 확인만 남음 (Pages 배포 완료, https://holoolook-del.github.io/sajoo/)
 
 ## 태스크별 기록
+### T9 (공유성·콘텐츠 강화)
+- 한 일: 일간 해석을 "사주 캐릭터"로 확장 — 10천간 각각에 유형명(예: 「만물을 적시는 이슬」)·키워드 3개·사회적 면모 4종(사람들이 보는 나/내가 잘하는 것/조심할 점/친해지면). 사주 페이지에 골드 테두리 캐릭터 카드, 운세 페이지에 운세 지수(%) 게이지·행운 색/방향/아이템 칩. share.ts(navigator.share→클립보드 폴백)+ShareButton을 사주·운세·카드·궁합 4곳에 배치 — 공유 텍스트는 캐릭터명·키워드·앱 URL만, 생년월일시 미포함. index.html에 OG 메타(카톡 미리보기, og:image=hero.webp 절대경로)
+- 바꾼 파일: src/content/interpret.ts(social 필드·DayMasterSocial), src/lib/interpret.ts, src/lib/share.ts(신규), src/components/share-button.tsx(신규), src/pages/{saju,fortune,card,compat}.tsx, src/content/fortune.ts(LUCKY), src/features/fortune/today.ts(luckIndex·lucky), index.html, e2e/fortune.spec.ts(운세 점수→지수 문구), src/lib/interpret.test.ts, src/features/fortune/today.test.ts
+- 새 공용 코드: shareResult, ShareButton, DayMasterSocial, LUCKY (CODE_INDEX 등록)
+- 남은 문제: 없음
+- 증거: vitest 41/41(신규 2건 — 캐릭터 필드·운세 지수 범위), e2e 24/24, e2e:preview AC7 통과, verify 통과, audit:code 클린
+- 배운 점: 공유 텍스트에 이름·캐릭터만 넣고 생년월일시는 절대 제외 — URL도 앱 루트만
+
+### 배포·홈 리디자인 (커밋 a8ebc20·968b2ef)
+- pnpm/action-setup version 필드가 packageManager와 충돌 → 워크플로우에서 제거. Pages 활성화·Actions 권한은 GitHub API로 직접 설정 완료
+- 홈 리디자인: 히어로 배너 + 카드 CTA + 일러스트 메뉴 그리드, 메뉴 썸네일 6장 + 온보딩 배너 1장 생성(텍스트 누출 2장은 소재 바꿔 재생성)
+
 ### T-last (마감)
 - 한 일: 온보딩 수정 모드(기존 프로필 프리필)+홈 '내 정보 수정' 링크, 카드 씬 lazy 분리(motion 125KB 청크), AC12 360px e2e, AC7 오프라인 e2e, README 작성. **치명 버그 발견·수정**: vite-plugin-pwa의 includeManifestIcons(기본 true)가 assets/icon.png를 revision付き로 추가하고 globPatterns가 같은 파일을 revision:null로 잡아 프리캐시 중복 → workbox `add-to-cache-list-conflicting-entries` throw → install 리스너 미등록 → SW가 캐시 0개로 활성화되는 결함. includeManifestIcons:false로 해결(아이콘은 glob이 담당)
 - 바꾼 파일: vite.config.ts, e2e/offline.spec.ts, e2e/viewport.spec.ts(신규), playwright.preview.config.ts(신규), playwright.config.ts, src/pages/onboarding.tsx, src/pages/home.tsx, README.md(신규), docs/*

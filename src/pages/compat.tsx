@@ -5,6 +5,7 @@ import { GRADE_COLOR } from '../features/card/card-frame.tsx';
 import { ProfileForm } from '../features/saju/profile-form.tsx';
 import { useSaju } from '../features/saju/use-saju.ts';
 import { StateView } from '../components/state-view.tsx';
+import { ShareButton } from '../components/share-button.tsx';
 import { calcSaju } from '../lib/engine.ts';
 import type { Profile } from '../lib/types.ts';
 
@@ -76,6 +77,13 @@ export function CompatPage() {
               ))}
             </ul>
           </section>
+
+          <div className="flex justify-center">
+            <ShareButton
+              label="궁합 결과 공유하기"
+              text={`${profile.name} × ${other.name} 궁합 ${result.score}점 「${result.grade}」\n${result.summary}\n너도 사주 궁합 해봐!`}
+            />
+          </div>
 
           <button
             type="button"

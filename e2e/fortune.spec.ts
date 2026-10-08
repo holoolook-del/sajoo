@@ -8,8 +8,9 @@ test('AC4: 오늘의 운세에 일진·등급·해석이 보인다', async ({ pa
 
   await expect(page.getByRole('heading', { name: '오늘의 운세' })).toBeVisible();
   await expect(page.getByText('오늘의 일진(日辰)')).toBeVisible();
-  // 등급 5종 중 하나 + 운세 점수 표시
-  await expect(page.getByText(/운세 점수 -?\d+/)).toBeVisible();
+  // 등급 5종 중 하나 + 운세 지수(%) 표시
+  await expect(page.getByText(/운세 지수/)).toBeVisible();
+  await expect(page.getByText(/\d+%/)).toBeVisible();
   await expect(page.getByText('오늘의 기운 해석')).toBeVisible();
   // 카드 미뽑기 상태 → 뽑기 유도 버튼
   await expect(page.getByRole('link', { name: '운세카드 뽑기' })).toBeVisible();

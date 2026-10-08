@@ -54,13 +54,15 @@
 | PillarTable | src/features/saju/pillar-table.tsx | 만세력식 팔자표 (십신·천간·지지·주명 행, 오행색) |
 | useSaju | src/features/saju/use-saju.ts | 프로필→사주 공용 훅 (페이지 진입점) |
 | StateView | src/components/state-view.tsx | 에러/빈 상태 공용 화면 |
+| shareResult | src/lib/share.ts | 결과 공유 — navigator.share(카톡 포함 OS 시트) → 미지원·실패 시 클립보드 폴백 | text,title? → 'shared'\|'copied'\|'canceled'\|'failed' |
+| ShareButton | src/components/share-button.tsx | 공유 버튼 (shareResult 호출 + 복사 피드백) | text,label? → 버튼 |
 
 ## 콘텐츠·풀이문
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
 | --- | --- | --- | --- |
 | ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey | src/content/meta.ts | 오행·십신 공용 메타 (색상·한자·타입) | 오행 → 색상/한자 |
-| DAY_MASTER_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT | src/content/interpret.ts | 풀이문 DB (일간·오행·균형·십신) | 키 → 해석 문장 |
-| BRANCH_RELATIONS / DAY_GOD_TEXT / RELATION_TEXT / GRADE_SUMMARY | src/content/fortune.ts | 지지 관계 테이블 + 오늘운세 풀이문 | 지지쌍/십신/등급 → 문장 |
+| DAY_MASTER_TEXT / DayMasterSocial / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT | src/content/interpret.ts | 풀이문 DB (일간 캐릭터·사회적 면모·오행·균형·십신) | 키 → 해석 문장 |
+| BRANCH_RELATIONS / DAY_GOD_TEXT / RELATION_TEXT / GRADE_SUMMARY / LUCKY | src/content/fortune.ts | 지지 관계 테이블 + 오늘운세 풀이문 + 행운 색·방향·아이템 | 지지쌍/십신/등급/오행 → 문장 |
 | COMPAT_GRADE_TEXT / COMPAT_RELATION_TEXT / STEM_RELATION_TEXT | src/content/compat.ts | 궁합 풀이문 (일간 관계·지지 관계·등급 요약) | 키 → 해석 문장 |
 
 ## 화면 공용 요소 (컴포넌트, 훅)

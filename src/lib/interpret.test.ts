@@ -18,6 +18,15 @@ describe('interpretSaju', () => {
     expect(reading.dayMaster.text.length).toBeGreaterThan(20);
   });
 
+  it('사주 캐릭터(유형명·키워드·사회적 면모)를 만든다', () => {
+    expect(reading.dayMaster.title.length).toBeGreaterThan(3);
+    expect(reading.dayMaster.keywords.length).toBe(3);
+    const { seen, good, watch, bond } = reading.dayMaster.social;
+    for (const s of [seen, good, watch, bond]) {
+      expect(s.length).toBeGreaterThan(10);
+    }
+  });
+
   it('오행 분포를 센다 (4주 = 8글자)', () => {
     const total = reading.elementCounts.reduce((s, e) => s + e.count, 0);
     expect(total).toBe(8);

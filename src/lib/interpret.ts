@@ -1,9 +1,17 @@
 import { DAY_MASTER_TEXT, ELEMENT_BALANCE, TEN_GOD_TEXT } from '../content/interpret.ts';
+import type { DayMasterSocial } from '../content/interpret.ts';
 import { ELEMENT_KEYS, type ElementKey, type TenGodKey } from '../content/meta.ts';
 import type { SajuResult } from './engine.ts';
 
 export interface SajuReading {
-  dayMaster: { hanja: string; nature: string; text: string };
+  dayMaster: {
+    hanja: string;
+    nature: string;
+    title: string;
+    keywords: string[];
+    text: string;
+    social: DayMasterSocial;
+  };
   elementCounts: { element: ElementKey; count: number }[];
   dominant: ElementKey;
   lacking: ElementKey[];
@@ -52,8 +60,22 @@ export function interpretSaju(saju: SajuResult): SajuReading {
   const dm = DAY_MASTER_TEXT[saju.dayMaster.hanja];
   return {
     dayMaster: dm
-      ? { hanja: saju.dayMaster.hanja, nature: dm.nature, text: dm.text }
-      : { hanja: saju.dayMaster.hanja, nature: saju.dayMaster.element, text: '' },
+      ? {
+          hanja: saju.dayMaster.hanja,
+          nature: dm.nature,
+          title: dm.title,
+          keywords: dm.keywords,
+          text: dm.text,
+          social: dm.social,
+        }
+      : {
+          hanja: saju.dayMaster.hanja,
+          nature: saju.dayMaster.element,
+          title: '',
+          keywords: [],
+          text: '',
+          social: { seen: '', good: '', watch: '', bond: '' },
+        },
     elementCounts,
     dominant,
     lacking,

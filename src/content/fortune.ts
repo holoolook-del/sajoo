@@ -74,6 +74,15 @@ export const RELATION_TEXT: Record<BranchRelation, string> = {
   파: '오늘의 지지가 내 일지와 파(破)합니다 — 작은 균열·깨짐이 생길 수 있습니다. 무리수를 두지 마세요.',
 };
 
+/** 오늘의 행운 요소 — 일진 오행 기준 (공유·재미용) */
+export const LUCKY: Record<string, { color: string; direction: string; item: string }> = {
+  목: { color: '초록색', direction: '동쪽', item: '식물·나무 소품' },
+  화: { color: '빨간색', direction: '남쪽', item: '따뜻한 차·캔들' },
+  토: { color: '노란색', direction: '중앙·집 안', item: '곡물 음식·도자기' },
+  금: { color: '흰색·금색', direction: '서쪽', item: '금속 액세서리' },
+  수: { color: '검정·남색', direction: '북쪽', item: '물·과일주스' },
+};
+
 /** 등급별 한줄 요약 */
 export const GRADE_SUMMARY: Record<Grade, string> = {
   대길: '오늘은 천시가 돕는 대길한 날 — 뜻한 바를 과감히 펼치세요.',

@@ -5,6 +5,7 @@ import { interpretSaju } from '../lib/interpret.ts';
 import { PillarTable } from '../features/saju/pillar-table.tsx';
 import { useSaju } from '../features/saju/use-saju.ts';
 import { StateView } from '../components/state-view.tsx';
+import { ShareButton } from '../components/share-button.tsx';
 import { useMemo } from 'react';
 
 export function SajuPage() {
@@ -37,17 +38,47 @@ export function SajuPage() {
         </p>
       </section>
 
-      {/* 일간 해석 */}
-      <section className="rounded-xl border border-gold/30 bg-night-soft p-5">
-        <h2 className="text-sm text-hanji/60">일간(日干) — 나를 나타내는 글자</h2>
-        <p className="mt-2 text-lg">
-          <span className="text-3xl font-bold" style={{ color: ELEMENT_COLOR[dayMaster.element as ElementKey] }}>
-            {dayMaster.hanja}
-          </span>{' '}
-          <span className="text-hanji">{dayMaster.korean}</span>{' '}
-          <span className="text-hanji/60">— {reading.dayMaster.nature}, {dayMaster.element}의 {dayMaster.yinYang} 기운</span>
+      {/* 나의 사주 캐릭터 — 일간을 공유하기 좋은 유형 카드로 */}
+      <section className="rounded-xl border-2 border-gold/50 bg-night-soft p-5 text-center shadow-[0_0_24px_rgba(201,162,39,0.12)]">
+        <p className="text-xs tracking-widest text-gold-bright">나의 사주 캐릭터</p>
+        <p className="mt-3 text-4xl font-bold" style={{ color: ELEMENT_COLOR[dayMaster.element as ElementKey] }}>
+          {dayMaster.hanja}
         </p>
-        <p className="mt-3 text-sm leading-6 text-hanji/85">{reading.dayMaster.text}</p>
+        <p className="mt-1 text-xl font-bold text-hanji">
+          「{reading.dayMaster.title}」
+        </p>
+        <p className="mt-1 text-xs text-hanji/50">
+          {dayMaster.korean} — {reading.dayMaster.nature}, {dayMaster.element}의 {dayMaster.yinYang} 기운
+        </p>
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          {reading.dayMaster.keywords.map((k) => (
+            <span key={k} className="rounded-full border border-gold/40 px-3 py-1 text-xs text-gold-bright">
+              #{k}
+            </span>
+          ))}
+        </div>
+        <p className="mt-4 text-left text-sm leading-6 text-hanji/85">{reading.dayMaster.text}</p>
+        <dl className="mt-4 space-y-2.5 rounded-lg bg-night p-4 text-left">
+          {(
+            [
+              ['사람들이 보는 나', reading.dayMaster.social.seen],
+              ['내가 잘하는 것', reading.dayMaster.social.good],
+              ['조심할 점', reading.dayMaster.social.watch],
+              ['친해지면', reading.dayMaster.social.bond],
+            ] as const
+          ).map(([label, value]) => (
+            <div key={label} className="flex gap-3 text-sm leading-6">
+              <dt className="shrink-0 font-bold text-gold-bright">{label}</dt>
+              <dd className="text-hanji/85">{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <div className="mt-4">
+          <ShareButton
+            label="내 사주 캐릭터 공유하기"
+            text={`${profile?.name ?? '나'}의 사주 캐릭터는 「${reading.dayMaster.title}」(${dayMaster.korean}${dayMaster.hanja}) — ${reading.dayMaster.keywords.map((k) => '#' + k).join(' ')}\n너의 사주 캐릭터도 확인해봐!`}
+          />
+        </div>
       </section>
 
       {/* 오행 분포 */}
