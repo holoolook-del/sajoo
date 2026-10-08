@@ -1,11 +1,20 @@
 # PROGRESS
 
 ## 현재 상태
-- 완료: Phase 0~4, T0~T6 (엔진·프로필·카드·풀이·오늘운세·대운세운월운·궁합)
-- 진행 중: 없음 — T7 대기
-- 다음: T7 히스토리 30일. H2 Pages 활성화(Settings→Pages→GitHub Actions)만 사용자 작업으로 남음
+- 완료: Phase 0~4, T0~T7 (엔진·프로필·카드·풀이·오늘운세·대운세운월운·궁합·히스토리)
+- 진행 중: 없음 — T8 대기 (H1 Gemini 키 확보됨)
+- 다음: T8 Gemini 이미지 전량 생성+적용, 한국 전통 디자인 마감
 
 ## 태스크별 기록
+### T7
+- 한 일: storage에 listFortunes/listCardDraws(날짜 내림차순 목록)·pruneHistory(cutoff 이전 기록 삭제), features/history/history.ts(buildHistory: 운세·카드 기록을 날짜별 병합, 30일 창, 경계 밖 prune), /history 페이지(날짜·일진·등급·요약·뽑은 카드명), e2e AC10
+- 바꾼 파일: src/lib/storage.ts, src/features/history/{history,history.test}.ts, src/pages/{history,home}.tsx, src/App.tsx, e2e/history.spec.ts
+- 새 공용 코드: listFortunes, listCardDraws, pruneHistory, buildHistory, HistoryEntry
+- 남은 문제: 없음
+- 다음 할 일: T8 이미지 생성+디자인 마감
+- 증거: vitest 39/39, e2e 22/22, verify 통과, audit:code 클린
+- 배운 점: localStorage 키 순회는 storage.ts가 단독 소유 — feature는 목록 함수만 호출
+
 ### T6
 - 한 일: content/compat.ts(궁합 풀이문: 일간 상생·비화·상극, 지지 관계, 등급 요약), features/compat/compat.ts(compatScore: 일간 오행 관계+일지 지지 관계+십신 역할+오행 보완→0~100 점수·등급·해석), /compat 페이지(ProfileForm 재사용, 상대 정보는 React state만 — 미저장 명시). 아키텍처 수정: interpretSaju→lib/interpret.ts, branchRelation→lib/relations.ts 이동(features 간 import 금지 규칙 준수)
 - 바꾼 파일: src/lib/{interpret,interpret.test,relations}.ts(신규·이동), src/features/{compat/compat.ts,compat.test.ts}, src/features/fortune/today{,.test}.ts, src/features/saju/profile-form.tsx(submitLabel prop), src/pages/{compat,home,saju}.tsx, src/App.tsx, e2e/compat.spec.ts, src/content/compat.ts

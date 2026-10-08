@@ -27,6 +27,8 @@
 | saveProfile / loadProfile / hasProfile | src/lib/storage.ts | 프로필 로컬 저장·조회 (키 sajoo:profile) | Profile ↔ 저장소 |
 | saveCardDraw / loadCardDraw | src/lib/storage.ts | 날짜별 카드 뽑기 기록 (키 sajoo:card:YYYY-MM-DD) | CardDraw ↔ 저장소 |
 | saveFortune / loadFortune | src/lib/storage.ts | 날짜별 운세 기록 (sajoo:fortune:날짜) | FortuneRecord ↔ 저장소 |
+| listFortunes / listCardDraws | src/lib/storage.ts | 저장된 운세·카드 기록 목록 (날짜 내림차순) | → FortuneRecord[] / CardDraw[] |
+| pruneHistory | src/lib/storage.ts | cutoff 이전 운세·카드 기록 삭제 | 'YYYY-MM-DD' → 저장소 정리 |
 
 ## 카드·운세
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
@@ -40,6 +42,7 @@
 | saveTodaysFortune | src/features/fortune/today.ts | 오늘 운세를 FortuneRecord로 기록 (멱등) | SajuResult,date → FortuneRecord |
 | buildLuckView | src/features/luck/luck.ts | 대운 타임라인+세운+월운 12개월 (현재 표시·십신) | SajuResult,Profile,date → LuckView |
 | compatScore | src/features/compat/compat.ts | 두 사주 궁합 (일간 관계+일지 관계+십신 역할+오행 보완) | SajuResult,SajuResult → CompatResult |
+| buildHistory | src/features/history/history.ts | 최근 30일 운세·카드 기록 날짜별 병합+옛 기록 정리 | today?,days → HistoryEntry[] |
 
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |

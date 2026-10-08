@@ -46,6 +46,12 @@ export function HomePage() {
         >
           궁합 보기
         </Link>
+        <Link
+          to="/history"
+          className="rounded-lg border border-gold/30 bg-night-soft p-4 text-center text-hanji"
+        >
+          지난 30일의 기록
+        </Link>
       </nav>
     </main>
   );
