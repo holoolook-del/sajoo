@@ -34,6 +34,12 @@ export function HomePage() {
         >
           내 사주팔자 보기
         </Link>
+        <Link
+          to="/luck"
+          className="rounded-lg border border-gold/30 bg-night-soft p-4 text-center text-hanji"
+        >
+          대운 · 세운 · 월운
+        </Link>
       </nav>
     </main>
   );

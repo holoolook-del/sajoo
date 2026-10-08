@@ -1,54 +1,29 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ELEMENT_COLOR } from '../content/meta.ts';
 import { getCardById } from '../content/cards.ts';
-import { todaysDraw } from '../features/card/draw.ts';
+import { ELEMENT_COLOR } from '../content/meta.ts';
 import { GRADE_COLOR } from '../features/card/card-frame.tsx';
+import { todaysDraw } from '../features/card/draw.ts';
 import { dailyFortune, saveTodaysFortune } from '../features/fortune/today.ts';
+import { useSaju } from '../features/saju/use-saju.ts';
+import { StateView } from '../components/state-view.tsx';
 import { todayKST } from '../lib/date.ts';
-import { calcSaju } from '../lib/engine.ts';
-import { loadProfile } from '../lib/storage.ts';
-import type { ElementKey } from '../content/meta.ts';
 
 export function FortunePage() {
-  const profile = loadProfile();
+  const { saju } = useSaju();
   const today = todayKST();
-  const result = useMemo(
-    () =>
-      profile
-        ? calcSaju({
-            year: profile.year,
-            month: profile.month,
-            day: profile.day,
-            hour: profile.hour,
-            minute: profile.minute,
-            calendar: profile.calendar,
-            isLeapMonth: profile.isLeapMonth,
-            gender: profile.gender,
-          })
-        : null,
-    [profile],
-  );
-  const fortune = useMemo(
-    () => (result?.ok ? dailyFortune(result.data, today) : null),
-    [result, today],
-  );
+  const fortune = useMemo(() => (saju ? dailyFortune(saju, today) : null), [saju, today]);
 
   // 방문할 때마다 오늘의 운세를 기록한다 (멱등 — 같은 값이 덮어씀, 히스토리 T7이 재사용)
   useEffect(() => {
-    if (result?.ok) saveTodaysFortune(result.data, today);
-  }, [result, today]);
+    if (saju) saveTodaysFortune(saju, today);
+  }, [saju, today]);
 
   const draw = todaysDraw();
   const drawnCard = draw ? getCardById(draw.cardId) : undefined;
 
-  if (!fortune || !result || !result.ok) {
-    return (
-      <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6">
-        <p className="text-hanji/70">오늘의 운세를 계산할 수 없습니다.</p>
-        <Link to="/" className="text-gold underline">홈으로</Link>
-      </main>
-    );
+  if (!fortune || !saju) {
+    return <StateView message="오늘의 운세를 계산할 수 없습니다." />;
   }
 
   return (
@@ -91,7 +66,7 @@ export function FortunePage() {
         {drawnCard ? (
           <>
             <p className="text-sm text-hanji/60">오늘 뽑은 카드</p>
-            <p className="mt-2 text-xl font-bold" style={{ color: ELEMENT_COLOR[drawnCard.element as ElementKey] }}>
+            <p className="mt-2 text-xl font-bold" style={{ color: ELEMENT_COLOR[drawnCard.element] }}>
               {drawnCard.name}
             </p>
             <p className={`mt-1 text-sm ${GRADE_COLOR[drawnCard.grade]}`}>{drawnCard.grade}</p>

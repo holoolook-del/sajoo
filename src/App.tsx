@@ -4,6 +4,7 @@ import { hasProfile } from './lib/storage.ts';
 import { CardPage } from './pages/card.tsx';
 import { FortunePage } from './pages/fortune.tsx';
 import { HomePage } from './pages/home.tsx';
+import { LuckPage } from './pages/luck.tsx';
 import { OnboardingPage } from './pages/onboarding.tsx';
 import { SajuPage } from './pages/saju.tsx';
 
@@ -30,6 +31,14 @@ export function App() {
           element={
             <RequireProfile>
               <CardPage />
+            </RequireProfile>
+          }
+        />
+        <Route
+          path="/luck"
+          element={
+            <RequireProfile>
+              <LuckPage />
             </RequireProfile>
           }
         />

@@ -80,6 +80,18 @@ export function iljinOf(year: number, month: number, day: number): Iljin {
   };
 }
 
+/** 그 해의 세운(연주 간지). 절기 경계를 피해 7월 1일 기준으로 계산한다. */
+export function yearPillarOf(year: number): { korean: string; hanja: string } {
+  const d = calculateFourPillars({ year, month: 7, day: 1, hour: 12, minute: 0, dayBoundary: 'jasi' });
+  return { korean: d.yearString, hanja: d.yearHanja };
+}
+
+/** 그 해·그 양력 월의 월운(월주 간지). 절입(4~8일) 이후인 15일 기준으로 계산한다. */
+export function monthPillarOf(year: number, month: number): { korean: string; hanja: string } {
+  const d = calculateFourPillars({ year, month, day: 15, hour: 12, minute: 0, dayBoundary: 'jasi' });
+  return { korean: d.monthString, hanja: d.monthHanja };
+}
+
 /** 입력을 검증한다. 실패 시 사용자에게 보여줄 한국어 문구를 돌려준다. */
 export function validateBirthInput(input: SajuBirthInput): Result<true> {
   const { year, month, day, calendar } = input;

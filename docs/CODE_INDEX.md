@@ -11,6 +11,7 @@
 | --- | --- | --- | --- |
 | calcSaju | src/lib/engine.ts | 생년월일시→사주팔자·십신·대운·공망 (자시 관법, 생시 null→3주) | SajuBirthInput → Result\<SajuResult\> |
 | iljinOf | src/lib/engine.ts | 날짜→일진(그날의 일주) | y,m,d → Iljin |
+| yearPillarOf / monthPillarOf | src/lib/engine.ts | 연도→세운, 연·월→월주 (절기 경계 회피) | y[,m] → {korean,hanja} |
 | validateBirthInput | src/lib/engine.ts | 생년월일시 입력 검증 (범위·미래·존재 날짜) | SajuBirthInput → Result\<true\> |
 
 ## 검증·포맷
@@ -25,7 +26,7 @@
 | --- | --- | --- | --- |
 | saveProfile / loadProfile / hasProfile | src/lib/storage.ts | 프로필 로컬 저장·조회 (키 sajoo:profile) | Profile ↔ 저장소 |
 | saveCardDraw / loadCardDraw | src/lib/storage.ts | 날짜별 카드 뽑기 기록 (키 sajoo:card:YYYY-MM-DD) | CardDraw ↔ 저장소 |
-| saveFortune / loadFortune / listRecordDates | src/lib/storage.ts | 날짜별 운세 기록 (sajoo:fortune:날짜), 날짜 키 나열 | FortuneRecord ↔ 저장소 |
+| saveFortune / loadFortune | src/lib/storage.ts | 날짜별 운세 기록 (sajoo:fortune:날짜) | FortuneRecord ↔ 저장소 |
 
 ## 카드·운세
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
@@ -36,6 +37,7 @@
 | interpretSaju | src/features/saju/interpret.ts | SajuResult → 일간·오행 분포·과다/부족·십신 해석 조합 | SajuResult → SajuReading |
 | dailyFortune / branchRelation | src/features/fortune/today.ts | 일진×사주 조합(십신·관계·상생상극)→등급·해석 | SajuResult,date → DailyFortune |
 | saveTodaysFortune | src/features/fortune/today.ts | 오늘 운세를 FortuneRecord로 기록 (멱등) | SajuResult,date → FortuneRecord |
+| buildLuckView | src/features/luck/luck.ts | 대운 타임라인+세운+월운 12개월 (현재 표시·십신) | SajuResult,Profile,date → LuckView |
 
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |
@@ -45,6 +47,8 @@
 | CardDrawScene | src/features/card/card-scene.tsx | 카드 팬아웃→선택→플립→폭발 뽑기 연출 |
 | CardFront / CardBack | src/features/card/card-frame.tsx | 카드 앞·뒷면 비주얼 (오행색 테두리) |
 | PillarTable | src/features/saju/pillar-table.tsx | 만세력식 팔자표 (십신·천간·지지·주명 행, 오행색) |
+| useSaju | src/features/saju/use-saju.ts | 프로필→사주 공용 훅 (페이지 진입점) |
+| StateView | src/components/state-view.tsx | 에러/빈 상태 공용 화면 |
 
 ## 콘텐츠·풀이문
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |

@@ -38,13 +38,3 @@ export function saveFortune(rec: FortuneRecord): void {
 export function loadFortune(date: string): FortuneRecord | null {
   return readRecord<FortuneRecord>(`fortune:${date}`);
 }
-/** sajoo: 접두 키 나열 — 히스토리(T7)용 */
-export function listRecordDates(bucket: 'fortune' | 'card'): string[] {
-  const prefix = `${PREFIX}${bucket}:`;
-  const dates: string[] = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key?.startsWith(prefix)) dates.push(key.slice(prefix.length));
-  }
-  return dates.sort();
-}

@@ -1,11 +1,20 @@
 # PROGRESS
 
 ## 현재 상태
-- 완료: Phase 0~4, T0~T4 (엔진·프로필·카드·풀이·오늘운세)
-- 진행 중: 없음 — T5 대기
-- 다음: T5 대운·세운·월운. H2 Pages 활성화는 사용자 작업 대기
+- 완료: Phase 0~4, T0~T5 (엔진·프로필·카드·풀이·오늘운세·대운세운월운)
+- 진행 중: 없음 — T6 대기
+- 다음: T6 궁합(상대 정보 그때그때 입력·미저장). H2 Pages 활성화는 사용자 작업 대기
 
 ## 태스크별 기록
+### T5
+- 한 일: engine에 yearPillarOf/monthPillarOf(세운·월주 — 절기 경계 피해 중순 기준), features/luck/luck.ts(buildLuckView: 대운 타임라인+현재 대운 표시·세운·월운 12개월+십신), /luck 페이지. 리팩터링: use-saju.ts(프로필→사주 공용 훅 — 3개 페이지 중복 제거), components/state-view.tsx(공용 에러/빈 상태). e2e helpers.ts 추출(registerProfile 중복 제거)
+- 바꾼 파일: src/lib/engine.ts, src/features/luck/{luck,luck.test}.ts, src/features/saju/use-saju.ts, src/components/state-view.tsx, src/pages/{luck,fortune,saju}.tsx, src/lib/storage.ts, e2e/{helpers,luck.spec,card.spec,fortune.spec}.ts
+- 새 공용 코드: useSaju, StateView, yearPillarOf/monthPillarOf, buildLuckView
+- 남은 문제: 없음
+- 다음 할 일: T6 궁합
+- 증거: vitest 33/33, e2e 18/18, audit:code 클린
+- 배운 점: 같은 calcSaju 블록을 3페이지가 반복 → useSaju 훅이 정석. 대운 나이는 세는나이(현재연도-생년+1) 기준
+
 ### T4
 - 한 일: engine에 iljinOf(날짜→일진), content/fortune.ts(지지 관계 테이블 육합·삼합·충·형·해·원진·파 + 십신 일진 해석 + 등급 요약), features/fortune/today.ts(dailyFortune: 십신·관계·상생상극 점수→등급, saveTodaysFortune: FortuneRecord 기록), meta.ts에 상생상극 맵(manseryeok 미공개 심볼 자체 구현), /fortune 페이지(일진+등급+해석+카드 연동), storage saveFortune/loadFortune/listRecordDates
 - 바꾼 파일: src/lib/{engine,types,storage}.ts, src/content/{meta,fortune}.ts, src/features/fortune/{today,today.test}.ts, src/pages/{fortune,home}.tsx, src/App.tsx, e2e/fortune.spec.ts

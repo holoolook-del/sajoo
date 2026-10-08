@@ -1,46 +1,21 @@
-import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ELEMENT_COLOR, ELEMENT_HANJA } from '../content/meta.ts';
+import { ELEMENT_COLOR, ELEMENT_HANJA, type ElementKey } from '../content/meta.ts';
 import { ELEMENT_TEXT } from '../content/interpret.ts';
-import { calcSaju } from '../lib/engine.ts';
-import { loadProfile } from '../lib/storage.ts';
 import { interpretSaju } from '../features/saju/interpret.ts';
 import { PillarTable } from '../features/saju/pillar-table.tsx';
+import { useSaju } from '../features/saju/use-saju.ts';
+import { StateView } from '../components/state-view.tsx';
+import { useMemo } from 'react';
 
 export function SajuPage() {
-  const profile = loadProfile();
-  const result = useMemo(
-    () =>
-      profile
-        ? calcSaju({
-            year: profile.year,
-            month: profile.month,
-            day: profile.day,
-            hour: profile.hour,
-            minute: profile.minute,
-            calendar: profile.calendar,
-            isLeapMonth: profile.isLeapMonth,
-            gender: profile.gender,
-          })
-        : null,
-    [profile],
-  );
+  const { profile, saju } = useSaju();
+  const reading = useMemo(() => (saju ? interpretSaju(saju) : null), [saju]);
 
-  const reading = useMemo(
-    () => (result?.ok ? interpretSaju(result.data) : null),
-    [result],
-  );
-
-  if (!result || !result.ok || !reading) {
-    return (
-      <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6">
-        <p className="text-hanji/70">사주를 계산할 수 없습니다.</p>
-        <Link to="/onboarding" className="text-gold underline">정보 다시 입력</Link>
-      </main>
-    );
+  if (!saju || !reading) {
+    return <StateView message="사주를 계산할 수 없습니다." linkTo="/onboarding" linkLabel="정보 다시 입력" />;
   }
 
-  const { pillars, dayMaster, lunar, hourIncluded, voidBranches } = result.data;
+  const { pillars, dayMaster, lunar, hourIncluded, voidBranches } = saju;
   const maxEl = Math.max(...reading.elementCounts.map((e) => e.count), 1);
 
   return (
@@ -66,7 +41,7 @@ export function SajuPage() {
       <section className="rounded-xl border border-gold/30 bg-night-soft p-5">
         <h2 className="text-sm text-hanji/60">일간(日干) — 나를 나타내는 글자</h2>
         <p className="mt-2 text-lg">
-          <span className="text-3xl font-bold" style={{ color: ELEMENT_COLOR[dayMaster.element as keyof typeof ELEMENT_COLOR] }}>
+          <span className="text-3xl font-bold" style={{ color: ELEMENT_COLOR[dayMaster.element as ElementKey] }}>
             {dayMaster.hanja}
           </span>{' '}
           <span className="text-hanji">{dayMaster.korean}</span>{' '}

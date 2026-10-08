@@ -1,17 +1,5 @@
 import { expect, test } from '@playwright/test';
-
-async function registerProfile(page: import('@playwright/test').Page) {
-  await page.goto('./');
-  await page.getByLabel('이름 (또는 닉네임)').fill('테스트');
-  await page.getByLabel('년').fill('1992');
-  await page.getByLabel('월').fill('10');
-  await page.getByLabel('일').fill('24');
-  await page.getByLabel('시', { exact: true }).selectOption('5');
-  await page.getByLabel('분', { exact: true }).selectOption('30');
-  await page.getByRole('radio', { name: '남' }).check();
-  await page.getByRole('button', { name: '저장하고 사주 보기' }).click();
-  await expect(page.getByText('일주')).toBeVisible();
-}
+import { registerProfile } from './helpers.ts';
 
 test('AC5: 카드를 뽑으면 연출 후 결과 카드와 해석이 보인다', async ({ page }) => {
   await registerProfile(page);
