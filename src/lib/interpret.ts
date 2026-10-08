@@ -1,5 +1,13 @@
-import { DAY_BRANCH_TEXT, DAY_MASTER_TEXT, ELEMENT_BALANCE, TEN_GOD_TEXT } from '../content/interpret.ts';
-import type { DayMasterSocial } from '../content/interpret.ts';
+import {
+  CONCERN_TEXT,
+  DAY_BRANCH_TEXT,
+  DAY_MASTER_TEXT,
+  ELEMENT_BALANCE,
+  ELEMENT_HEALTH,
+  TEN_GOD_TEXT,
+  type ConcernKey,
+  type DayMasterSocial,
+} from '../content/interpret.ts';
 import { ELEMENT_KEYS, type ElementKey, type TenGodKey } from '../content/meta.ts';
 import type { SajuResult } from './engine.ts';
 
@@ -21,7 +29,12 @@ export interface SajuReading {
   tenGodCounts: { god: TenGodKey; count: number }[];
   topTenGods: TenGodKey[];
   tenGodTexts: { god: TenGodKey; text: string }[];
+  /** 고민별 해석 — 돈·직업·연애·건강·관계·가족 (전통 명리 매핑 기반) */
+  concerns: { key: ConcernKey; label: string; text: string }[];
 }
+
+/** 도화 — 자·오·묘·유 (매력·인연의 별) */
+const DOHWA = ['子', '午', '卯', '酉'];
 
 /** 사주 계산 결과를 풀이문 DB와 조합해 해석을 만든다. */
 export function interpretSaju(saju: SajuResult): SajuReading {
@@ -59,6 +72,36 @@ export function interpretSaju(saju: SajuResult): SajuReading {
   const topTenGods = tenGodCounts.filter((t) => t.count === max && t.count > 0).map((t) => t.god);
   const tenGodTexts = topTenGods.map((god) => ({ god, text: TEN_GOD_TEXT[god] }));
 
+  // ── 고민별 해석 ──
+  const godCount = (gods: TenGodKey[]) => gods.reduce((s, g) => s + (tgCount.get(g) ?? 0), 0);
+  const tone = (n: number): 'strong' | 'normal' | 'weak' => (n >= 3 ? 'strong' : n === 0 ? 'weak' : 'normal');
+
+  const dohwaCount = pillars.filter((p) => DOHWA.includes(p.branchHanja)).length;
+  const loveTone = dohwaCount >= 2 ? 'strong' : dohwaCount === 1 ? 'normal' : 'weak';
+
+  const concerns: SajuReading['concerns'] = (
+    [
+      ['money', tone(godCount(['정재', '편재']))],
+      ['career', tone(godCount(['정관', '편관']))],
+      ['love', loveTone],
+      ['relations', tone(godCount(['식신', '상관']))],
+      ['family', tone(godCount(['정인', '편인']))],
+    ] as [ConcernKey, 'strong' | 'normal' | 'weak'][]
+  ).map(([key, t]) => ({ key, label: CONCERN_TEXT[key].label, text: CONCERN_TEXT[key][t] }));
+
+  // 건강은 비어있는 오행으로 개인화 — 없으면 균형 문장
+  concerns.splice(3, 0, {
+    key: 'health',
+    label: CONCERN_TEXT.health.label,
+    text:
+      lacking.length === 0
+        ? CONCERN_TEXT.health.strong
+        : lacking
+            .slice(0, 2)
+            .map((e) => `${e} 기운이 비어 있어 ${ELEMENT_HEALTH[e].organ} 쪽을 챙기면 좋습니다 — ${ELEMENT_HEALTH[e].tip}.`)
+            .join(' '),
+  });
+
   const dm = DAY_MASTER_TEXT[saju.dayMaster.hanja];
   return {
     dayMaster: dm
@@ -90,5 +133,6 @@ export function interpretSaju(saju: SajuResult): SajuReading {
     tenGodCounts,
     topTenGods,
     tenGodTexts,
+    concerns,
   };
 }

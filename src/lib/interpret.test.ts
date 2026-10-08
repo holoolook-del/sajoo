@@ -50,4 +50,14 @@ describe('interpretSaju', () => {
       expect(reading.tenGodTexts.map((t) => t.god)).toContain(g);
     }
   });
+
+  it('고민별 해석 6종을 모두 채운다', () => {
+    expect(reading.concerns.map((c) => c.key)).toEqual([
+      'money', 'career', 'love', 'health', 'relations', 'family',
+    ]);
+    for (const c of reading.concerns) {
+      expect(c.label.length).toBeGreaterThan(1);
+      expect(c.text.length).toBeGreaterThan(30);
+    }
+  });
 });

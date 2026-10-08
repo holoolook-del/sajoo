@@ -36,7 +36,7 @@
 | CARD_DECK / getCardById | src/content/cards.ts | 운세카드 24장 정의(등급·오행·해석·조언) + id 조회 | id → CardDef |
 | dailyCard | src/features/card/draw.ts | 날짜+사주 시드로 그날의 카드 결정적 선택 | Profile,date → CardDef |
 | drawToday / canDrawOn / todaysDraw | src/features/card/draw.ts | 하루 1장 뽑기 기록·조회 (멱등) | Profile,date? → CardDraw |
-| interpretSaju | src/lib/interpret.ts | SajuResult → 일간·오행 분포·과다/부족·십신 해석 조합 | SajuResult → SajuReading |
+| interpretSaju | src/lib/interpret.ts | SajuResult → 일간·일지·오행 분포·십신·고민별 해석 조합 | SajuResult → SajuReading |
 | branchRelation | src/lib/relations.ts | 지지 두 글자의 관계 (육합→삼합→충→형→해→원진→파) | 지지,지지 → BranchRelation\|null |
 | dailyFortune | src/features/fortune/today.ts | 일진×사주 조합(십신·관계·상생상극)→등급·해석 | SajuResult,date → DailyFortune |
 | saveTodaysFortune | src/features/fortune/today.ts | 오늘 운세를 FortuneRecord로 기록 (멱등) | SajuResult,date → FortuneRecord |
@@ -49,7 +49,7 @@
 | --- | --- | --- |
 | ProfileForm | src/features/saju/profile-form.tsx | 프로필 입력 폼 (검증·에러 표시 포함) |
 | useProfile | src/features/saju/use-profile.ts | 프로필 읽기·저장 훅 |
-| CardDrawScene | src/features/card/card-scene.tsx | 카드 팬아웃→선택→플립→폭발 뽑기 연출 |
+| CardDrawScene | src/features/card/card-scene.tsx | 드래그/휠 덱 넘기기(관성·스냅)→선택→플립→폭발 뽑기 연출 |
 | CardFront / CardBack | src/features/card/card-frame.tsx | 카드 앞·뒷면 비주얼 (오행색 테두리) |
 | PillarTable | src/features/saju/pillar-table.tsx | 만세력식 팔자표 (십신·천간·지지·주명 행, 오행색) |
 | useSaju | src/features/saju/use-saju.ts | 프로필→사주 공용 훅 (페이지 진입점) |
@@ -67,7 +67,7 @@
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
 | --- | --- | --- | --- |
 | ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey | src/content/meta.ts | 오행·십신 공용 메타 (색상·한자·타입) | 오행 → 색상/한자 |
-| DAY_MASTER_TEXT / DayMasterSocial / DAY_BRANCH_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT | src/content/interpret.ts | 풀이문 DB (일간 캐릭터·사회적 면모·일지 12지지 내면 해석·오행·균형·십신) | 키 → 해석 문장 |
+| DAY_MASTER_TEXT / DayMasterSocial / DAY_BRANCH_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT / CONCERN_TEXT / ELEMENT_HEALTH / GLOSSARY | src/content/interpret.ts | 풀이문 DB (일간 캐릭터·사회적 면모·일지 12지지·오행·균형·십신·고민 6종·건강 보완·용어 평어) | 키 → 해석 문장 |
 | BRANCH_RELATIONS / DAY_GOD_TEXT / RELATION_TEXT / GRADE_SUMMARY / LUCKY | src/content/fortune.ts | 지지 관계 테이블 + 오늘운세 풀이문 + 행운 색·방향·아이템 | 지지쌍/십신/등급/오행 → 문장 |
 | COMPAT_GRADE_TEXT / COMPAT_RELATION_TEXT / STEM_RELATION_TEXT | src/content/compat.ts | 궁합 풀이문 (일간 관계·지지 관계·등급 요약) | 키 → 해석 문장 |
 

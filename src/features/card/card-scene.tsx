@@ -1,21 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { animate, motion, useMotionValue, useMotionValueEvent, useReducedMotion } from 'motion/react';
 import type { CardDef } from '../../content/cards.ts';
 import { playCardCharge, playCardPick, playCardReveal } from '../../lib/sound.ts';
 import { CardBack, CardFront, GRADE_COLOR, cardElementColor } from './card-frame.tsx';
 
-const FAN_COUNT = 7;
-const FAN_TILT = 10;
+const DECK_COUNT = 12; // 덱처럼 겹쳐 보이는 카드 수
+const SPACING = 64; // 카드 간격 — 카드폭(88)보다 좁아 겹침
 const CARD_W = 88;
 const CARD_H = 132;
 const CHARGE_MS = 950; // 기 모으는 시간 — 라이저 길이와 맞춤
 
 type Phase = 'fan' | 'charge' | 'reveal';
 
-function fanStyle(i: number) {
-  const offset = i - (FAN_COUNT - 1) / 2;
-  return { x: offset * 36, y: Math.abs(offset) * 13, rotate: offset * FAN_TILT };
-}
+const clampIdx = (v: number) => Math.max(0, Math.min(DECK_COUNT - 1, v));
 
 /** 폭발 입자 — 결정적 방향(인덱스 기반)으로 퍼져나가는 금빛 점들 */
 function Burst({ color, big }: { color: string; big: boolean }) {
@@ -115,6 +112,15 @@ export function CardDrawScene({
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState<Phase>('fan');
   const [chosen, setChosen] = useState<number | null>(null);
+  const [centered, setCentered] = useState<number | null>(null);
+
+  // 덱 트랙 위치 — 0이면 0번 카드가 중앙. 중간에서 시작
+  const x = useMotionValue(-((DECK_COUNT - 1) / 2) * SPACING);
+
+  useMotionValueEvent(x, 'change', (v) => {
+    const i = clampIdx(Math.round(-v / SPACING));
+    setCentered((c) => (c === i ? c : i));
+  });
 
   const accent = cardElementColor(card.element);
   const bigGrade = card.grade === '대길' || card.grade === '길';
@@ -127,9 +133,23 @@ export function CardDrawScene({
     if (phase === 'reveal') playCardReveal();
   }, [phase, reduce]);
 
+  // 휠/스크롤로도 덱 넘기기 — 멈추면 가장 가까운 카드로 스냅
+  const wheelSnap = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function onWheel(e: React.WheelEvent) {
+    if (phase !== 'fan') return;
+    const nx = Math.max(-((DECK_COUNT - 1) * SPACING), Math.min(0, x.get() - e.deltaX - e.deltaY));
+    x.set(nx);
+    if (wheelSnap.current) clearTimeout(wheelSnap.current);
+    wheelSnap.current = setTimeout(() => {
+      animate(x, -clampIdx(Math.round(-x.get() / SPACING)) * SPACING, { type: 'spring', stiffness: 260, damping: 28 });
+    }, 140);
+  }
+
   function pick(i: number) {
     if (chosen !== null) return;
     setChosen(i);
+    // 뽑은 카드를 중앙으로 — 덱이 미끄러져 그 자리로 감
+    animate(x, -i * SPACING, { type: 'spring', stiffness: 240, damping: 26 });
     playCardPick();
     playCardCharge();
     onPick();
@@ -143,6 +163,7 @@ export function CardDrawScene({
         animate={phase === 'reveal' && !reduce ? { x: [0, -6, 6, -3, 2, 0] } : { x: 0 }}
         transition={{ duration: 0.45 }}
         className="relative flex h-72 w-full items-center justify-center overflow-visible"
+        onWheel={onWheel}
       >
         {/* 배경 광원 — charge부터 점점 강해짐 */}
         <motion.div
@@ -161,78 +182,112 @@ export function CardDrawScene({
         {phase !== 'fan' && <SummonRing />}
         {phase === 'reveal' && <LightRays color={accent} />}
 
-        {Array.from({ length: FAN_COUNT }, (_, i) => {
-          const isChosen = chosen === i;
-          const fan = fanStyle(i);
-          const faded = phase !== 'fan' && !isChosen;
-          return (
-            <motion.button
-              key={i}
-              type="button"
-              aria-label={`운세카드 ${i + 1}`}
-              disabled={chosen !== null}
-              onClick={() => pick(i)}
-              initial={{ opacity: 0, y: -160, x: 0, rotate: 0 }}
-              animate={
-                faded
-                  ? { opacity: 0, y: 60, scale: 0.7, rotate: fan.rotate }
-                  : isChosen && phase === 'charge' && !reduce
-                    ? {
-                        // 기 모으기 — 좌우로 떨리며 커짐
-                        x: [0, -3, 3, -3, 3, -2, 2, 0],
-                        y: 0,
-                        rotate: 0,
-                        scale: [1.22, 1.3, 1.24, 1.34, 1.28],
-                        opacity: 1,
-                      }
-                    : isChosen
-                      ? { x: 0, y: 0, rotate: 0, scale: phase === 'reveal' ? 1.9 : 1.25, opacity: 1 }
-                      : { x: fan.x, y: fan.y, rotate: fan.rotate, opacity: 1, scale: 1 }
-              }
-              transition={
-                reduce
-                  ? { duration: 0.1 }
-                  : faded
-                    ? { duration: 0.4, ease: 'easeIn' }
-                    : isChosen && phase === 'charge'
-                      ? { duration: CHARGE_MS / 1000, times: [0, 0.15, 0.3, 0.5, 0.7, 0.85, 0.95, 1] }
+        {/* 덱 트랙 — 좌우로 밀어 넘기기 (속도·관성 반영, 가운데 카드에 스냅) */}
+        <motion.div
+          className="absolute inset-0"
+          style={{ x }}
+          drag={phase === 'fan' ? 'x' : false}
+          dragConstraints={{
+            left: -((DECK_COUNT - 1) * SPACING) - 60,
+            right: 60,
+          }}
+          dragElastic={0.15}
+          dragTransition={{
+            power: 0.35,
+            timeConstant: 200,
+            // 손가락 속도가 반영된 목표 지점을 가장 가까운 카드로 스냅
+            modifyTarget: (v) => -clampIdx(Math.round(-v / SPACING)) * SPACING,
+          }}
+        >
+          {Array.from({ length: DECK_COUNT }, (_, i) => {
+            const isChosen = chosen === i;
+            const isCenter = centered === i;
+            const faded = phase !== 'fan' && !isChosen;
+            return (
+              <motion.button
+                key={i}
+                type="button"
+                aria-label={`운세카드 ${i + 1}`}
+                disabled={chosen !== null}
+                onTap={() => pick(i)}
+                initial={{ opacity: 0, y: -160 }}
+                animate={
+                  faded
+                    ? { opacity: 0, y: 60, scale: 0.7 }
+                    : isChosen && phase === 'charge' && !reduce
+                      ? {
+                          // 기 모으기 — 좌우로 떨리며 커짐
+                          x: [i * SPACING, i * SPACING - 3, i * SPACING + 3, i * SPACING - 3, i * SPACING + 3, i * SPACING - 2, i * SPACING + 2, i * SPACING],
+                          y: 0,
+                          scale: [1.22, 1.3, 1.24, 1.34, 1.28],
+                          opacity: 1,
+                        }
                       : isChosen
-                        ? { type: 'spring', stiffness: 260, damping: 22 }
-                        : { type: 'spring', stiffness: 180, damping: 20, delay: i * 0.06 }
-              }
-              className="absolute cursor-pointer outline-none"
-              style={{ width: CARD_W, height: CARD_H, zIndex: isChosen ? 20 : i }}
-            >
-              {/* 충전 오라 — 뽑힌 카드만 */}
-              {isChosen && phase === 'charge' && !reduce && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.6 }}
-                  animate={{ opacity: [0, 0.9, 0.6], scale: 1.5 }}
-                  transition={{ duration: CHARGE_MS / 1000 }}
-                  className="pointer-events-none absolute inset-0 -z-10 rounded-xl"
-                  style={{ background: `radial-gradient(circle, ${accent}88 0%, transparent 70%)` }}
-                />
-              )}
-              {/* 플립 래퍼 */}
-              <motion.div
-                animate={{ rotateY: isChosen && phase === 'reveal' ? 180 : 0 }}
-                transition={{ duration: reduce ? 0.1 : 0.6, delay: 0.05, ease: [0.2, 0.8, 0.3, 1] }}
-                className="relative h-full w-full"
-                style={{ transformStyle: 'preserve-3d' }}
+                        ? { x: i * SPACING, y: -20, scale: phase === 'reveal' ? 1.9 : 1.3, opacity: 1 }
+                        : { x: i * SPACING, y: 0, opacity: 1, scale: isCenter ? 1.12 : 0.95 }
+                }
+                transition={
+                  reduce
+                    ? { duration: 0.1 }
+                    : faded
+                      ? { duration: 0.4, ease: 'easeIn' }
+                      : isChosen && phase === 'charge'
+                        ? { duration: CHARGE_MS / 1000, times: [0, 0.15, 0.3, 0.5, 0.7, 0.85, 0.95, 1] }
+                        : isChosen
+                          ? { type: 'spring', stiffness: 260, damping: 22 }
+                          : { type: 'spring', stiffness: 180, damping: 20, delay: i * 0.04 }
+                }
+                className="absolute cursor-pointer outline-none"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  marginLeft: -CARD_W / 2,
+                  marginTop: -CARD_H / 2,
+                  width: CARD_W,
+                  height: CARD_H,
+                  zIndex: isChosen ? 20 : isCenter ? 10 : i,
+                }}
               >
-                <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden' }}>
-                  <CardBack className={chosen === null ? 'transition-transform duration-200 hover:-translate-y-3' : ''} />
-                </div>
-                <div
-                  className="absolute inset-0"
-                  style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                {/* 가운데 온 카드 강조 — 팬 페이즈일 때 */}
+                {phase === 'fan' && isCenter && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.5 }}
+                    className="pointer-events-none absolute -inset-1.5 -z-10 rounded-xl"
+                    style={{ boxShadow: `0 0 24px ${accent}66` }}
+                  />
+                )}
+                {/* 충전 오라 — 뽑힌 카드만 */}
+                {isChosen && phase === 'charge' && !reduce && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.6 }}
+                    animate={{ opacity: [0, 0.9, 0.6], scale: 1.5 }}
+                    transition={{ duration: CHARGE_MS / 1000 }}
+                    className="pointer-events-none absolute inset-0 -z-10 rounded-xl"
+                    style={{ background: `radial-gradient(circle, ${accent}88 0%, transparent 70%)` }}
+                  />
+                )}
+                {/* 플립 래퍼 */}
+                <motion.div
+                  animate={{ rotateY: isChosen && phase === 'reveal' ? 180 : 0 }}
+                  transition={{ duration: reduce ? 0.1 : 0.6, delay: 0.05, ease: [0.2, 0.8, 0.3, 1] }}
+                  className="relative h-full w-full"
+                  style={{ transformStyle: 'preserve-3d' }}
                 >
-                  <CardFront card={card} />
-                </div>
-              </motion.div>
-            </motion.button>
-          );
-        })}
+                  <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden' }}>
+                    <CardBack className={chosen === null ? 'transition-transform duration-200 hover:-translate-y-3' : ''} />
+                  </div>
+                  <div
+                    className="absolute inset-0"
+                    style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                  >
+                    <CardFront card={card} />
+                  </div>
+                </motion.div>
+              </motion.button>
+            );
+          })}
+        </motion.div>
 
         {phase === 'reveal' && <Burst color={accent} big={bigGrade} />}
 
@@ -256,7 +311,7 @@ export function CardDrawScene({
           transition={{ delay: 0.5 }}
           className="mt-4 text-sm text-hanji/60"
         >
-          끌리는 카드 하나를 뽑으세요
+          카드를 밀어 넘겨서, 끌리는 한 장을 눌러 뽑으세요
         </motion.p>
       )}
 

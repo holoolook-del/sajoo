@@ -19,7 +19,7 @@ test('AC1·AC2: 프로필 입력 후 사주팔자가 보인다', async ({ page }
   await expect(page.getByText('계유')).toBeVisible();
   await expect(page.getByText('을묘')).toBeVisible();
   await expect(page.getByText('오행(五行) 분포')).toBeVisible();
-  await expect(page.getByText('십신(十神)')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /십신/ })).toBeVisible();
 });
 
 test('AC3: 생시 모름이면 3주로 계산한다', async ({ page }) => {

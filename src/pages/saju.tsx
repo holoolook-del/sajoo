@@ -1,6 +1,6 @@
 import { BackHome } from '../components/back-home.tsx';
 import { ELEMENT_COLOR, ELEMENT_HANJA, type ElementKey } from '../content/meta.ts';
-import { ELEMENT_TEXT } from '../content/interpret.ts';
+import { ELEMENT_TEXT, GLOSSARY } from '../content/interpret.ts';
 import { interpretSaju } from '../lib/interpret.ts';
 import { PillarTable } from '../features/saju/pillar-table.tsx';
 import { useSaju } from '../features/saju/use-saju.ts';
@@ -145,6 +145,19 @@ export function SajuPage() {
         </ul>
       </section>
 
+      {/* 고민별 해석 — 점집을 찾는 실제 이유들 */}
+      <section className="rounded-xl border border-gold/30 bg-night-soft p-5">
+        <h2 className="text-sm text-hanji/60">궁금한 것부터 — 고민별 해석</h2>
+        <dl className="mt-3 space-y-4">
+          {reading.concerns.map((c) => (
+            <div key={c.key}>
+              <dt className="text-sm font-bold text-gold-bright">{c.label}</dt>
+              <dd className="mt-1 text-sm leading-6 text-hanji/85">{c.text}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
       {/* 십신 해석 */}
       <section className="rounded-xl border border-gold/30 bg-night-soft p-5">
         <h2 className="text-sm text-hanji/60">십신(十神) — 사주에 드러난 성향</h2>
@@ -164,6 +177,23 @@ export function SajuPage() {
           </p>
         ))}
       </section>
+
+      {/* 용어 설명 — 어려운 말을 평어로 */}
+      <section className="rounded-xl border border-hanji/15 bg-night-soft p-5">
+        <h2 className="text-sm text-hanji/60">이 말이 무슨 뜻?</h2>
+        <dl className="mt-3 space-y-2.5">
+          {GLOSSARY.map((g) => (
+            <div key={g.term} className="flex gap-3 text-sm leading-6">
+              <dt className="shrink-0 font-bold text-hanji">{g.term}</dt>
+              <dd className="text-hanji/70">{g.desc}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <p className="text-center text-[10px] leading-4 text-hanji/30">
+        만세력 계산 — 한국천문연구원 간지 데이터 기반 · 해석 — 전통 명리 체계(십신·오행·합충형해) 정리
+      </p>
     </main>
   );
 }
