@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-night: #16141f;
+  --color-night-soft: #221e30;
+  --color-hanji: #f3ead7;
+  --color-gold: #c9a227;
+  --color-gold-bright: #e8c766;
+  --color-vermilion: #c8402a;
+  --color-dancheong: #2a6f6f;
+}
+
+body {
+  background-color: var(--color-night);
+  color: var(--color-hanji);
+}

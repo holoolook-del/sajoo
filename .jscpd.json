@@ -1,0 +1,16 @@
+{
+  "threshold": 0,
+  "reporters": ["console"],
+  "absolute": true,
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/dev-dist/**",
+    "**/docs/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/playwright-report/**",
+    "**/pnpm-lock.yaml"
+  ],
+  "format": ["typescript", "javascript", "tsx"]
+}

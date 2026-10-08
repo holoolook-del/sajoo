@@ -1,0 +1,6 @@
+#!/bin/sh
+# .env 계열 파일 커밋 차단 (.env.example 제외)
+if git diff --cached --name-only | grep -E '(^|/)\.env(\..*)?$' | grep -v '\.env\.example$'; then
+  echo "차단: .env 파일은 커밋할 수 없습니다. 키는 .env에 직접 넣으세요." >&2
+  exit 1
+fi
