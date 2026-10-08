@@ -1,4 +1,5 @@
 import { Link, Navigate } from 'react-router-dom';
+import { SoundToggle } from '../components/sound-toggle.tsx';
 import { todaysDraw } from '../features/card/draw.ts';
 import { todayKST } from '../lib/date.ts';
 import { hasProfile } from '../lib/storage.ts';
@@ -36,7 +37,10 @@ export function HomePage() {
         </div>
       </header>
 
-      <p className="text-center text-xs text-hanji/50">{todayKST()}</p>
+      <div className="flex items-center justify-center gap-3">
+        <p className="text-xs text-hanji/50">{todayKST()}</p>
+        <SoundToggle />
+      </div>
 
       <Link
         to="/card"

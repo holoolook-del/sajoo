@@ -56,6 +56,8 @@
 | StateView | src/components/state-view.tsx | 에러/빈 상태 공용 화면 |
 | shareResult | src/lib/share.ts | 결과 공유 — navigator.share(카톡 포함 OS 시트) → 미지원·실패 시 클립보드 폴백 | text,title? → 'shared'\|'copied'\|'canceled'\|'failed' |
 | ShareButton | src/components/share-button.tsx | 공유 버튼 (shareResult 호출 + 복사 피드백) | text,label? → 버튼 |
+| playCardPick / playCardReveal / isSoundEnabled / setSoundEnabled | src/lib/sound.ts | Web Audio 합성 효과음 (종소리·휙·팡파레) + 음소거 설정 (키 sajoo:sound) | → void / boolean |
+| SoundToggle | src/components/sound-toggle.tsx | 효과음 켜기/끄기 토글 버튼 | → 버튼 |
 
 ## 콘텐츠·풀이문
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |

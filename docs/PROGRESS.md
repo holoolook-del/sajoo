@@ -14,6 +14,12 @@
 - 증거: vitest 41/41(신규 2건 — 캐릭터 필드·운세 지수 범위), e2e 24/24, e2e:preview AC7 통과, verify 통과, audit:code 클린
 - 배운 점: 공유 텍스트에 이름·캐릭터만 넣고 생년월일시는 절대 제외 — URL도 앱 루트만
 
+### 효과음 (T9 후속)
+- 한 일: Web Audio API 합성 효과음(파일·비용·라이선스 0) — 카드 선택 종소리(playCardPick), 공개 휙+오음계 팡파레(playCardReveal), AudioContext는 첫 클릭 제스처 안에서 lazy 생성해 자동재생 정책 회피. sajoo:sound 키로 음소거 유지, SoundToggle을 홈·카드 헤더에 배치
+- 바꾼 파일: src/lib/sound.ts(신규), src/lib/sound.test.ts(신규), src/components/sound-toggle.tsx(신규), src/features/card/card-scene.tsx, src/pages/{card,home}.tsx
+- 새 공용 코드: playCardPick, playCardReveal, isSoundEnabled, setSoundEnabled, SoundToggle (CODE_INDEX 등록)
+- 증거: vitest 42/42, e2e 24/24, verify 통과, audit 클린
+
 ### 배포·홈 리디자인 (커밋 a8ebc20·968b2ef)
 - pnpm/action-setup version 필드가 packageManager와 충돌 → 워크플로우에서 제거. Pages 활성화·Actions 권한은 GitHub API로 직접 설정 완료
 - 홈 리디자인: 히어로 배너 + 카드 CTA + 일러스트 메뉴 그리드, 메뉴 썸네일 6장 + 온보딩 배너 1장 생성(텍스트 누출 2장은 소재 바꿔 재생성)

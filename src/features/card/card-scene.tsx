@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import type { CardDef } from '../../content/cards.ts';
+import { playCardPick, playCardReveal } from '../../lib/sound.ts';
 import { CardBack, CardFront, GRADE_COLOR, cardElementColor } from './card-frame.tsx';
 
 const FAN_COUNT = 7;
@@ -66,11 +67,13 @@ export function CardDrawScene({
       const t = setTimeout(() => setPhase('reveal'), reduce ? 100 : 650);
       return () => clearTimeout(t);
     }
+    if (phase === 'reveal') playCardReveal();
   }, [phase, reduce]);
 
   function pick(i: number) {
     if (chosen !== null) return;
     setChosen(i);
+    playCardPick();
     onPick();
     setPhase('chosen');
   }

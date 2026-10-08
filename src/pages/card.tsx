@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getCardById } from '../content/cards.ts';
 import { CardFront, GRADE_COLOR } from '../features/card/card-frame.tsx';
 import { ShareButton } from '../components/share-button.tsx';
+import { SoundToggle } from '../components/sound-toggle.tsx';
 
 import { dailyCard, drawToday, todaysDraw } from '../features/card/draw.ts';
 import { todayKST } from '../lib/date.ts';
@@ -26,7 +27,10 @@ export function CardPage() {
     return (
       <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
         <header className="pt-6">
-          <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+          <div className="flex items-center justify-between">
+            <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+            <SoundToggle />
+          </div>
           <h1 className="mt-2 text-2xl font-bold text-gold">오늘의 운세카드</h1>
           <p className="mt-1 text-sm text-hanji/60">{today} · 오늘 뽑은 카드</p>
         </header>
@@ -63,7 +67,10 @@ export function CardPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
       <header className="pt-6">
-        <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+        <div className="flex items-center justify-between">
+          <Link to="/" className="text-sm text-hanji/50">← 홈</Link>
+          <SoundToggle />
+        </div>
         <h1 className="mt-2 text-2xl font-bold text-gold">오늘의 운세카드</h1>
         <p className="mt-1 text-sm text-hanji/60">{today}</p>
       </header>
