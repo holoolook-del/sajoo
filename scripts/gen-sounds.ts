@@ -148,4 +148,22 @@ console.log('효과음 합성 중…');
   writeWav('reveal.wav', buf);
 }
 
+// knock.wav — 목탁 "톡": 속 빈 나무 공명(600Hz 본음+배음, 매우 빠른 감쇠) + 타격 클릭
+{
+  const buf = new Float32Array(sec(0.5));
+  const start = 0;
+  const n = sec(0.35);
+  for (let i = 0; i < n; i++) {
+    const t = i / SR;
+    const env = Math.exp(-t / 0.045); // 목탁은 여운이 짧다
+    const v =
+      Math.sin(TAU * 620 * t) +
+      0.45 * Math.sin(TAU * 620 * 2.4 * t) + // 비정수 배음 — 나무통 울림
+      0.2 * Math.sin(TAU * 620 * 4.1 * t);
+    buf[start + i] = 0.7 * env * v;
+  }
+  noise(buf, 0, 0.03, 0.5, true); // 막대가 닿는 클릭
+  writeWav('knock.wav', buf);
+}
+
 console.log('완료 — public/assets/audio/');

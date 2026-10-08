@@ -7,6 +7,7 @@ import { FortunePage } from './pages/fortune.tsx';
 import { HistoryPage } from './pages/history.tsx';
 import { HomePage } from './pages/home.tsx';
 import { LuckPage } from './pages/luck.tsx';
+import { MoktakPage } from './pages/moktak.tsx';
 import { OnboardingPage } from './pages/onboarding.tsx';
 import { SajuPage } from './pages/saju.tsx';
 
@@ -57,6 +58,14 @@ export function App() {
           element={
             <RequireProfile>
               <HistoryPage />
+            </RequireProfile>
+          }
+        />
+        <Route
+          path="/moktak"
+          element={
+            <RequireProfile>
+              <MoktakPage />
             </RequireProfile>
           }
         />

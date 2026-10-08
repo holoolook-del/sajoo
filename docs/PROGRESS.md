@@ -127,3 +127,17 @@
 
 ## 발견 사항 (지금 고치지 않고 적어 둔 것)
 - `manseryeok` 라이브러리는 T1에서 설치 후 실제 API(함수명·대운 계산 시그니처) 검증 필요. 문서 기준으로는 사주팔자·십신·대운·공망·야자시 지원
+
+## T10 — 심심풀이 섹션 + 공덕 목탁 + 카드 사운드 버그 수정 (완료)
+
+### 한 일
+- `src/pages/moktak.tsx` — 공덕 목탁 미니앱: 탭하면 노크음+스쿼시+물결 파티클, 오늘/누적 카운트(localStorage `sajoo:moktak`, 자정 리셋), 공덕 마일스톤 문구(7/21/54/108/540/1080), 공유 버튼, ←홈 링크
+- `src/lib/sound.ts` — 카드 사운드 버그 수정: `primeOthers`가 같은 제스처 안에서 곧바로 재생될 charge까지 무음 프라임 → muted 재생 중 프라임의 pause가 진짜 재생을 잘라 충전음이 안 들리던 문제. `prime(['reveal'])`로 '나중에 자동 재생될 것'만 프라임. `knock` 사운드 추가
+- `scripts/gen-sounds.ts` — knock.wav 합성(620Hz 속빈나무 공명+클릭, 0.5s)
+- `scripts/gen-images.ts` — illust/moktak(본체), illust/menu-moktak, illust/menu-necut 생성 추가(3장)
+- `home.tsx` — 하단에 '심심풀이' 섹션(공덕 목탁 내부 링크 + 민화네컷 외부 링크)
+- 라우트 `/moktak` (RequireProfile)
+- e2e/moktak.spec.ts 3건 — 섹션 표시/탭 카운트/새로고침 유지
+
+### 검증
+- vitest 42/42, e2e 30/30, lint 경고 2(기존), build+SW 49개

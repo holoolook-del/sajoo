@@ -127,6 +127,24 @@ const jobs: Job[] = [
     mp: '0.25',
   },
   {
+    file: 'illust/menu-moktak.webp',
+    prompt: `a round wooden fish drum (moktak) resting on a silk cushion, warm polished wood with carved scales, golden glow, temple stillness${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/menu-necut.webp',
+    prompt: `a vertical strip of four small framed folk paintings hanging on a dark wall, minhwa tiger and peony motifs in the frames, warm lantern light${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/moktak.webp',
+    prompt: `a large round wooden fish drum (moktak) seen from the front, centered on a round embroidered silk cushion, polished warm brown wood with carved fish scales and eyes, wooden striker stick resting beside it, dark temple night background, warm candle glow from below${STYLE}`,
+    aspect: '1:1',
+    mp: '1',
+  },
+  {
     file: 'illust/onboarding.webp',
     prompt: `a mystical night scene with a glowing eight-trigram cosmic wheel floating above clouds and a distant mountain, welcoming and wondrous${STYLE}`,
     aspect: '4:3',

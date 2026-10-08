@@ -64,7 +64,7 @@ export function HomePage() {
         <span className="shrink-0 text-gold/60 transition-transform group-hover:translate-x-1">→</span>
       </Link>
 
-      <nav className="grid grid-cols-2 gap-3">
+      <nav className="grid grid-cols-2 gap-3" aria-label="운세 메뉴">
         {MENUS.map((m) => (
           <Link
             key={m.to}
@@ -86,6 +86,53 @@ export function HomePage() {
           </Link>
         ))}
       </nav>
+
+      {/* 심심풀이 — 가볍게 노는 미니 기능들 */}
+      <section aria-label="심심풀이">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="h-px flex-1 bg-gold/20" />
+          <h2 className="text-xs font-bold tracking-widest text-gold/70">심심풀이</h2>
+          <span className="h-px flex-1 bg-gold/20" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Link
+            to="/moktak"
+            className="group overflow-hidden rounded-xl border border-gold/30 bg-night-soft transition-colors hover:border-gold/60"
+          >
+            <div className="relative">
+              <img
+                src={`${A}assets/illust/menu-moktak.webp`}
+                alt=""
+                className="h-24 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-night/60 to-transparent" />
+            </div>
+            <div className="p-3">
+              <p className="text-sm font-bold text-hanji">공덕 목탁</p>
+              <p className="mt-0.5 text-[11px] leading-4 text-hanji/50">두드릴수록 번뇌가 사라지는 소리</p>
+            </div>
+          </Link>
+          <a
+            href="https://holoolook-del.github.io/necut/"
+            target="_blank"
+            rel="noreferrer"
+            className="group overflow-hidden rounded-xl border border-gold/30 bg-night-soft transition-colors hover:border-gold/60"
+          >
+            <div className="relative">
+              <img
+                src={`${A}assets/illust/menu-necut.webp`}
+                alt=""
+                className="h-24 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-night/60 to-transparent" />
+            </div>
+            <div className="p-3">
+              <p className="text-sm font-bold text-hanji">민화네컷</p>
+              <p className="mt-0.5 text-[11px] leading-4 text-hanji/50">내 사진이 민화가 되는 네 컷</p>
+            </div>
+          </a>
+        </div>
+      </section>
 
       <footer className="mt-1 text-center">
         <Link to="/onboarding" className="text-xs text-hanji/40 underline">
