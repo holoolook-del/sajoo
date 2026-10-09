@@ -18,6 +18,14 @@ function writeRecord(key: string, value: unknown): void {
 export function saveProfile(profile: Profile): void {
   writeRecord('profile', profile);
 }
+
+/** 테스트 결과 저장 — 마지막으로 본 타입 코드만 (sajoo:test:<id>) */
+export function saveTestResult(quizId: string, code: string): void {
+  writeRecord(`test:${quizId}`, code);
+}
+export function loadTestResult(quizId: string): string | null {
+  return readRecord<string>(`test:${quizId}`);
+}
 export function loadProfile(): Profile | null {
   return readRecord<Profile>('profile');
 }
