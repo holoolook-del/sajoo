@@ -346,3 +346,13 @@
 ### 검증
 - verify 통과 (typecheck·lint·vitest 55/55·build+SW 61 프리캐시)
 - e2e test.spec 8/8
+
+## T22b — 문항 수 전문 검사 수준으로 추가 확장
+
+### 한 일
+- mbti 32→40(축당 10), job/love/animal/color 18→24(유형·축당 8), stress 15→20 — 임계값 5/10/15로 재조정
+- QuizDef.neutral — 매 문항에 '둘 다 아니다·잘 모르겠다' 선택지(w=N, 득점 없음) 추가. 억지 양택으로 생기는 노이즈 제거, 절반 이상 N이면 결과에 자료 부족 경고
+- 인트로 소요시간을 문항 수 기반으로 자동 계산
+
+### 검증
+- verify 통과 (vitest 55/55), e2e test.spec 8/8

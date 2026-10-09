@@ -29,30 +29,30 @@ function countWeight(quiz: (typeof QUIZZES)[string]) {
 }
 
 describe('문항 구조 — 전문 검사 수준의 균형', () => {
-  it('모든 테스트가 15문 이상 — 한두 문항 오차가 결과를 뒤집지 않는다', () => {
+  it('모든 테스트가 20문 이상 — 한두 문항 오차가 결과를 뒤집지 않는다', () => {
     for (const q of Object.values(QUIZZES)) {
-      expect(q.questions.length, q.id).toBeGreaterThanOrEqual(15);
+      expect(q.questions.length, q.id).toBeGreaterThanOrEqual(20);
     }
   });
 
-  it('MBTI — 축당 8문으로 각 극이 균등하게 배정된다', () => {
+  it('MBTI — 축당 10문으로 각 극이 균등하게 배정된다', () => {
     const { counts } = countWeight(mbti);
     for (const k of ['E', 'I', 'S', 'N', 'T', 'F', 'J', 'P']) {
-      expect(counts[k], k).toBe(8);
+      expect(counts[k], k).toBe(10);
     }
   });
 
-  it('연애·동물 — 축당 6문으로 각 유형이 균등하게 배정된다', () => {
+  it('연애·동물 — 축당 8문으로 각 유형이 균등하게 배정된다', () => {
     for (const q of [love, animal]) {
       const { counts } = countWeight(q);
-      for (const v of Object.values(counts)) expect(v, q.id).toBe(6);
+      for (const v of Object.values(counts)) expect(v, q.id).toBe(8);
     }
   });
 
-  it('직업·색깔 — 유형당 6문 슬롯이 균등하다', () => {
+  it('직업·색깔 — 유형당 8문 슬롯이 균등하다', () => {
     for (const q of [job, color]) {
       const { counts } = countWeight(q);
-      for (const v of Object.values(counts)) expect(v, q.id).toBe(6);
+      for (const v of Object.values(counts)) expect(v, q.id).toBe(8);
     }
   });
 
@@ -91,18 +91,18 @@ describe('채점 안정성', () => {
     const s = tally(mbti, true);
     for (const [a, b] of [['E', 'I'], ['S', 'N'], ['T', 'F'], ['J', 'P']] as const) {
       const gap = Math.abs((s[a] ?? 0) - (s[b] ?? 0));
-      expect(gap, `${a}/${b}`).toBeLessThanOrEqual(4); // 8문 중 극단(8:0)이 나오면 편향
+      expect(gap, `${a}/${b}`).toBeLessThanOrEqual(5); // 10문 중 극단(10:0)이 나오면 편향
     }
   });
 
   it('경계선 판정 — 반반인 축만 borderlineAxes로 잡힌다', () => {
-    const weak = borderlineAxes(mbti.bars!, { E: 4, I: 4, S: 7, N: 1, T: 6, F: 2, J: 8, P: 0 });
+    const weak = borderlineAxes(mbti.bars!, { E: 5, I: 5, S: 8, N: 2, T: 7, F: 3, J: 9, P: 1 });
     expect(weak).toEqual(['에너지 방향']);
   });
 
   it('MBTI — 한 문항만 바뀌어도 우세한 축의 결과는 유지된다', () => {
-    // E 7:1, S 6:2, T 8:0, J 7:1 — 어느 한 문항을 반대로 바꿔도 타입 불변
-    const s = { E: 7, I: 1, S: 6, N: 2, T: 8, F: 0, J: 7, P: 1 };
+    // E 8:2, S 7:3, T 10:0, J 8:2 — 어느 한 문항을 반대로 바꿔도 타입 불변
+    const s = { E: 8, I: 2, S: 7, N: 3, T: 10, F: 0, J: 8, P: 2 };
     const before = mbti.resolve(s);
     for (const [a, b] of [['E', 'I'], ['S', 'N'], ['T', 'F'], ['J', 'P']] as const) {
       const flipped = { ...s, [a]: s[a] - 1, [b]: s[b] + 1 };
@@ -111,19 +111,19 @@ describe('채점 안정성', () => {
   });
 
   it('확신도 — 완전 반반이면 낮음, 뚜렷하면 높음', () => {
-    expect(mbti.confidence!({ E: 4, I: 4, S: 4, N: 4, T: 4, F: 4, J: 4, P: 4 }).level).toBe('low');
-    expect(mbti.confidence!({ E: 8, I: 0, S: 8, N: 0, T: 8, F: 0, J: 8, P: 0 }).level).toBe('high');
-    expect(job.confidence!({ R: 3, I: 3, A: 3, S: 3, E: 3, C: 3 }).level).toBe('low');
-    expect(job.confidence!({ R: 6, I: 0, A: 0, S: 0, E: 0, C: 0 }).level).toBe('high');
-    expect(stress.confidence!({ S: 4, O: 11 }).level).toBe('mid'); // 경계선
-    expect(stress.confidence!({ S: 15, O: 0 }).level).toBe('high');
+    expect(mbti.confidence!({ E: 5, I: 5, S: 5, N: 5, T: 5, F: 5, J: 5, P: 5 }).level).toBe('low');
+    expect(mbti.confidence!({ E: 10, I: 0, S: 10, N: 0, T: 10, F: 0, J: 10, P: 0 }).level).toBe('high');
+    expect(job.confidence!({ R: 4, I: 4, A: 4, S: 4, E: 4, C: 4 }).level).toBe('low');
+    expect(job.confidence!({ R: 8, I: 0, A: 0, S: 0, E: 0, C: 0 }).level).toBe('high');
+    expect(stress.confidence!({ S: 5, O: 15 }).level).toBe('mid'); // 경계선
+    expect(stress.confidence!({ S: 20, O: 0 }).level).toBe('high');
   });
 
-  it('스트레스 — 15문 기준으로 단계가 매겨지고 경계값 근처가 구분된다', () => {
+  it('스트레스 — 20문 기준으로 단계가 매겨지고 경계값 근처가 구분된다', () => {
+    expect(stress.resolve({ S: 20 })).toBe('한계');
     expect(stress.resolve({ S: 15 })).toBe('한계');
-    expect(stress.resolve({ S: 12 })).toBe('한계');
-    expect(stress.resolve({ S: 8 })).toBe('주의');
-    expect(stress.resolve({ S: 5 })).toBe('보통');
+    expect(stress.resolve({ S: 10 })).toBe('주의');
+    expect(stress.resolve({ S: 6 })).toBe('보통');
     expect(stress.resolve({ S: 0 })).toBe('평온');
   });
 

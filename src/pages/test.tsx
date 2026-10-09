@@ -97,9 +97,10 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
   const step = answers.length;
   const q = quiz.questions[step];
 
+  // 'N'(모르겠다)은 어느 축에도 득점하지 않는다 — 억지 양택 노이즈 제거용
   const score = useMemo(() => {
     const s: Record<string, number> = {};
-    for (const w of answers) s[w] = (s[w] ?? 0) + 1;
+    for (const w of answers) if (w !== 'N') s[w] = (s[w] ?? 0) + 1;
     return s;
   }, [answers]);
 
@@ -138,7 +139,7 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
   }
 
   function scoreOf(list: string[]) {
-    return list.reduce<Record<string, number>>((s, k) => ((s[k] = (s[k] ?? 0) + 1), s), {});
+    return list.reduce<Record<string, number>>((s, k) => (k === 'N' ? s : ((s[k] = (s[k] ?? 0) + 1), s)), {});
   }
 
   function reset() {
@@ -176,7 +177,7 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
             className="mx-auto h-36 w-full rounded-lg object-cover"
           />
           <p className="mt-4 text-sm leading-6 text-hanji/80">
-            질문 {quiz.questions.length}개 · 약 1분
+            질문 {quiz.questions.length}개 · 약 {Math.ceil(quiz.questions.length / 20)}분
             <br />
             정답은 없어요 — 솔직하게 골라주세요
           </p>
@@ -244,6 +245,16 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
                 {c.label}
               </button>
             ))}
+            {quiz.neutral && (
+              <button
+                type="button"
+                data-w="N"
+                onClick={() => choose('N')}
+                className="rounded-xl border border-hanji/15 px-5 py-2.5 text-left text-xs text-hanji/40 transition-colors hover:border-hanji/30 hover:text-hanji/60 active:scale-[0.98]"
+              >
+                {quiz.neutral}
+              </button>
+            )}
           </motion.section>
         </>
       )}
@@ -279,6 +290,12 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
                 </p>
                 <p className="mt-0.5 text-[11px] leading-4 text-hanji/60">{conf.text}</p>
               </div>
+            )}
+            {/* 절반 이상 '모르겠다'면 자료 부족 — 정직하게 경고 */}
+            {Object.values(score).reduce((a, b) => a + b, 0) < quiz.questions.length * 0.5 && (
+              <p className="mt-3 text-[11px] leading-4 text-hanji/45">
+                '모르겠다' 답변이 많아 결과 정확도가 낮습니다 — 솔직한 선택으로 다시보면 더 정확해요
+              </p>
             )}
             <div className="mt-4 flex flex-wrap justify-center gap-1.5">
               {result.tags.map((t) => (
