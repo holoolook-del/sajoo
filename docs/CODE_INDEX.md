@@ -60,6 +60,8 @@
 | shareResult | src/lib/share.ts | 결과 공유 — navigator.share(카톡 포함 OS 시트) → 미지원·실패 시 클립보드 폴백 | text,title? → 'shared'\|'copied'\|'canceled'\|'failed' |
 | ShareButton | src/components/share-button.tsx | 공유 버튼 (shareResult 호출 + 복사 피드백) | text,label? → 버튼 |
 | ShareImageButton | src/components/share-image-button.tsx | 결과 이미지 생성→파일 공유(미지원 시 PNG 저장 폴백) 버튼 | ShareImageData → 버튼 |
+| TestPage | src/pages/test.tsx | 설문형 테스트 공용 러너 (인트로→진행바→양택일→결과+공유, 프로필 불필요). 라우트 /test/:id | — |
+| QUIZZES / QuizDef | src/content/tests.ts | 테스트 콘텐츠 DB — MBTI 12문→16타입, 직업성향 RIASEC 12문→6형+추천직업 | score → code → QuizResultType |
 | LotsPage | src/pages/lots.tsx | 제비뽑기 — 인원·당첨 수 설정→섞인 제비를 탭으로 공개·결과 공유 (미저장). 라우트 /lots | — |
 | playCardPick / playCardCharge / playCardReveal / playKnock / isSoundEnabled / setSoundEnabled / setBgm / syncBgm | src/lib/sound.ts | WAV 효과음·배경음악 재생 (HTMLAudioElement, 인앱 브라우저 대응 제스처 언락 — 나중에 자동 재생될 사운드만 프라임; BGM은 pointerdown 재시도) + 음소거 설정 (키 sajoo:sound) | track? → void |
 | MoktakPage | src/pages/moktak.tsx | 공덕 목탁 미니앱 — 탭 카운터(오늘/누적, 키 sajoo:moktak)·마일스톤 문구·공유. 라우트 /moktak | — |

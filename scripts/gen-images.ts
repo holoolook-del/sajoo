@@ -140,6 +140,18 @@ const jobs: Job[] = [
     mp: '0.25',
   },
   {
+    file: 'illust/menu-mbti.webp',
+    prompt: `four glowing Korean constellation letter cards floating in a spiral above an open palm, personality quiz concept, gold and deep blue, mystical${STYLE}`,
+    aspect: '16:9',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/menu-job.webp',
+    prompt: `a standing traditional Korean scholar choosing between several glowing paths fanning out ahead under moonlight, career crossroads concept${STYLE}`,
+    aspect: '16:9',
+    mp: '0.25',
+  },
+  {
     file: 'illust/menu-lots.webp',
     prompt: `several small folded paper fortune lots tied with red string, scattered on dark silk beside an open lot showing a golden mark, warm candlelight, playful${STYLE}`,
     aspect: '16:9',
