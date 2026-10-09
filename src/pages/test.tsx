@@ -108,6 +108,9 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
   const result = code ? quiz.types[code] : null;
   const secondType = second ? quiz.types[second] : null;
   const accent = result?.accent ?? '#e8c766';
+  const conf = done && quiz.confidence ? quiz.confidence(score) : null;
+  const CONF_COLOR = { high: '#6ec4a0', mid: '#e8c766', low: '#e0705a' } as const;
+  const CONF_LABEL = { high: '높음', mid: '보통', low: '낮음' } as const;
 
   const shareText = useMemo(() => {
     if (!result) return '';
@@ -234,6 +237,7 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
               <button
                 key={c.label}
                 type="button"
+                data-w={c.w}
                 onClick={() => choose(c.w)}
                 className="rounded-xl border border-gold/30 bg-night-soft px-5 py-4 text-left text-sm font-bold text-hanji transition-colors hover:border-gold-bright hover:bg-gold/10 active:scale-[0.98]"
               >
@@ -266,6 +270,16 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
               <p className="mt-1 text-xs text-hanji/50">보조 유형: {secondType.name}</p>
             )}
             <p className="mt-3 text-sm leading-6 text-hanji/80">{result.desc}</p>
+            {conf && (
+              <div className="mx-auto mt-3 max-w-xs rounded-lg border px-3 py-2 text-left"
+                style={{ borderColor: `${CONF_COLOR[conf.level]}55` }}
+              >
+                <p className="text-[11px] font-bold" style={{ color: CONF_COLOR[conf.level] }}>
+                  결과 확신도 {CONF_LABEL[conf.level]}
+                </p>
+                <p className="mt-0.5 text-[11px] leading-4 text-hanji/60">{conf.text}</p>
+              </div>
+            )}
             <div className="mt-4 flex flex-wrap justify-center gap-1.5">
               {result.tags.map((t) => (
                 <span
@@ -313,7 +327,14 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
                           <div className="h-full rounded-full bg-gold" style={{ width: `${(aN / maxBar) * 100}%` }} />
                         </div>
                       )}
-                      {b.b && <p className="mt-0.5 text-[10px] text-hanji/40">{b.label}</p>}
+                      {b.b && (
+                        <p className="mt-0.5 text-[10px] text-hanji/40">
+                          {b.label}
+                          {Math.abs(aN - bN) <= 1 && (
+                            <span className="text-gold-bright"> · 거의 비슷한 축이에요</span>
+                          )}
+                        </p>
+                      )}
                     </li>
                   );
                 })}
