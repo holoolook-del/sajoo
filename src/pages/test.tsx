@@ -432,6 +432,8 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
                 title: result.name,
                 lines: [result.desc, result.tags.join(' · ')],
               }}
+              text={shareText}
+              url={`${location.origin}${A}#/test/${quiz.id}`}
             />
           </div>
           <button

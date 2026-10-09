@@ -57,9 +57,9 @@
 | PillarTable | src/features/saju/pillar-table.tsx | 만세력식 팔자표 (십신·천간·지지·주명 행, 오행색) |
 | useSaju | src/features/saju/use-saju.ts | 프로필→사주 공용 훅 (페이지 진입점) |
 | StateView | src/components/state-view.tsx | 에러/빈 상태 공용 화면 |
-| shareResult | src/lib/share.ts | 결과 공유 — navigator.share(카톡 포함 OS 시트) → 미지원·실패 시 클립보드 폴백 | text,title? → 'shared'\|'copied'\|'canceled'\|'failed' |
+| APP_URL / shareResult | src/lib/share.ts | 결과 공유 — navigator.share(카톡 포함 OS 시트) → 미지원·실패 시 클립보드 폴백 | text,title? → 'shared'\|'copied'\|'canceled'\|'failed' |
 | ShareButton | src/components/share-button.tsx | 공유 버튼 (shareResult 호출 + 복사 피드백) | text,label? → 버튼 |
-| ShareImageButton | src/components/share-image-button.tsx | 결과 이미지 생성→파일 공유(미지원 시 PNG 저장 폴백) 버튼 | ShareImageData → 버튼 |
+| ShareImageButton | src/components/share-image-button.tsx | 결과 이미지+텍스트+링크를 한 번에 공유(파일 공유 미지원 시 PNG 저장 폴백) 버튼 | data,text?,url? → 버튼 |
 | TestHubPage | src/pages/test.tsx | 심리테스트 허브 — QUIZZES 전체 목록(썸네일·문항수·지난결과 칩), 프로필 불필요. 라우트 /test | — |
 | TestPage | src/pages/test.tsx | 설문형 테스트 공용 러너 (인트로→진행바→양택일·이전문항→결과+공유, 프로필 불필요). 라우트 /test/:id | — |
 | QUIZZES / QuizDef | src/content/tests.ts | 테스트 콘텐츠 DB — mbti(축당10문 40문→16타입)·job(RIASEC 24문→6형+보조)·love·animal(축당8문 24문→6유형)·color(색당8문 24문)·stress(20문→4단계 지수). QuizDef.neutral로 문항별 "모르겠다" 선택지(N, 득점 없음). 축별 문항 균등·선택지 방향 혼합(위치 편향 제거). 유형은 strong·scenes·note 포함, QuizDef.confidence로 결과 확신도 산출 | score → code → QuizResultType |

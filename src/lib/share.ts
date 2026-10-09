@@ -1,4 +1,4 @@
-const APP_URL = () => `${location.origin}${import.meta.env.BASE_URL}`;
+export const APP_URL = () => `${location.origin}${import.meta.env.BASE_URL}`;
 
 /** 결과 공유 — Web Share API(카톡 포함 OS 공유 시트) → 미지원·실패 시 클립보드 복사 */
 export async function shareResult(

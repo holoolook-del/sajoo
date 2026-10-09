@@ -22,6 +22,7 @@ export function SajuPage() {
 
   const { pillars, dayMaster, lunar, hourIncluded, voidBranches } = saju;
   const maxEl = Math.max(...reading.elementCounts.map((e) => e.count), 1);
+  const charShareText = `${profile?.name ?? '나'}의 사주 캐릭터는 「${reading.dayMaster.title}」(${dayMaster.korean}${dayMaster.hanja}) — ${reading.dayMaster.keywords.map((k) => '#' + k).join(' ')}\n너의 사주 캐릭터도 확인해봐!`;
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
@@ -80,7 +81,7 @@ export function SajuPage() {
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           <ShareButton
             label="내 사주 캐릭터 공유하기"
-            text={`${profile?.name ?? '나'}의 사주 캐릭터는 「${reading.dayMaster.title}」(${dayMaster.korean}${dayMaster.hanja}) — ${reading.dayMaster.keywords.map((k) => '#' + k).join(' ')}\n너의 사주 캐릭터도 확인해봐!`}
+            text={charShareText}
           />
           <ShareImageButton
             data={{
@@ -92,6 +93,7 @@ export function SajuPage() {
               keywords: reading.dayMaster.keywords,
               lines: [],
             }}
+            text={charShareText}
           />
         </div>
       </section>

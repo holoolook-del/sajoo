@@ -356,3 +356,14 @@
 
 ### 검증
 - verify 통과 (vitest 55/55), e2e test.spec 8/8
+
+## T23 — 이미지+텍스트+링크 한 번에 공유
+
+### 한 일
+- shareImageResult에 text/url 인자 추가 — navigator.share({files, text, url})로 이미지와 링크를 동시 전송(카톡 등에서 이미지+링크가 같이 도착)
+- ShareImageButton에 text/url props — 미지정 시 카드 데이터로 텍스트 자동 생성 + APP_URL 기본 링크
+- test/compat/saju/card 4곳 모두 기존 공유 텍스트를 이미지 공유에도 탑재. 테스트는 딥링크(/test/:id) 유지
+- 버튼 라벨을「이미지+링크로 공유하기」로 변경
+
+### 검증
+- verify 통과 (vitest 55/55, build+SW 61 프리캐시)

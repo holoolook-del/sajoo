@@ -52,6 +52,10 @@ export function CompatPage() {
     !inviteMode && profile && saju
       ? `${location.origin}${import.meta.env.BASE_URL}#/compat?with=${encodeInvite(profile.name, saju)}`
       : null;
+  const resultShareText =
+    result && result !== 'error'
+      ? `${nameA} × ${nameB} 궁합 ${result.score}점 「${result.grade}」\n${result.summary}\n너도 사주 궁합 해봐!`
+      : '';
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
@@ -120,7 +124,7 @@ export function CompatPage() {
           <div className="flex flex-wrap justify-center gap-2">
             <ShareButton
               label="궁합 결과 공유하기"
-              text={`${nameA} × ${nameB} 궁합 ${result.score}점 「${result.grade}」\n${result.summary}\n너도 사주 궁합 해봐!`}
+              text={resultShareText}
             />
             <ShareImageButton
               data={{
@@ -131,6 +135,7 @@ export function CompatPage() {
                 grade: result.grade,
                 lines: [result.summary],
               }}
+              text={resultShareText}
             />
           </div>
 

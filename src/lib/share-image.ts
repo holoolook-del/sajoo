@@ -212,13 +212,23 @@ async function render(data: ShareCardData): Promise<Blob> {
   );
 }
 
-/** 결과 이미지를 생성해 공유한다. 파일 공유 미지원이면 PNG 저장. */
-export async function shareImageResult(data: ShareCardData): Promise<'shared' | 'saved' | 'failed'> {
+/**
+ * 결과 이미지를 생성해 공유한다. 파일 공유 미지원이면 PNG 저장.
+ * text·url을 넘기면 이미지와 함께 한 번에 공유된다 (카톡 등).
+ */
+export async function shareImageResult(
+  data: ShareCardData,
+  extra?: { text?: string; url?: string },
+): Promise<'shared' | 'saved' | 'failed'> {
   try {
     const blob = await render(data);
     const file = new File([blob], 'saju-result.png', { type: 'image/png' });
     if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file] });
+      await navigator.share({
+        files: [file],
+        ...(extra?.text ? { text: extra.text } : {}),
+        ...(extra?.url ? { url: extra.url } : {}),
+      });
       return 'shared';
     }
     const url = URL.createObjectURL(blob);

@@ -26,6 +26,9 @@ export function CardPage() {
   // 오늘 이미 뽑은 경우: 기록된 카드를 다시 보여준다 (AC6)
   if (drawn) {
     const card = getCardById(drawn.cardId);
+    const cardShareText = card
+      ? `${today} 내가 뽑은 운세카드는 「${card.name} ${card.hanja}」(${card.grade})\n${card.message}\n너도 오늘의 카드를 뽑아봐!`
+      : '';
     return (
       <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
         <header className="pt-6">
@@ -54,7 +57,7 @@ export function CardPage() {
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <ShareButton
                 label="오늘의 카드 공유하기"
-                text={`${today} 내가 뽑은 운세카드는 「${card.name} ${card.hanja}」(${card.grade})\n${card.message}\n너도 오늘의 카드를 뽑아봐!`}
+                text={cardShareText}
               />
               <ShareImageButton
                 data={{
@@ -65,6 +68,7 @@ export function CardPage() {
                   accent: ELEMENT_COLOR[card.element as ElementKey],
                   lines: [card.message],
                 }}
+                text={cardShareText}
               />
             </div>
             <p className="mt-3 text-xs text-hanji/40">카드는 매일 자정(한국 시간)에 새로 뽑을 수 있습니다.</p>
