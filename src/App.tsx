@@ -14,7 +14,7 @@ import { MoktakPage } from './pages/moktak.tsx';
 import { OnboardingPage } from './pages/onboarding.tsx';
 import { SajuPage } from './pages/saju.tsx';
 import { SleepPage } from './pages/sleep.tsx';
-import { TestPage } from './pages/test.tsx';
+import { TestHubPage, TestPage } from './pages/test.tsx';
 
 function RequireProfile({ children }: { children: ReactNode }) {
   return hasProfile() ? children : <Navigate to="/onboarding" replace />;
@@ -65,6 +65,7 @@ export function App() {
           element={<CompatPage />}
         />
         {/* 테스트는 프로필 없이도 가능 — 공유 링크로 친구가 바로 들어오는 입구 */}
+        <Route path="/test" element={<TestHubPage />} />
         <Route path="/test/:id" element={<TestPage />} />
         <Route
           path="/lots"

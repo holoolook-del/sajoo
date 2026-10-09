@@ -9,6 +9,66 @@ import { QUIZZES, type QuizDef } from '../content/tests.ts';
 import { playCardPick, playCardReveal } from '../lib/sound.ts';
 import { hasProfile, loadTestResult, saveTestResult } from '../lib/storage.ts';
 
+const A = import.meta.env.BASE_URL;
+
+/**
+ * 심리테스트 허브 — /test. 목록에서 고르는 카드 리스트.
+ * 프로필 없이 진입 가능 — 공유 링크로 온 친구도 바로 다른 테스트를 고를 수 있다.
+ */
+export function TestHubPage() {
+  const quizzes = Object.values(QUIZZES);
+  return (
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 p-6">
+      <header className="pt-6">
+        <BackHome />
+        <h1 className="mt-2 text-2xl font-bold text-gold">심리테스트</h1>
+        <p className="mt-1 text-sm text-hanji/60">
+          정답 없는 질문들로 만나는 나 — 해보고 친구에게 공유해보세요
+        </p>
+      </header>
+
+      <ul className="flex flex-col gap-3">
+        {quizzes.map((quiz) => {
+          const prev = loadTestResult(quiz.id);
+          const prevType = prev ? quiz.types[prev] : undefined;
+          return (
+            <li key={quiz.id}>
+              <Link
+                to={`/test/${quiz.id}`}
+                className="group flex items-center gap-3 overflow-hidden rounded-xl border border-gold/30 bg-night-soft transition-colors hover:border-gold/60"
+              >
+                <img
+                  src={`${A}assets/illust/${quiz.img}.webp`}
+                  alt=""
+                  className="h-20 w-32 shrink-0 object-cover"
+                />
+                <div className="min-w-0 flex-1 py-3">
+                  <p className="text-sm font-bold text-hanji">{quiz.title}</p>
+                  <p className="mt-0.5 text-[11px] leading-4 text-hanji/50">
+                    {quiz.subtitle} · {quiz.questions.length}문
+                  </p>
+                  {prevType && (
+                    <p className="mt-1 text-[11px] font-bold" style={{ color: prevType.accent ?? '#e8c766' }}>
+                      지난 결과: {prevType.code} {prevType.name}
+                    </p>
+                  )}
+                </div>
+                <span className="shrink-0 pr-3 text-gold/60 transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+
+      <p className="mt-auto pb-2 text-center text-[11px] text-hanji/30">
+        재미로 보는 테스트입니다 — 참고용으로만 봐주세요
+      </p>
+    </main>
+  );
+}
+
 /**
  * 설문형 테스트 공용 페이지 — /test/:id
  * 프로필 없이도 진입 가능 (공유 링크로 친구가 바로 들어오는 입구).
@@ -17,7 +77,7 @@ export function TestPage() {
   const { id } = useParams();
   const quiz = id ? QUIZZES[id] : undefined;
   if (!quiz) {
-    return <StateView message="없는 테스트입니다." linkTo="/" linkLabel="홈으로" />;
+    return <StateView message="없는 테스트입니다." linkTo="/test" linkLabel="테스트 목록" />;
   }
   return <QuizRunner key={quiz.id} quiz={quiz} />;
 }
@@ -80,13 +140,21 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
   }
 
   const maxBar = quiz.bars
-    ? Math.max(...quiz.bars.map((b) => (score[b.a] ?? 0) + (b.b ? (score[b.b] ?? 0) : 0)), 1)
+    ? Math.max(...quiz.bars.map((b) => b.max ?? (score[b.a] ?? 0) + (b.b ? (score[b.b] ?? 0) : 0)), 1)
     : 1;
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 p-6">
       <header className="pt-6">
-        <BackHome />
+        <div className="flex items-center gap-2">
+          <BackHome />
+          <Link
+            to="/test"
+            className="rounded-lg border border-hanji/20 px-3 py-1.5 text-xs font-bold text-hanji/70 transition-colors hover:border-gold/50 hover:text-gold-bright"
+          >
+            모든 테스트
+          </Link>
+        </div>
         <h1 className="mt-2 text-2xl font-bold text-gold">{quiz.title}</h1>
         <p className="mt-1 text-sm text-hanji/60">{quiz.subtitle}</p>
       </header>
@@ -213,7 +281,7 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
                     <li key={b.a}>
                       <div className="flex justify-between text-[11px]">
                         <span className="font-bold text-hanji/80">
-                          {b.a} {b.b ? '' : b.label}
+                          {b.b ? b.a : b.label}
                         </span>
                         {b.b ? (
                           <span className="text-hanji/50">

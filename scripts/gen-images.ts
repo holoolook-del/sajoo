@@ -157,6 +157,37 @@ const jobs: Job[] = [
     aspect: '16:9',
     mp: '0.25',
   },
+  // ── 심리테스트 허브 + 각 테스트 썸네일 ──
+  {
+    file: 'illust/menu-test.webp',
+    prompt: `a fan of glowing oracle cards spread open showing different mysterious symbols — a fox, a flame, a wave, a moon — floating above an open palm at night, curiosity and wonder${STYLE}`,
+    aspect: '16:9',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/test-love.webp',
+    prompt: `a pair of mandarin ducks floating close together on a dark still pond with pink lotus blossoms, reflections in the water, tender romantic mood${STYLE}`,
+    aspect: '16:9',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/test-animal.webp',
+    prompt: `a circle of Korean folk animals gathered under a full moon — a tiger, a fox, a rabbit, a magpie, a cat — each sitting upright facing inward like a council, mystical folk tale mood${STYLE}`,
+    aspect: '16:9',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/test-stress.webp',
+    prompt: `a small empty boat floating on dark water, half the sky calm moonlit and half stormy rain, the divide of weather passing through the middle, emotional weather concept${STYLE}`,
+    aspect: '16:9',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/test-color.webp',
+    prompt: `six long silk ribbons of different colors — vermilion, gold, teal, violet, pine green, silver — swirling and intertwining upward into the dark night sky like aurora${STYLE}`,
+    aspect: '16:9',
+    mp: '0.25',
+  },
   {
     file: 'illust/menu-moktak.webp',
     prompt: `a round wooden fish drum (moktak) resting on a silk cushion, warm polished wood with carved scales, golden glow, temple stillness${STYLE}`,
