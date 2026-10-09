@@ -4,8 +4,8 @@ const APP_URL = () => `${location.origin}${import.meta.env.BASE_URL}`;
 export async function shareResult(
   text: string,
   title = 'SAJOO 사주',
+  url = APP_URL(),
 ): Promise<'shared' | 'copied' | 'canceled' | 'failed'> {
-  const url = APP_URL();
   if (typeof navigator.share === 'function') {
     try {
       await navigator.share({ title, text, url });

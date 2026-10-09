@@ -318,3 +318,14 @@
 
 ### 검증
 - vitest 43/43, e2e test.spec 8/8, build+SW 61
+
+
+## T21 — 테스트 공유·허브 연결 강화
+
+### 한 일
+- 공유 링크를 개별 테스트 딥링크로 교체 — shareResult에 url 파라미터 추가, ShareButton에 url prop
+- 결과 화면에「다음 테스트도 해보세요」추천 카드 — 아직 안 한 테스트 2개 썸네일 링크
+- 허브 헤더에 진행도 칩(n/6 완료)
+
+### 검증
+- typecheck, e2e test.spec 8/8

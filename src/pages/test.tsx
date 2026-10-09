@@ -21,7 +21,12 @@ export function TestHubPage() {
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 p-6">
       <header className="pt-6">
         <BackHome />
-        <h1 className="mt-2 text-2xl font-bold text-gold">심리테스트</h1>
+        <div className="mt-2 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gold">심리테스트</h1>
+          <span className="rounded-full border border-gold/40 px-2.5 py-0.5 text-[11px] font-bold text-gold-bright">
+            {quizzes.filter((q) => loadTestResult(q.id)).length}/{quizzes.length} 완료
+          </span>
+        </div>
         <p className="mt-1 text-sm text-hanji/60">
           정답 없는 질문들로 만나는 나 — 해보고 친구에게 공유해보세요
         </p>
@@ -376,7 +381,11 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
           )}
 
           <div className="flex flex-wrap justify-center gap-2">
-            <ShareButton label="결과 공유하기" text={shareText} />
+            <ShareButton
+              label="결과 공유하기"
+              text={shareText}
+              url={`${location.origin}${A}#/test/${quiz.id}`}
+            />
             <ShareImageButton
               data={{
                 label: quiz.title,
@@ -402,6 +411,41 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
               나도 내 사주 보러 가기
             </Link>
           )}
+
+          {/* 다른 테스트 추천 — 아직 안 한 것 우선 */}
+          {(() => {
+            const others = Object.values(QUIZZES).filter(
+              (q) => q.id !== quiz.id && !loadTestResult(q.id),
+            );
+            const pick = others.length > 0 ? others : Object.values(QUIZZES).filter((q) => q.id !== quiz.id);
+            const next = pick.slice(0, 2);
+            return next.length > 0 ? (
+              <div className="rounded-xl border border-hanji/15 bg-night-soft p-4">
+                <p className="text-xs text-hanji/50">다음 테스트도 해보세요</p>
+                <ul className="mt-2 space-y-2">
+                  {next.map((q) => (
+                    <li key={q.id}>
+                      <Link
+                        to={`/test/${q.id}`}
+                        className="group flex items-center gap-3 rounded-lg border border-transparent px-1 py-1 transition-colors hover:border-gold/40"
+                      >
+                        <img
+                          src={`${A}assets/illust/${q.img}.webp`}
+                          alt=""
+                          className="h-10 w-16 shrink-0 rounded-md object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-hanji">{q.title}</p>
+                          <p className="text-[11px] text-hanji/50">{q.subtitle}</p>
+                        </div>
+                        <span className="shrink-0 text-gold/60 transition-transform group-hover:translate-x-1">→</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null;
+          })()}
         </motion.section>
       )}
 

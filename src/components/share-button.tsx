@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { shareResult } from '../lib/share.ts';
 
 /** 결과 공유 버튼 — 공유 시트를 열거나 클립보드 복사 후 피드백 */
-export function ShareButton({ text, label = '결과 공유하기' }: { text: string; label?: string }) {
+export function ShareButton({ text, label = '결과 공유하기', url }: { text: string; label?: string; url?: string }) {
   const [state, setState] = useState<'idle' | 'copied'>('idle');
   return (
     <button
       type="button"
       onClick={async () => {
-        const r = await shareResult(text);
+        const r = await shareResult(text, undefined, url);
         if (r === 'copied') {
           setState('copied');
           setTimeout(() => setState('idle'), 2000);
