@@ -58,6 +58,13 @@
 | useSaju | src/features/saju/use-saju.ts | 프로필→사주 공용 훅 (페이지 진입점) |
 | StateView | src/components/state-view.tsx | 에러/빈 상태 공용 화면 |
 | APP_URL / shareResult | src/lib/share.ts | 결과 공유 — navigator.share(카톡 포함 OS 시트) → 미지원·실패 시 클립보드 폴백 | text,title? → 'shared'\|'copied'\|'canceled'\|'failed' |
+| FIREBASE_CFG / firebaseReady | src/lib/firebase.ts | Firebase env 플래그 — SDK import 없음(초기 번들 분리). 미설정 시 게시판은 준비 중 화면 | — → bool |
+| watchPosts/watchComments/addPost/addComment/removePost/deviceUid/startPresence/watchPresence | src/features/board/posts.ts | 게시판 데이터 — Firestore posts+comments, RTDB presence. /board 라우트와 함께 지연 로드 | 콜백·텍스트 ↔ 스트림/Promise |
+| checkText/POST_MAX_LEN/COMMENT_MAX_LEN | src/features/board/filter.ts | 게시판 텍스트 검사 — 욕설·링크·도배 차단 | text → {ok,reason?} |
+| boardNickname/saveNickname/genNickname | src/features/board/nickname.ts | 기기별 익명 닉네임 생성·저장(사용자 수정 가능) | — → 닉네임 |
+| BoardPage | src/pages/board.tsx | 자유 게시판 — 글·댓글·접속자 수·'내 결과 자랑' 카드 첨부. 프로필 불필요, 미설정 시 준비 중 화면. 라우트 /board | — |
+| timeAgo | src/lib/date.ts | 상대 시각 — 방금 전/N분 전/N시간 전/M월 D일 | ts → 라벨 |
+| readRecord/writeRecord/boardLastWrite/boardStampWrite | src/lib/storage.ts | record 헬퍼 export + 게시판 도배 방지용 작성 시각 | key → 저장값 |
 | ShareButton | src/components/share-button.tsx | 공유 버튼 (shareResult 호출 + 복사 피드백) | text,label? → 버튼 |
 | ShareImageButton | src/components/share-image-button.tsx | 결과 이미지+텍스트+링크를 한 번에 공유(파일 공유 미지원 시 PNG 저장 폴백) 버튼 | data,text?,url? → 버튼 |
 | TestHubPage | src/pages/test.tsx | 심리테스트 허브 — QUIZZES 전체 목록(썸네일·문항수·지난결과 칩), 프로필 불필요. 라우트 /test | — |

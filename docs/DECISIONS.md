@@ -91,3 +91,27 @@ type FortuneRecord = { v: 1; date: string; iljin: string; grade: Grade; summary:
 - 선택지 방향 혼합: 같은 성향이 항상 첫 번째 선택지에 오던 위치 편향 제거 — 각 가중치가 A/B 양쪽에 배정(색깔은 색당 3:3). "첫 것만 누르는" 답변이 극단 결과를 만들지 않는다.
 - 경계선 결과를 숨기지 않는다: 대립 축 |a-b|≤1이면「거의 비슷한 축」표시 + QuizDef.confidence가 결과 확신도(높음/보통/낮음)를 산출해 결과 카드에 표기. 스트레스는 단계 경계값 근처면 보통으로.
 - 검증은 src/content/tests.test.ts가 구조적으로 잠근다: 축별 문항 균등·위치 편향·유형 도달 가능성·한 문항 플립 안정성·확신도 경계를 단위 테스트로 고정.
+
+## D14 — 게시판·동시접속자는 Firebase, 초기 번들과 분리
+
+### 배경
+게시판과 동시접속자 표시는 서버 저장이 필수 — 정적 GitHub Pages만으로는 불가능. 앱 최초의 런타임 외부 서비스 도입.
+
+### 결정
+- **Firebase Spark(무료)**: Firestore=글·댓글 저장, Realtime DB presence=동시접속자 수.
+- **익명 인증**: 로그인 UI 없이 `signInAnonymously`로 기기별 uid — 글 삭제 소유권과 presence 키에 사용. rules가 uid를 검증.
+- **env 게이트**: `VITE_FIREBASE_*` 미설정이면 `firebaseReady=false` → 게시판만 '준비 중' 화면, 나머지 기능은 외부 호출 0으로 동작.
+- **번들 분리**: firebase.ts는 env 플래그만 들고 SDK import 안 함. posts.ts(SDK 전체)는 /board 라우트와 지연 청크로 분리 — 초기 번들 ~705KB 유지.
+- **config 주입 경로**: 로컬=`.env`(gitignore), 배포=GitHub repo Variables → deploy.yml env로 빌드 주입. 웹 config는 공개값이라 secret 불필요. 보안은 firestore.rules/database.rules.json.
+- **방어선**: 클라이언트=욕설·링크·도배 필터 + 작성 간격 제한(글30초/댓글10초). 서버=rules가 필드·길이·uid·서버시각 검증. App Check는 미도입(후속 과제).
+
+### 스키마
+```
+posts/{id}              {uid, nick<=12, text<=300, card?{label,big,title,accent}, ts=serverTimestamp}
+posts/{id}/comments/{id} {uid, nick<=12, text<=150, ts=serverTimestamp}
+presence/{uid}          = serverTimestamp (RTDB, onDisconnect remove)
+```
+
+### 트레이드오프
+- '런타임 외부 호출 0' 원칙에 첫 예외 — 게시판 외 기능은 여전히 오프라인 완결.
+- 익명 게시판의 스팸 리스크를 완전히 막지는 못함 — 링크 차단+간격제한+rules가 1차 방어.

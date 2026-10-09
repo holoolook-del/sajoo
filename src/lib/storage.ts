@@ -2,7 +2,7 @@ import type { CardDraw, FortuneRecord, Profile } from './types.ts';
 
 const PREFIX = 'sajoo:';
 
-function readRecord<T>(key: string): T | null {
+export function readRecord<T>(key: string): T | null {
   try {
     const raw = localStorage.getItem(`${PREFIX}${key}`);
     return raw === null ? null : (JSON.parse(raw) as T);
@@ -11,7 +11,7 @@ function readRecord<T>(key: string): T | null {
   }
 }
 
-function writeRecord(key: string, value: unknown): void {
+export function writeRecord(key: string, value: unknown): void {
   localStorage.setItem(`${PREFIX}${key}`, JSON.stringify(value));
 }
 
@@ -65,6 +65,14 @@ export function listFortunes(): FortuneRecord[] {
 /** 날짜 내림차순으로 저장된 카드 뽑기 기록 전부 */
 export function listCardDraws(): CardDraw[] {
   return listRecords<CardDraw>('card').sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/** 게시판 도배 방지용 마지막 작성 시각 — 'post'|'comment'별 ms 타임스탬프 */
+export function boardLastWrite(kind: 'post' | 'comment'): number {
+  return readRecord<number>(`board:last:${kind}`) ?? 0;
+}
+export function boardStampWrite(kind: 'post' | 'comment'): void {
+  writeRecord(`board:last:${kind}`, Date.now());
 }
 
 /** cutoff('YYYY-MM-DD') 이전의 운세·카드 기록을 지운다 — 히스토리는 최근만 유지 */

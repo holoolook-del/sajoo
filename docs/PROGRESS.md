@@ -367,3 +367,28 @@
 
 ### 검증
 - verify 통과 (vitest 55/55, build+SW 61 프리캐시)
+
+## T24 — 자유 게시판 + 동시접속자 표시 (Firebase)
+
+### 한 일
+- Firebase 도입(Spark 무료 플랜): Firestore=글·댓글, RTDB presence=동시접속자 수, 익명 인증으로 소유권
+- 새 파일: src/lib/firebase.ts(env 플래그 전용, SDK 미포함), src/features/board/{posts,filter,nickname}.ts, src/pages/board.tsx
+- 게시판: 최신 50글 스트림, 글(300자)·댓글(150자), 내 글 삭제, 「내 결과 자랑」— 완료한 테스트 결과를 카드로 첨부
+- 동시접속자: presence/{uid} + onDisconnect — 앱 헤더에「● N명 접속 중」실시간 표시
+- 방어: 욕설·링크·도배 클라이언트 필터, 작성 간격(글30초·댓글10초), firestore.rules/database.rules.json 서버 검증
+- 번들 분리: posts 청크 지연 로드 → 초기 번들 705KB 유지
+- 홈 메뉴「자유 게시판」+ menu-board.webp 생성
+
+### 설정(사람이 할 일 H)
+1. firebase.google.com에서 무료 프로젝트 생성 → 웹앱 등록
+2. Authentication → 익명 로그인 활성화
+3. Firestore Database + Realtime Database 생성(Realtime은 URL 복사)
+4. firestore.rules → Firestore 규칙 탭, database.rules.json → Realtime 규칙 탭에 각각 붙여넣기
+5. GitHub repo → Settings → Secrets and variables → Actions → Variables에
+   VITE_FIREBASE_API_KEY/AUTH_DOMAIN/PROJECT_ID/DATABASE_URL/APP_ID 5개 등록
+   → 다음 배포부터 게시판 활성화 (로컬 dev는 같은 5줄을 .env에도)
+
+### 검증
+- verify 통과 (vitest 63/63 — 필터·닉네임 신규 8개, build+SW 64 프리캐시)
+- e2e 52/52 — board.spec 2개(준비중 화면·홈 메뉴 진입) 포함
+- 미검증: 실제 Firebase 연동(글쓰기·접속자 수) — env 설정 후 실기기 확인 필요

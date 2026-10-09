@@ -16,6 +16,7 @@ const MENUS = [
   { to: '/moktak', img: 'menu-moktak', title: '공덕 목탁', desc: '두드릴수록 번뇌가 사라지는 소리' },
   { to: '/lots', img: 'menu-lots', title: '제비뽑기', desc: '모임에서 돌아가며 하나씩' },
   { to: '/test', img: 'menu-test', title: '심리테스트', desc: 'MBTI·연애·동물까지 — 정답 없는 질문들' },
+  { to: '/board', img: 'menu-board', title: '자유 게시판', desc: '지금 접속한 사람들과 운세 수다' },
   { to: 'https://holoolook-del.github.io/necut/', img: 'menu-necut', title: '민화네컷', desc: '내 사진이 민화가 되는 네 컷' },
   { to: '/sleep', img: 'menu-sleep', title: '숙면 사운드', desc: '잠이 올 때까지 틀어두는 밤의 소리' },
 ];

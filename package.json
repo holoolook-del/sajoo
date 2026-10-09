@@ -19,6 +19,7 @@
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {
+    "firebase": "12.19.0",
     "manseryeok": "2.0.0",
     "motion": "13.5.0",
     "react": "19.3.0",

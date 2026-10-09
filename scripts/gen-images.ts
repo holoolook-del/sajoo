@@ -195,6 +195,12 @@ const jobs: Job[] = [
     mp: '0.25',
   },
   {
+    file: 'illust/menu-board.webp',
+    prompt: `an old Korean village notice board at night with small paper notes pinned on it, glowing lantern light, a few curious villagers' hands pinning notes, warm communal mood${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
     file: 'illust/menu-necut.webp',
     prompt: `a vertical strip of four small framed folk paintings hanging on a dark wall, minhwa tiger and peony motifs in the frames, warm lantern light${STYLE}`,
     aspect: '1:1',

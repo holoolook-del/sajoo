@@ -1,7 +1,8 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { useEffect, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { hasProfile } from './lib/storage.ts';
 import { setBgm, syncBgm } from './lib/sound.ts';
+import { firebaseReady } from './lib/firebase.ts';
 import { NightBackdrop } from './components/night-backdrop.tsx';
 import { CardPage } from './pages/card.tsx';
 import { CompatPage } from './pages/compat.tsx';
@@ -16,6 +17,9 @@ import { SajuPage } from './pages/saju.tsx';
 import { SleepPage } from './pages/sleep.tsx';
 import { TestHubPage, TestPage } from './pages/test.tsx';
 
+// Firebase SDK가 크므로 게시판은 진입할 때만 로드 (초기 번들에 포함 안 함)
+const BoardPage = lazy(() => import('./pages/board.tsx').then((m) => ({ default: m.BoardPage })));
+
 function RequireProfile({ children }: { children: ReactNode }) {
   return hasProfile() ? children : <Navigate to="/onboarding" replace />;
 }
@@ -28,6 +32,13 @@ export function App() {
     const h = () => syncBgm();
     document.addEventListener('pointerdown', h);
     return () => document.removeEventListener('pointerdown', h);
+  }, []);
+
+  // 동시접속자 카운트 — 앱 전체 방문자 기준. firebase 미설정이면 건너뛰고,
+  // posts 모듈은 지연 로드해 초기 번들에 Firebase를 싣지 않는다.
+  useEffect(() => {
+    if (!firebaseReady) return;
+    void import('./features/board/posts.ts').then((m) => m.startPresence()).catch(() => {});
   }, []);
 
   return (
@@ -64,9 +75,17 @@ export function App() {
           path="/compat"
           element={<CompatPage />}
         />
-        {/* 테스트는 프로필 없이도 가능 — 공유 링크로 친구가 바로 들어오는 입구 */}
+        {/* 테스트·게시판은 프로필 없이도 가능 — 공유 링크로 친구가 바로 들어오는 입구 */}
         <Route path="/test" element={<TestHubPage />} />
         <Route path="/test/:id" element={<TestPage />} />
+        <Route
+          path="/board"
+          element={
+            <Suspense fallback={<p className="p-10 text-center text-sm text-hanji/40">불러오는 중…</p>}>
+              <BoardPage />
+            </Suspense>
+          }
+        />
         <Route
           path="/lots"
           element={

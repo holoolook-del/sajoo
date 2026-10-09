@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "presence": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.isNumber() && newData.val() <= now + 60000"
+      }
+    },
+    ".read": false,
+    ".write": false
+  }
+}
