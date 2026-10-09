@@ -162,12 +162,19 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
       {/* 인트로 */}
       {!started && !done && (
         <section className="rounded-xl border border-gold/30 bg-night-soft p-6 text-center">
-          <p className="text-5xl">☯</p>
+          <img
+            src={`${A}assets/illust/${quiz.img}.webp`}
+            alt=""
+            className="mx-auto h-36 w-full rounded-lg object-cover"
+          />
           <p className="mt-4 text-sm leading-6 text-hanji/80">
             질문 {quiz.questions.length}개 · 약 1분
             <br />
             정답은 없어요 — 솔직하게 골라주세요
           </p>
+          {quiz.note && (
+            <p className="mt-2 text-[11px] leading-4 text-hanji/40">{quiz.note}</p>
+          )}
           {prevCode && quiz.types[prevCode] && (
             <p className="mt-3 text-xs text-hanji/50">
               지난 결과:{' '}
@@ -309,6 +316,34 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
             </div>
           )}
 
+          {result.strong && (
+            <div className="rounded-xl border border-hanji/15 bg-night-soft p-4">
+              <p className="text-xs text-hanji/50">당신의 강점</p>
+              <ul className="mt-2 space-y-1.5">
+                {result.strong.map((s) => (
+                  <li key={s} className="flex items-start gap-2 text-sm leading-6 text-hanji/85">
+                    <span style={{ color: accent }}>◆</span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {result.scenes && (
+            <div className="rounded-xl border border-hanji/15 bg-night-soft p-4">
+              <p className="text-xs text-hanji/50">상황별로 보면</p>
+              <ul className="mt-2 space-y-2.5">
+                {result.scenes.map((s) => (
+                  <li key={s.label}>
+                    <p className="text-xs font-bold" style={{ color: accent }}>{s.label}</p>
+                    <p className="mt-0.5 text-sm leading-6 text-hanji/85">{s.text}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {result.jobs && (
             <div className="rounded-xl border border-hanji/15 bg-night-soft p-4">
               <p className="text-xs text-hanji/50">이런 일이 잘 맞아요</p>
@@ -370,9 +405,10 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
         </motion.section>
       )}
 
-      <p className="mt-auto pb-2 text-center text-[11px] text-hanji/30">
-        재미로 보는 테스트입니다 — 참고용으로만 봐주세요
-      </p>
+      <div className="mt-auto pb-2 text-center text-[11px] leading-4 text-hanji/30">
+        {quiz.note && <p>{quiz.note}</p>}
+        <p className="mt-1">재미로 보는 테스트입니다 — 참고용으로만 봐주세요</p>
+      </div>
     </main>
   );
 }
