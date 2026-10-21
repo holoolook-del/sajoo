@@ -11,6 +11,10 @@ test.describe('로또 분석소', () => {
     await expect(page.getByText('추첨기는 공정한가 — 카이제곱 검정')).toBeVisible();
     await expect(page.getByText('핫 번호')).toBeVisible();
     await expect(page.getByText('장기 미출현')).toBeVisible();
+    // 구조 검정 — 8개 가설 + 결론
+    await expect(page.getByText('구조 검정 — 과거 번호에 숨은 패턴이 있나')).toBeVisible();
+    await expect(page.getByText('Hurst 지수 (장기의존·프랙탈 추정)')).toBeVisible();
+    await expect(page.getByText('구조=조합 수학')).toBeVisible();
     // 방법론·한계 고지
     await expect(page.getByText('어떻게 뽑았나 — 수학적 근거')).toBeVisible();
     await expect(page.getByText('정직한 한계')).toBeVisible();

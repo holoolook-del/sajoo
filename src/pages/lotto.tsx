@@ -5,6 +5,7 @@ import { SoundToggle } from '../components/sound-toggle.tsx';
 import { LOTTO_DRAWS } from '../content/lotto-draws.ts';
 import {
   analyzeLotto,
+  analyzeStructure,
   generatePicks,
   JACKPOT_ODDS,
   mulberry32,
@@ -60,6 +61,7 @@ function StatRow({ label, items }: { label: string; items: { n: number; note: st
 
 export function LottoPage() {
   const stats = useMemo(() => analyzeLotto(LOTTO_DRAWS), []);
+  const structure = useMemo(() => analyzeStructure(LOTTO_DRAWS), []);
   const [picks, setPicks] = useState<LottoPick[] | null>(null);
 
   const latest = LOTTO_DRAWS[LOTTO_DRAWS.length - 1]!;
@@ -125,6 +127,40 @@ export function LottoPage() {
           {uniform
             ? 'p > 0.05 — 번호별 출현 차이는 무작위 변동 범위 안. 추첨기에 통계적으로 잡히는 편향은 없습니다. 그래도 사후예측 모형은 미세한 관측 편차를 그대로 반영합니다.'
             : 'p ≤ 0.05 — 균일에서 벗어나는 번호가 감지됩니다. 사후예측 가중치가 이를 반영합니다.'}
+        </p>
+      </section>
+
+      {/* 구조 검정 — 과거 번호에 숨은 패턴·프랙탈 구조가 있는지 8개 가설 실측 */}
+      <section className="rounded-xl border border-gold/30 bg-night-soft p-4">
+        <p className="text-sm font-bold text-hanji">구조 검정 — 과거 번호에 숨은 패턴이 있나</p>
+        <p className="mt-1 text-xs leading-5 text-hanji/60">
+          주식의 프랙탈 모형처럼 과거가 미래를 결정하는 구조가 있는지 {structure.length}개
+          가설을 {stats.drawCount.toLocaleString()}회 실데이터에 대입했습니다
+        </p>
+        <div className="mt-2 divide-y divide-hanji/8">
+          {structure.map((t) => (
+            <div key={t.name} className="flex items-center gap-2 py-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-hanji/80">{t.name}</p>
+                <p className="mt-0.5 text-[10px] text-hanji/45">
+                  {t.measured} · {t.expected}
+                </p>
+              </div>
+              <span
+                className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold ${
+                  t.structural
+                    ? 'border-gold/60 bg-gold/10 text-gold-bright'
+                    : 'border-hanji/20 text-hanji/50'
+                }`}
+              >
+                {t.verdict}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-1 text-[11px] leading-4 text-hanji/50">
+          결론: 시간적 기억 구조(프랙탈·상관·이월·쌍)는 전부 부정됐고, 남는 구조는
+          조합론(조합 수학)뿐 — 그래서 추천은 형태 전형성과 분배 기대값에 집중합니다.
         </p>
       </section>
 

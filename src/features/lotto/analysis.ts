@@ -376,3 +376,245 @@ export function mulberry32(seed: number): () => number {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+// ── 구조 검정 — 과거 당첨번호에 "기억 구조·숨은 패턴"이 실재하는지 실측 ──
+
+export interface StructureTest {
+  /** 검정 이름 */
+  name: string;
+  /** 실측값 표시 문자열 */
+  measured: string;
+  /** 비교 기준 (무작위·이론 기대) */
+  expected: string;
+  /** 판정 배지 */
+  verdict: string;
+  /** true면 '진짜 구조(조합론)', false면 무작위 부합 */
+  structural: boolean;
+}
+
+/** R/S법 Hurst 지수 — 시계열 장기의존(프랙탈 기억) 추정. 무기억이면 ≈0.5 */
+function hurstRS(series: readonly number[]): number {
+  const N = series.length;
+  const pts: [number, number][] = [];
+  for (const s of [N >> 4, N >> 3, N >> 2, N >> 1]) {
+    if (s < 8) continue;
+    const rs: number[] = [];
+    for (let st = 0; st + s <= N; st += s) {
+      const seg = series.slice(st, st + s);
+      const m = seg.reduce((a, b) => a + b, 0) / s;
+      let cum = 0, mx = -Infinity, mn = Infinity, sd2 = 0;
+      for (const v of seg) {
+        cum += v - m;
+        mx = Math.max(mx, cum);
+        mn = Math.min(mn, cum);
+        sd2 += (v - m) * (v - m);
+      }
+      const sd = Math.sqrt(sd2 / s);
+      if (sd > 0) rs.push((mx - mn) / sd);
+    }
+    if (rs.length) pts.push([Math.log(s), Math.log(rs.reduce((a, b) => a + b, 0) / rs.length)]);
+  }
+  if (pts.length < 2) return 0.5;
+  const mx = pts.reduce((a, p) => a + p[0], 0) / pts.length;
+  const my = pts.reduce((a, p) => a + p[1], 0) / pts.length;
+  let num = 0, den = 0;
+  for (const p of pts) {
+    num += (p[0] - mx) * (p[1] - my);
+    den += (p[0] - mx) * (p[0] - mx);
+  }
+  return den === 0 ? 0.5 : num / den;
+}
+
+/** 6개 조합 합계의 조합론적 pmf — C(45,6)=8,145,060개 조합의 합계별 개수 (동적계획) */
+export function combinatorialSumPmf(): Map<number, number> {
+  const dp: Map<number, bigint>[] = [new Map([[0, 1n]])];
+  for (let n = 1; n <= LOTTO_MAX; n++) {
+    for (let k = Math.min(n, PICK_SIZE); k >= 1; k--) {
+      const prev = dp[k - 1]!;
+      const cur = dp[k] ?? new Map<number, bigint>();
+      for (const [s, c] of prev) cur.set(s + n, (cur.get(s + n) ?? 0n) + c);
+      dp[k] = cur;
+    }
+  }
+  const comb = dp[PICK_SIZE]!;
+  let total = 0n;
+  for (const c of comb.values()) total += c;
+  const pmf = new Map<number, number>();
+  for (const [s, c] of comb) pmf.set(s, Number(c) / Number(total));
+  return pmf;
+}
+
+/**
+ * 과거 당첨번호의 구조 가설 8종 실측 — "프랙탈식 시간적 기억" 가설들은
+ * 전부 무기억·균일로 귀결되고, 조합론(조합 수학) 구조만 실재함을 보여준다.
+ */
+export function analyzeStructure(draws: readonly LottoDraw[]): StructureTest[] {
+  const D = draws.length;
+  const seq = draws.map((d) => d.nums);
+  const tests: StructureTest[] = [];
+
+  // ① 이월수 — 직전 회차와 겹치는 번호 수 (초기하 기대 6·6/45=0.8)
+  let repSum = 0;
+  for (let i = 1; i < D; i++) {
+    const prev = new Set(seq[i - 1]!);
+    repSum += seq[i]!.filter((n) => prev.has(n)).length;
+  }
+  const repMean = repSum / Math.max(1, D - 1);
+  tests.push({
+    name: '이월수 (직전 회차 번호 재출현)',
+    measured: `평균 ${repMean.toFixed(2)}개/회차`,
+    expected: '초기하 기대 0.80',
+    verdict: Math.abs(repMean - 0.8) < 0.15 ? '기억 없음' : '편차 있음',
+    structural: false,
+  });
+
+  // ② 지연-1 자기상관 — 번호별 출현 지표의 시계열 상관 평균
+  let acSum = 0;
+  for (let n = 1; n <= LOTTO_MAX; n++) {
+    const m = seq.reduce((a, ns) => a + (ns.includes(n) ? 1 : 0), 0) / D;
+    let v = 0, c = 0;
+    for (let i = 0; i < D; i++) v += (seq[i]!.includes(n) ? 1 - m : -m) ** 2;
+    for (let i = 1; i < D; i++)
+      c += (seq[i - 1]!.includes(n) ? 1 - m : -m) * (seq[i]!.includes(n) ? 1 - m : -m);
+    if (v > 0) acSum += c / v;
+  }
+  const acMean = acSum / LOTTO_MAX;
+  tests.push({
+    name: '지연-1 자기상관 (프랙탈 기억의 직접 검정)',
+    measured: `r = ${acMean.toFixed(3)}`,
+    expected: '무상관 기대 ≈0',
+    verdict: Math.abs(acMean) < 0.06 ? '기억 없음' : '상관 있음',
+    structural: false,
+  });
+
+  // ③ 미출현 간격 — 연속 출현 간 평균 회차 (기하분포 기대 1/p=7.5)
+  const gaps: number[] = [];
+  for (let n = 1; n <= LOTTO_MAX; n++) {
+    let last = -1;
+    for (const [i, ns] of seq.entries()) {
+      if (ns.includes(n)) {
+        if (last >= 0) gaps.push(i - last);
+        last = i;
+      }
+    }
+  }
+  const gapMean = gaps.reduce((a, b) => a + b, 0) / Math.max(1, gaps.length);
+  tests.push({
+    name: '미출현 간격 분포',
+    measured: `평균 ${gapMean.toFixed(2)}회차`,
+    expected: `기하분포 기대 ${(45 / 6).toFixed(2)}`,
+    verdict: Math.abs(gapMean - 7.5) < 0.4 ? '기하분포 일치' : '편차 있음',
+    structural: false,
+  });
+
+  // ④ Hurst 지수 — 45개 번호 출현 지표의 R/S 평균
+  let hSum = 0, hN = 0;
+  for (let n = 1; n <= LOTTO_MAX; n++) {
+    hSum += hurstRS(seq.map((ns) => (ns.includes(n) ? 1 : 0) - 6 / 45));
+    hN++;
+  }
+  const hMean = hSum / Math.max(1, hN);
+  tests.push({
+    name: 'Hurst 지수 (장기의존·프랙탈 추정)',
+    measured: `H ≈ ${hMean.toFixed(2)} (45개 번호 평균)`,
+    expected: '무기억 기대 0.50',
+    verdict: Math.abs(hMean - 0.5) < 0.12 ? '장기의존 없음' : '의존 감지',
+    structural: false,
+  });
+
+  // ⑤ 시대 일관성 — 전반부↔후반부 핫번호 순위 상관 (스피어만 ρ)
+  const half = Math.floor(D / 2);
+  const f1 = new Array(LOTTO_MAX + 1).fill(0);
+  const f2 = new Array(LOTTO_MAX + 1).fill(0);
+  seq.slice(0, half).forEach((ns) => ns.forEach((n) => f1[n]++));
+  seq.slice(half).forEach((ns) => ns.forEach((n) => f2[n]++));
+  const rankOf = (f: number[]) => {
+    const order = Array.from({ length: LOTTO_MAX }, (_, i) => i + 1).sort(
+      (a, b) => f[a]! - f[b]!,
+    );
+    const r = new Array(LOTTO_MAX + 1).fill(0);
+    order.forEach((n, i) => (r[n] = i + 1));
+    return r;
+  };
+  const rk1 = rankOf(f1), rk2 = rankOf(f2);
+  let d2 = 0;
+  for (let n = 1; n <= LOTTO_MAX; n++) d2 += (rk1[n] - rk2[n]) ** 2;
+  const rho = 1 - (6 * d2) / (LOTTO_MAX * (LOTTO_MAX * LOTTO_MAX - 1));
+  tests.push({
+    name: '시대 일관성 (전반부 핫번호가 후반부에도 핫?)',
+    measured: `순위상관 ρ = ${rho.toFixed(2)}`,
+    expected: '지속 편향이면 ρ>0, 없으면 ≈0',
+    verdict: rho < 0.15 ? '지속 편향 없음' : '지속 편향 감지',
+    structural: false,
+  });
+
+  // ⑥ 쌍 동시출현 — 990개 쌍 전체의 출현 횟수 카이제곱 (기대 D/66)
+  const pairCnt = new Map<string, number>();
+  for (const ns of seq) {
+    for (let i = 0; i < ns.length; i++)
+      for (let j = i + 1; j < ns.length; j++) {
+        const k = `${ns[i]!},${ns[j]!}`;
+        pairCnt.set(k, (pairCnt.get(k) ?? 0) + 1);
+      }
+  }
+  const expPair = (D * PICK_SIZE * (PICK_SIZE - 1)) / (LOTTO_MAX * (LOTTO_MAX - 1));
+  let pairChi2 = 0;
+  for (let a = 1; a <= LOTTO_MAX; a++)
+    for (let b = a + 1; b <= LOTTO_MAX; b++) {
+      const c = pairCnt.get(`${a},${b}`) ?? 0;
+      pairChi2 += (c - expPair) ** 2 / expPair;
+    }
+  const pairDf = (LOTTO_MAX * (LOTTO_MAX - 1)) / 2;
+  const pairP = chiSquarePValue(pairChi2, pairDf);
+  tests.push({
+    name: '쌍 동시출현 (번호 궁합 가설)',
+    measured: `χ² = ${pairChi2.toFixed(0)}, p = ${pairP.toFixed(2)}`,
+    expected: '균일 기대 χ²≈990',
+    verdict: pairP > 0.05 ? '균일분포 범위' : '유의한 쌍 존재',
+    structural: false,
+  });
+
+  // ⑦ 합계 분포 vs 조합론적 pmf — "공통 패턴"의 정체가 물리가 아니라 조합 수학임을 보임
+  const combPmf = combinatorialSumPmf();
+  const sumHist = new Map<number, number>();
+  for (const ns of seq) {
+    const s = ns.reduce((a, b) => a + b, 0);
+    sumHist.set(s, (sumHist.get(s) ?? 0) + 1);
+  }
+  let sumChi2 = 0, sumDf = 0;
+  for (const [s, p] of combPmf) {
+    const e = p * D;
+    if (e >= 5) {
+      sumChi2 += ((sumHist.get(s) ?? 0) - e) ** 2 / e;
+      sumDf++;
+    }
+  }
+  tests.push({
+    name: '합계 분포 = 조합론 그 자체?',
+    measured: `χ²/df = ${(sumChi2 / Math.max(1, sumDf)).toFixed(2)}`,
+    expected: '조합론 pmf와 일치면 ≈1',
+    verdict: sumChi2 / Math.max(1, sumDf) < 1.6 ? '구조=조합 수학' : '조합론과 다름',
+    structural: true,
+  });
+
+  // ⑧ 구간(10번대) 분포 균일 검정
+  const decBins = [0, 0, 0, 0, 0];
+  const decNums = [9, 10, 10, 10, 6]; // 1-9,10-19,20-29,30-39,40-45
+  for (const ns of seq)
+    for (const n of ns) decBins[n <= 9 ? 0 : n <= 19 ? 1 : n <= 29 ? 2 : n <= 39 ? 3 : 4]!++;
+  let decChi2 = 0;
+  for (let b = 0; b < 5; b++) {
+    const e = (decNums[b]! / LOTTO_MAX) * PICK_SIZE * D;
+    decChi2 += (decBins[b]! - e) ** 2 / e;
+  }
+  const decP = chiSquarePValue(decChi2, 4);
+  tests.push({
+    name: '10번대 구간 분포',
+    measured: `χ² = ${decChi2.toFixed(1)}, p = ${decP.toFixed(2)}`,
+    expected: '구간별 번호 수 비례 균일',
+    verdict: decP > 0.05 ? '균일분포 범위' : '구간 편향 있음',
+    structural: false,
+  });
+
+  return tests;
+}

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { LOTTO_DRAWS, type LottoDraw } from '../../content/lotto-draws.ts';
 import {
   analyzeLotto,
+  analyzeStructure,
   chiSquarePValue,
+  combinatorialSumPmf,
   generatePicks,
   LOTTO_MAX,
   mulberry32,
@@ -107,5 +109,43 @@ describe('generatePicks', () => {
     const picks = generatePicks(stats, mulberry32(1));
     // 역대 당첨 합계의 대부분은 100~177 — 추천도 그 근처에 몰려야 함
     expect(picks.filter((p) => p.sum >= 90 && p.sum <= 190).length).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('analyzeStructure', () => {
+  const tests = analyzeStructure(LOTTO_DRAWS);
+
+  it('8개 가설 검정을 반환하고 각 항목에 실측·기대·판정이 있다', () => {
+    expect(tests).toHaveLength(8);
+    for (const t of tests) {
+      expect(t.name.length).toBeGreaterThan(0);
+      expect(t.measured.length).toBeGreaterThan(0);
+      expect(t.expected.length).toBeGreaterThan(0);
+      expect(t.verdict.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('실데이터는 기억 구조가 없고 조합론 구조만 남는다', () => {
+    // 합계 분포만 structural=true
+    expect(tests.filter((t) => t.structural)).toHaveLength(1);
+    expect(tests.find((t) => t.structural)!.name).toContain('합계');
+    // 이월수·자기상관·미출현 간격은 무기억 판정
+    expect(tests[0]!.verdict).toBe('기억 없음');
+    expect(tests[1]!.verdict).toBe('기억 없음');
+    expect(tests[2]!.verdict).toBe('기하분포 일치');
+  });
+});
+
+describe('combinatorialSumPmf', () => {
+  it('확률 총합 1, 범위 21~255, 최빈 합계는 이론 중심 부근', () => {
+    const pmf = combinatorialSumPmf();
+    let total = 0;
+    for (const p of pmf.values()) total += p;
+    expect(total).toBeCloseTo(1, 9);
+    expect(Math.min(...pmf.keys())).toBe(21);
+    expect(Math.max(...pmf.keys())).toBe(255);
+    const mode = [...pmf.entries()].sort((a, b) => b[1] - a[1])[0]![0];
+    expect(mode).toBeGreaterThanOrEqual(135);
+    expect(mode).toBeLessThanOrEqual(141);
   });
 });
