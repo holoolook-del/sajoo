@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   animate,
   motion,
@@ -22,6 +22,8 @@ const CHARGE_MS = 950; // 기 모으는 시간 — 라이저 길이와 맞춤
 const FAN_R = 330; // 원호 반지름 — 작을수록 급하게 휨
 const FAN_A = 0.2; // 카드당 원호 각도(rad) ≈ 11.5° — 정면 ±2장의 중심은 클릭 가능하게 노출
 const FAN_EDGE = 4.6; // 이 |d| 넘어가면 페이드아웃 — 12장 중 앞 9장 정도 보임
+// 팬이 온전히 보이는 데 필요한 폭: 원호 최대 가로 오프셋(투명해진 꼬리 카드까지) 양쪽 + 카드폭 + 회전 여백
+const FAN_FIT_W = Math.round(2 * (FAN_R + CARD_W / 2 + 16));
 
 type Phase = 'fan' | 'charge' | 'reveal';
 
@@ -289,6 +291,24 @@ export function CardDrawScene({
   const accent = cardElementColor(card.element);
   const bigGrade = card.grade === '대길' || card.grade === '길';
 
+  // 좁은 화면에서는 덱 전체를 축소해 보여준다 — 카드를 자르지 않고 팬 형태를 그대로 유지.
+  // 뽑는 순간 scale이 1로 돌아오며 카드가 손으로 당겨오듯 커진다.
+  // clientWidth도 함께 본다: 모바일 크롬은 넘친 콘텐츠만큼 innerWidth를 키워버려서
+  // innerWidth만 보면 축소 비율이 제대로 계산되지 않는다
+  const viewW = () =>
+    typeof window === 'undefined'
+      ? 0
+      : Math.min(window.innerWidth, document.documentElement.clientWidth);
+  const [vw, setVw] = useState(viewW);
+  // 첫 페인트 전에 한 번 재측정 — 마운트 시점에 레이아웃이 안 잡혀 0이면 즉시 교정
+  useLayoutEffect(() => {
+    const on = () => setVw(viewW());
+    on();
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, []);
+  const fanScale = vw > 0 && vw < FAN_FIT_W ? Math.max(0.4, vw / FAN_FIT_W) : 1;
+
   useEffect(() => {
     if (phase === 'charge') {
       const t = setTimeout(() => setPhase('reveal'), reduce ? 100 : CHARGE_MS);
@@ -324,9 +344,15 @@ export function CardDrawScene({
     <div className="flex select-none flex-col items-center">
       {/* 카드 영역 — 공개 순간 화면 전체가 살짝 흔들림 */}
       <motion.div
-        animate={phase === 'reveal' && !reduce ? { x: [0, -6, 6, -3, 2, 0] } : { x: 0 }}
+        initial={false}
+        animate={{
+          x: phase === 'reveal' && !reduce ? [0, -6, 6, -3, 2, 0] : 0,
+          scale: phase === 'fan' ? fanScale : 1,
+        }}
         transition={{ duration: 0.45 }}
-        className="relative flex h-72 w-full touch-pan-y items-center justify-center overflow-visible"
+        className={`relative flex h-72 w-full touch-pan-y items-center justify-center overflow-visible transition-[margin] duration-300 ${
+          phase === 'fan' && fanScale < 1 ? '-my-14' : ''
+        }`}
         onWheel={onWheel}
         onPointerDown={(e) => {
           if (phase === 'fan' && chosen === null) dragControls.start(e);
