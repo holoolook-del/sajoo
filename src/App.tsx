@@ -19,6 +19,8 @@ import { TestHubPage, TestPage } from './pages/test.tsx';
 
 // Firebase SDK가 크므로 게시판은 진입할 때만 로드 (초기 번들에 포함 안 함)
 const BoardPage = lazy(() => import('./pages/board.tsx').then((m) => ({ default: m.BoardPage })));
+// 로또 역대 당첨번호 데이터(~96KB)가 붙으므로 진입할 때만 로드
+const LottoPage = lazy(() => import('./pages/lotto.tsx').then((m) => ({ default: m.LottoPage })));
 
 function RequireProfile({ children }: { children: ReactNode }) {
   return hasProfile() ? children : <Navigate to="/onboarding" replace />;
@@ -91,6 +93,16 @@ export function App() {
           element={
             <RequireProfile>
               <LotsPage />
+            </RequireProfile>
+          }
+        />
+        <Route
+          path="/lotto"
+          element={
+            <RequireProfile>
+              <Suspense fallback={<p className="p-10 text-center text-sm text-hanji/40">불러오는 중…</p>}>
+                <LottoPage />
+              </Suspense>
             </RequireProfile>
           }
         />

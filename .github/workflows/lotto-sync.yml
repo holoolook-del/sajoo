@@ -1,0 +1,35 @@
+name: Sync lotto draws
+
+# 매주 토요일 밤 추첨(KST 20:45) 이후 최신 회차를 반영 — UTC 일 00시 = KST 일 09시
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write # 갱신된 lotto-draws.ts를 main에 커밋 — push가 deploy.yml을 트리거
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm gen:lotto
+      - name: Commit if data changed
+        run: |
+          if git diff --quiet src/content/lotto-draws.ts; then
+            echo "변경 없음 — 스킵"
+            exit 0
+          fi
+          git config user.name "devin-ai-integration[bot]"
+          git config user.email "158243242+devin-ai-integration[bot]@users.noreply.github.com"
+          git add src/content/lotto-draws.ts
+          LATEST=$(grep -o '최종 회차: [0-9]*회' src/content/lotto-draws.ts | head -1)
+          git commit -m "chore: 로또 당첨번호 갱신 ($LATEST)"
+          git push

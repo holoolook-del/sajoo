@@ -392,3 +392,29 @@
 - verify 통과 (vitest 63/63 — 필터·닉네임 신규 8개, build+SW 64 프리캐시)
 - e2e 52/52 — board.spec 2개(준비중 화면·홈 메뉴 진입) 포함
 - 미검증: 실제 Firebase 연동(글쓰기·접속자 수) — env 설정 후 실기기 확인 필요
+
+## T25 — 로또 6/45 실데이터 통계 분석소 (/lotto)
+
+### 한 일
+- `scripts/gen-lotto.ts` — 동행복권 미러(smok95/lotto, GitHub Pages)에서 1회~최신회 전량 수집 → `src/content/lotto-draws.ts` 자동 생성. 본 사이트는 해외 IP 차단 확인 → 미러 사용 + 1회차 공식값 대조 검증 내장
+- `src/features/lotto/analysis.ts` — 통계 엔진: 베이지안 사후예측 가중치(Dirichlet α=1, 전체55%+지수감쇠45%), 카이제곱 균일검정(불완전감마 직접 구현), 합계 KDE·홀짝·고저·연번 경험분포 우도, 생일·등차수열 분배 패널티, 형태군별 다양 선택
+- `src/pages/lotto.tsx` — 최근 추첨 결과, 검정 결과, 핫/콜드/장기미출현, 45개 빈도 그래프, 5조합 추천(합계·홀짝·고저·연번·점수 표기), 방법론+정직한 한계 고지 카드, 공유
+- `scripts/gen-lotto-thumb.ts` — Playwright Canvas로 공식 공 색상 썸네일 menu-lotto.webp (Replicate 불필요·무료)
+- `.github/workflows/lotto-sync.yml` — 매주 일요일 00:00 UTC 자동 재수집·커밋 → deploy 트리거 (완전 자동 갱신)
+- 홈 메뉴·라우트 /lotto (RequireProfile), e2e/lotto.spec.ts 2건
+- 실측 결과: χ²=29.0, p=0.96 — 추첨기 편향 증거 없음(정직하게 페이지에 표기)
+- 번들: /lotto 라우트 지연 로드(데이터 96KB 분리, 초기 705KB 유지 — 게시판과 같은 패턴)
+
+### 새 파일을 만든 이유
+- analysis.ts: 로또 도메인 로직은 features 계층 규칙대로 features/lotto/ 배치 (lib는 사주 엔진 전용)
+- lotto-draws.ts: 생성 데이터는 content=순수 데이터 계층 규칙
+
+### 검증
+- vitest 73/73 (로또 분석 10건 신규 — 균등분포 검정·gap·패널티·재현성·전형 합계)
+- e2e 56/56 (로또 4건 포함 — 전체 실행 중 2건 타임아웃은 병렬 부하 플래키, 단독 재실행 통과)
+- pnpm verify 통과 (typecheck·lint·build+SW 65 프리캐시)
+- 수동 검증(Playwright 스크린샷): 5조합 서로 다른 형태군, 점수 69~100 분포 확인
+
+### 발견 사항 (지금 고치지 않고 적어 둠)
+- `pnpm audit:code`의 knip이 이 환경에서 OOM — oxc-parser가 파일당 고정 2GB ArrayBuffer를 할당하는데 이 머신은 두 번째 할당부터 실패(내 변경 없이도 동일 재현, 환경 이슈). jscpd는 정상 동작
+- jscpd가 `src/features/board/posts.ts`에 기존 중복 1건 보고(watchPosts/watchComments의 doc 매핑 블록, 9줄) — 내 작업 범위 밖 기존 코드, 통합 후보로 남김

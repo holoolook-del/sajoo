@@ -47,6 +47,15 @@
 | encodeInvite / decodeInvite / sajuFromHanjaPillars | src/lib/invite.ts | 궁합 초대 링크 — 8글자 한자만 base64 URL 인코딩·복원 (생년월일 미포함) | name,SajuResult ↔ token / token → 최소 SajuResult |
 | renderShareImage | src/lib/share-image.ts | 결과 공유 이미지 캔버스 합성 (제목·등급·이미지·풀이문 → 1080×1350 PNG blob) | ShareImageData → Blob |
 
+## 로또 6/45
+|| 이름 | 경로 | 하는 일 | 입력 → 출력 |
+|| --- | --- | --- | --- |
+|| LOTTO_DRAWS / LottoDraw | src/content/lotto-draws.ts | 역대 당첨번호 전량 (scripts/gen-lotto.ts 자동 생성, 회차별 6번호+보너스+날짜) | — → LottoDraw[] |
+|| analyzeLotto / LottoStats | src/features/lotto/analysis.ts | 실데이터 통계 — 번호별 빈도·감쇠가중·사후예측 가중치·미출현 gap·카이제곱 균일검정·조합형태 경험분포(합계 KDE·홀짝·고저·연번 pmf) | LottoDraw[] → LottoStats |
+|| generatePicks / LottoPick | src/features/lotto/analysis.ts | 추천 조합 — 가중 비복원 샘플링 3만 후보 → 형태 대수우도+대중조합 패널티(생일·등차수열) 채점 → 형태군별 다양 선택 | LottoStats,rng,count → LottoPick[] |
+|| scoreCombo / chiSquarePValue / mulberry32 | src/features/lotto/analysis.ts | 조합 형태 점수 / 카이제곱 p값(불완전감마) / 시드 난수 | nums,stats → 점수 등 |
+|| LottoPage | src/pages/lotto.tsx | 로또 분석소 — 실데이터 기준·검정 결과·핫콜드·빈도 그래프·5조합 추천·방법론+한계 고지. 라우트 /lotto | — |
+
 ## 화면 공용 요소 (컴포넌트, 훅)
 | 이름 | 경로 | 하는 일 |
 | --- | --- | --- |

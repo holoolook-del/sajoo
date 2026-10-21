@@ -115,3 +115,19 @@ presence/{uid}          = serverTimestamp (RTDB, onDisconnect remove)
 ### 트레이드오프
 - '런타임 외부 호출 0' 원칙에 첫 예외 — 게시판 외 기능은 여전히 오프라인 완결.
 - 익명 게시판의 스팸 리스크를 완전히 막지는 못함 — 링크 차단+간격제한+rules가 1차 방어.
+
+## D15 — 로또 실데이터 소스·갱신·추천 수학 (T25)
+
+### 데이터
+- 동행복권 본 사이트(dhlottery.co.kr)는 해외 IP 차단으로 CI·로컬 fetch 불가 → `scripts/gen-lotto.ts`가 `smok95/lotto` 미러(GitHub Pages, 매주 자동 동기화)의 all.json을 받아 `src/content/lotto-draws.ts` 생성. 미러 오염 방지로 1회차 공식값(10·23·29·33·37·40+16)을 스크립트에서 대조 검증. 번들 방식이라 오프라인 PWA 원칙 유지.
+- 갱신은 완전 자동: `.github/workflows/lotto-sync.yml`이 매주 일요일 00:00 UTC(토요 추첨 직후) 데이터 재수집 → 변경 시 main에 커밋 → push가 deploy.yml을 트리거해 재배포.
+
+### 추천 수학 (실제 구현 — src/features/lotto/analysis.ts)
+- 번호 가중치: 디리클레-다항 사후예측 p(n)=(유효빈도+1)/(6D+45), 유효빈도 = 전체 빈도 55% + 지수감쇠(반감기 104회) 가중 빈도 45%.
+- 조합 형태 우도: 역대 조합의 합계(가우시안 KDE)·홀짝·고저·연번 경험분포 대수우도로 3만 후보 채점.
+- 대중조합 패널티: 생일(≤31)만·등차수열 감점 — 당첨 시 분배 인원이 적어 기대 당첨금을 올리는 유일한 수학적 이점.
+- 형태군(홀짝·고저·연번)별 최우수 조합 선택 — 최빈 형태만 반복되지 않음.
+- 정직 원칙: 독립시행이라 조합별 1등 확률(1/8,145,060)은 불변 — 카이제곱 검정 결과와 함께 방법론·한계를 페이지에 그대로 고지(과장 없음).
+
+### 썸네일
+- menu-lotto.webp는 Replicate 대신 `scripts/gen-lotto-thumb.ts`(Playwright Canvas→webp) — 번호 공은 프로그램 렌더링이 정확·무료. esbuild __name 헬퍼가 브라우저에 없어 evaluate(함수) 대신 HTML 문자열 스크립트 주입 방식 사용.

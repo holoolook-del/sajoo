@@ -15,6 +15,7 @@ const MENUS = [
   // 심심풀이 — 기록 다음에 이어지는 가벼운 놀이 메뉴
   { to: '/moktak', img: 'menu-moktak', title: '공덕 목탁', desc: '두드릴수록 번뇌가 사라지는 소리' },
   { to: '/lots', img: 'menu-lots', title: '제비뽑기', desc: '모임에서 돌아가며 하나씩' },
+  { to: '/lotto', img: 'menu-lotto', title: '로또 번호 분석소', desc: '실제 당첨번호 통계로 뽑는 조합' },
   { to: '/test', img: 'menu-test', title: '심리테스트', desc: 'MBTI·연애·동물까지 — 정답 없는 질문들' },
   { to: '/board', img: 'menu-board', title: '자유 게시판', desc: '지금 접속한 사람들과 운세 수다' },
   { to: 'https://holoolook-del.github.io/necut/', img: 'menu-necut', title: '민화네컷', desc: '내 사진이 민화가 되는 네 컷' },
