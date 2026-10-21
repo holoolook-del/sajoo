@@ -441,3 +441,10 @@
 - 수정: vite.config.ts workbox에 `dontCacheBustURLsMatching: /[.-]\w{8,}\./` — 해시 포함 번들명만 불변 처리, public 자산은 콘텐츠 리비전 부여. 배포 후 기존 클라이언트도 새 캐시키로 자동 재다운로드(자가 치유)
 - 검증: dist/sw.js에서 revision 부여 5→62/66 확인(null은 해시 번들 4개뿐), pnpm verify 통과(테스트 76/76)
 - 배운 점: 배포본 vs 로컬 파일 해시 일치로 "서버 정상·클라이언트 캐시"를 확정하고, precache manifest의 revision 필드를 직접 보는 게 확실한 진단법
+
+## T25-후속4 — SW 업데이트 체크 자동화 (개선: 배포 반영 속도)
+
+- 생성된 registerSW.js는 등록만 하고 update() 호출이 없음 → 설치형 PWA가 새 버전 감지를 브라우저 스케줄에만 의존
+- main.tsx에 명시적 체크 추가: 앱 시작(navigator.serviceWorker.ready) + 1시간 주기 + visibilitychange 포커스 복귀 때마다 registration.update(). virtual:pwa-register 대신 순수 SW API 사용 — workbox-window 미설치로 새 의존성 추가 불필요
+- registerType 'autoUpdate'와 조합: 새 SW 감지→설치→skipWaiting→자동 리로드까지 완결
+- 검증: pnpm verify 통과(테스트 76/76, 빌드+SW 66 프리캐시)
