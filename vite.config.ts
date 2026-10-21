@@ -31,6 +31,10 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // vite-plugin-pwa 기본값 /^assets\//는 public/assets의 고정 파일명 이미지까지
+        // "불변"으로 간주해 revision:null로 프리캐시 → 같은 URL로 교체해도 영구히 구버전을 서빙한다.
+        // 해시가 들어간 번들 파일명(index-XXXXXXXX.js)만 불변으로 좁혀, public 자산은 콘텐츠 리비전을 받게 한다.
+        dontCacheBustURLsMatching: /[.-]\w{8,}\./,
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2,json,wav}'],
         // 수면 음원(~6MB)은 프리캐시에서 제외 — 첫 방문 용량을 지키고, 재생할 때 런타임 캐시
         globIgnores: ['**/assets/audio/sleep/**'],

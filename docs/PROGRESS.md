@@ -434,3 +434,10 @@
 - 씬 루트에 select-none — 드래그 중 텍스트 선택 방지
 - 데스크톱 e2e에서 카드7 버튼 중심이 앞 카드에 가려지는 것 발견 → 팬 간격(FAN_A 0.155→0.20)을 넓혀 정면 ±2장 중심 노출
 - 검증: typecheck·lint 통과, card e2e 4/4 (환경 OOM으로 간헐 워커 크래시 — 재시도 통과), 스크린샷 육안 확인
+
+## T25-후속3 — PWA 프리캐시에 갇힌 public 이미지 (사용자 제보: 메뉴 사진이 옛날 것)
+
+- 원인: vite-plugin-pwa가 `dontCacheBustURLsMatching: /^assets\//`를 기본 주입 → public/assets 아래 고정 파일명 자산(illust/cards/audio/bg/icon)이 전부 `revision:null`로 프리캐시. 같은 URL로 내용이 바뀌어도 캐시키가 동일해 workbox가 재다운로드를 영구 건너뜀 → 설치된 PWA는 이미지만 구버전 고정 (코드는 해시명이라 정상 갱신)
+- 수정: vite.config.ts workbox에 `dontCacheBustURLsMatching: /[.-]\w{8,}\./` — 해시 포함 번들명만 불변 처리, public 자산은 콘텐츠 리비전 부여. 배포 후 기존 클라이언트도 새 캐시키로 자동 재다운로드(자가 치유)
+- 검증: dist/sw.js에서 revision 부여 5→62/66 확인(null은 해시 번들 4개뿐), pnpm verify 통과(테스트 76/76)
+- 배운 점: 배포본 vs 로컬 파일 해시 일치로 "서버 정상·클라이언트 캐시"를 확정하고, precache manifest의 revision 필드를 직접 보는 게 확실한 진단법
