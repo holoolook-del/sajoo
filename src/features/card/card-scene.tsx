@@ -18,6 +18,10 @@ const SPACING = 64; // 카드 간격 — 카드폭(88)보다 좁아 겹침
 const CARD_W = 88;
 const CARD_H = 132;
 const CHARGE_MS = 950; // 기 모으는 시간 — 라이저 길이와 맞춤
+// 손에 쥔 카드 팬: 반지름 R 원호 위에 카드를 놓고 각도만큼 rotateZ
+const FAN_R = 330; // 원호 반지름 — 작을수록 급하게 휨
+const FAN_A = 0.2; // 카드당 원호 각도(rad) ≈ 11.5° — 정면 ±2장의 중심은 클릭 가능하게 노출
+const FAN_EDGE = 4.6; // 이 |d| 넘어가면 페이드아웃 — 12장 중 앞 9장 정도 보임
 
 type Phase = 'fan' | 'charge' | 'reveal';
 
@@ -134,33 +138,40 @@ function DeckCard({
 }) {
   // d: 정면 기준 오프셋 (0 = 정면)
   const d = useTransform(x, (v) => (v + i * SPACING) / SPACING);
-  // 원호 화면 X — sin 곡선이라 가장자리로 갈수록 간격이 줄며 수렴
-  const arcX = useTransform(d, (dd) => Math.sin(dd * 0.3) * 245);
+  // 원호 배치 — 손에 쥔 카드처럼 중앙이 높고 양끝이 내려가며 겹침
+  const arcX = useTransform(d, (dd) => Math.sin(dd * FAN_A) * FAN_R);
+  const arcY = useTransform(
+    d,
+    (dd) => (1 - Math.cos(Math.min(Math.abs(dd), 6) * FAN_A)) * FAN_R * 0.9,
+  );
+  const rz = useTransform(d, (dd) => Math.max(-46, Math.min(46, dd * 8)));
   // 트랙 자체가 x만큼 이동하므로 보정해 화면 위치를 arcX로 고정
   const childX = useTransform<number, number>([x, arcX], (latest) => {
     const [v, a] = latest as [number, number];
     return a - v;
   });
-  // 뒤로 빠지는 깊이 + 회전 (정면은 0, 멀수록 뒤로·돌아감)
-  const az = useTransform(d, (dd) => (Math.cos(Math.min(Math.abs(dd), 4.2) * 0.3) - 1) * 640);
-  const ry = useTransform(d, (dd) => Math.max(-62, Math.min(62, -dd * 18)));
-  const op = useTransform(d, (dd) => clamp01(1 - (Math.abs(dd) - 3.1) / 1.1));
-  const sc = useTransform(d, (dd) => 1.06 - Math.min(Math.abs(dd) * 0.05, 0.2));
-  const zi = useTransform(d, (dd) => Math.round(30 - Math.abs(dd) * 5));
+  const az = useTransform(d, (dd) => -Math.abs(dd) * 34);
+  const op = useTransform(d, (dd) => clamp01(1 - (Math.abs(dd) - FAN_EDGE) / 0.9));
+  const sc = useTransform(d, (dd) => 1.05 - Math.min(Math.abs(dd) * 0.03, 0.14));
+  const zi = useTransform(d, (dd) => Math.round(30 - Math.abs(dd) * 4));
 
   const isChosen = chosen === i;
   const isCenter = centered === i;
   const faded = phase !== 'fan' && !isChosen;
+  // 투명해진 가장자리 카드는 탭 대상에서 제외 — 안 보이는 카드가 뽑히지 않게
+  const far = centered !== null && Math.abs(i - centered) >= 5;
 
   return (
     <motion.div
       className="pointer-events-auto absolute"
       style={{
         x: childX,
+        y: arcY,
         z: az,
-        rotateY: ry,
+        rotate: rz,
         opacity: op,
         scale: sc,
+        pointerEvents: far ? 'none' : 'auto',
         zIndex: isChosen ? 40 : zi,
         left: '50%',
         top: '50%',
@@ -174,7 +185,7 @@ function DeckCard({
       <motion.button
         type="button"
         aria-label={`운세카드 ${i + 1}`}
-        disabled={chosen !== null}
+        disabled={chosen !== null || far}
         onTap={() => onPick(i)}
         initial={{ opacity: 0, y: -160 }}
         animate={
@@ -190,7 +201,7 @@ function DeckCard({
                 }
               : isChosen
                 ? { x: 0, y: -20, scale: phase === 'reveal' ? 1.9 : 1.3, opacity: 1 }
-                : { x: 0, y: 0, opacity: 1, scale: isCenter ? 1.1 : 1 }
+                : { x: 0, y: isCenter ? -8 : 0, opacity: 1, scale: isCenter ? 1.1 : 1 }
         }
         transition={
           reduce
@@ -209,7 +220,7 @@ function DeckCard({
         {phase === 'fan' && isCenter && (
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
+            animate={{ opacity: 0.8 }}
             className="pointer-events-none absolute -inset-1.5 -z-10 rounded-xl"
             style={{ boxShadow: `0 0 24px ${accent}66` }}
           />
@@ -262,11 +273,13 @@ export function CardDrawScene({
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState<Phase>('fan');
   const [chosen, setChosen] = useState<number | null>(null);
-  const [centered, setCentered] = useState<number | null>(null);
+  // 첫 렌더부터 정면 카드가 하이라이트되도록 초기값과 트랙 위치를 맞춘다
+  const INIT_IDX = 5;
+  const [centered, setCentered] = useState<number | null>(INIT_IDX);
   const dragControls = useDragControls();
 
-  // 덱 트랙 위치 — 0이면 0번 카드가 중앙. 중간에서 시작
-  const x = useMotionValue(-((DECK_COUNT - 1) / 2) * SPACING);
+  // 덱 트랙 위치 — -i*SPACING이면 i번 카드가 중앙. 카드 사이가 아니라 한 장 정면으로 시작
+  const x = useMotionValue(-INIT_IDX * SPACING);
 
   useMotionValueEvent(x, 'change', (v) => {
     const i = clampIdx(Math.round(-v / SPACING));
@@ -308,7 +321,7 @@ export function CardDrawScene({
   }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex select-none flex-col items-center">
       {/* 카드 영역 — 공개 순간 화면 전체가 살짝 흔들림 */}
       <motion.div
         animate={phase === 'reveal' && !reduce ? { x: [0, -6, 6, -3, 2, 0] } : { x: 0 }}
