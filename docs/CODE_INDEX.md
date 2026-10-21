@@ -41,9 +41,10 @@
 | dailyFortune | src/features/fortune/today.ts | 일진×사주 조합(십신·관계·상생상극)→등급·해석 | SajuResult,date → DailyFortune |
 | saveTodaysFortune | src/features/fortune/today.ts | 오늘 운세를 FortuneRecord로 기록 (멱등) | SajuResult,date → FortuneRecord |
 | buildLuckView | src/features/luck/luck.ts | 대운 타임라인+세운+월운 12개월 (현재 표시·십신) | SajuResult,Profile,date → LuckView |
-| compatScore | src/features/compat/compat.ts | 두 사주 궁합 (일간 관계+일지 관계+십신 역할+오행 보완) | SajuResult,SajuResult → CompatResult |
+| compatScore | src/features/compat/compat.ts | 두 사주 궁합 — 기본 50점에서 전통 항목 가감: 일간 천간합·천간충·상생상극·음양 / 일지 관계 / 십신 상호 역할·배우자성(남=재성·여=관성) / 오행 상호 보완·용신 / 합쳐 완성하는 삼합 / 연지·도화. 결과는 항목별 aspects(제목·가감점 delta·문장들)로 반환 | SajuResult,SajuResult,{nameA?,nameB?,genderA?,genderB?} → CompatResult |
 | buildHistory | src/features/history/history.ts | 최근 30일 운세·카드 기록 날짜별 병합+옛 기록 정리 | today?,days → HistoryEntry[] |
 | findSinsal | src/lib/sinsal.ts | 신살 판정 (도화·역마·화개·양인·괴강 — 일지 삼합 표준표 기준) | SajuResult → Sinsal[] |
+|| samhapGroupOf / SAMHAP_GROUPS | src/lib/sinsal.ts | 일지→삼합 그룹 조회 / 삼합 4국 표(지지 3자·완성 오행·도화·역마·화개 글자) | 지지한자 → 그룹\|null |
 | encodeInvite / decodeInvite / sajuFromHanjaPillars | src/lib/invite.ts | 궁합 초대 링크 — 8글자 한자만 base64 URL 인코딩·복원 (생년월일 미포함) | name,SajuResult ↔ token / token → 최소 SajuResult |
 | renderShareImage | src/lib/share-image.ts | 결과 공유 이미지 캔버스 합성 (제목·등급·이미지·풀이문 → 1080×1350 PNG blob) | ShareImageData → Blob |
 
@@ -93,7 +94,7 @@
 ## 콘텐츠·풀이문
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
 | --- | --- | --- | --- |
-| ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey | src/content/meta.ts | 오행·십신 공용 메타 (색상·한자·타입) | 오행 → 색상/한자 |
+| ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey / TEN_GOD_HANJA | src/content/meta.ts | 오행·십신 공용 메타 (색상·한자·타입) | 오행·십신 → 색상/한자 |
 | DAY_MASTER_TEXT / DayMasterSocial / DAY_BRANCH_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT / CONCERN_TEXT / ELEMENT_HEALTH / HOUR_GUESS / GLOSSARY | src/content/interpret.ts | 풀이문 DB (일간 캐릭터·사회적 면모·일지 12지지·오행·균형·십신·고민 6종·건강 보완·생시 유추·용어 평어) | 키 → 해석 문장 |
 | BRANCH_RELATIONS / DAY_GOD_TEXT / RELATION_TEXT / GRADE_SUMMARY / LUCKY / MONTH_GOD_READING | src/content/fortune.ts | 지지 관계 테이블 + 오늘운세·이번 달 풀이문 + 행운 색·방향·아이템 | 지지쌍/십신/등급/오행 → 문장 |
-| COMPAT_GRADE_TEXT / COMPAT_RELATION_TEXT / STEM_RELATION_TEXT | src/content/compat.ts | 궁합 풀이문 (일간 관계·지지 관계·등급 요약) | 키 → 해석 문장 |
+| STEM_HAP / STEM_CLASH / STEM_RELATION_TEXT / STEM_CLASH_TEXT / YINYANG_TEXT / COMPAT_RELATION_TEXT / ROLE_TEXT / SPOUSE_STAR_TEXT / SPOUSE_PALACE_TEXT / ELEMENT_FILL_TEXT / SAMHAP_COMPLETE / FIVE_ELEMENT_COMPLETE / SAME_DOMINANT_TEXT / DOHWA_CROSS_TEXT / BRANCH_ANIMAL / COMPAT_GRADE_TEXT / ADVICE_TEXT / COMPAT_SOURCE_NOTE | src/content/compat.ts | 궁합 풀이문 DB — 천간합 5쌍·천간충 4쌍·일간 관계·음양·지지 관계·십신 역할·배우자성·배우자상·오행 보완·삼합 완성·도화·띠·등급·조언·근거 표기 | 키/쌍 → 해석 문장 |

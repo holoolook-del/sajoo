@@ -28,3 +28,8 @@ export const ELEMENT_CONTROLS: Record<ElementKey, ElementKey> = {
 export type TenGodKey =
   | '비견' | '겁재' | '식신' | '상관' | '편재'
   | '정재' | '편관' | '정관' | '편인' | '정인';
+
+export const TEN_GOD_HANJA: Record<TenGodKey, string> = {
+  비견: '比肩', 겁재: '劫財', 식신: '食神', 상관: '傷官', 편재: '偏財',
+  정재: '正財', 편관: '偏官', 정관: '正官', 편인: '偏印', 정인: '正印',
+};

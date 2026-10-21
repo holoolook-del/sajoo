@@ -9,6 +9,7 @@
  * 판정 기준 글자는 일지(日支) — 가장 널리 쓰이는 관법.
  */
 import type { SajuResult } from './engine.ts';
+import type { ElementKey } from '../content/meta.ts';
 
 export interface Sinsal {
   key: string;
@@ -19,12 +20,12 @@ export interface Sinsal {
   text: string;
 }
 
-/** 삼합 그룹 — 일지가 속한 삼합에 따라 도화/역마/화개의 글자가 결정됨 */
-const SAMHAP: { branches: string[]; dohwa: string; yeokma: string; hwagae: string }[] = [
-  { branches: ['申', '子', '辰'], dohwa: '酉', yeokma: '寅', hwagae: '辰' },
-  { branches: ['巳', '酉', '丑'], dohwa: '午', yeokma: '亥', hwagae: '丑' },
-  { branches: ['寅', '午', '戌'], dohwa: '卯', yeokma: '申', hwagae: '戌' },
-  { branches: ['亥', '卯', '未'], dohwa: '子', yeokma: '巳', hwagae: '未' },
+/** 삼합 그룹 — 일지가 속한 삼합에 따라 도화/역마/화개의 글자가 결정됨. element는 삼합이 완성될 때 이루는 오행 */
+export const SAMHAP_GROUPS: { branches: string[]; element: ElementKey; dohwa: string; yeokma: string; hwagae: string }[] = [
+  { branches: ['申', '子', '辰'], element: '수', dohwa: '酉', yeokma: '寅', hwagae: '辰' },
+  { branches: ['巳', '酉', '丑'], element: '금', dohwa: '午', yeokma: '亥', hwagae: '丑' },
+  { branches: ['寅', '午', '戌'], element: '화', dohwa: '卯', yeokma: '申', hwagae: '戌' },
+  { branches: ['亥', '卯', '未'], element: '목', dohwa: '子', yeokma: '巳', hwagae: '未' },
 ];
 
 const YANGIN: Record<string, string> = {
@@ -45,6 +46,11 @@ const WHERE_LABEL: Record<string, string> = {
   year: '연지', month: '월지', day: '일지', hour: '시지',
 };
 
+/** 일지가 속한 삼합 그룹 — 도화·역마·화개 판정 글자를 돌려준다 */
+export function samhapGroupOf(dayBranchHanja: string) {
+  return SAMHAP_GROUPS.find((g) => g.branches.includes(dayBranchHanja)) ?? null;
+}
+
 /** 사주에서 발견된 신살 목록 — 같은 신살이 여러 자리에 있으면 첫 자리만 표시 */
 export function findSinsal(saju: SajuResult): Sinsal[] {
   const pillars = (['year', 'month', 'day', 'hour'] as const)
@@ -53,8 +59,7 @@ export function findSinsal(saju: SajuResult): Sinsal[] {
       (e): e is { key: 'year' | 'month' | 'day' | 'hour'; p: NonNullable<typeof e.p> } => e.p !== null,
     );
 
-  const dayBranch = saju.pillars.day.branchHanja;
-  const group = SAMHAP.find((g) => g.branches.includes(dayBranch));
+  const group = samhapGroupOf(saju.pillars.day.branchHanja);
   const dayHanja = saju.pillars.day.hanja;
   const found: Sinsal[] = [];
 

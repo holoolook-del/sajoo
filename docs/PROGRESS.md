@@ -448,3 +448,22 @@
 - main.tsx에 명시적 체크 추가: 앱 시작(navigator.serviceWorker.ready) + 1시간 주기 + visibilitychange 포커스 복귀 때마다 registration.update(). virtual:pwa-register 대신 순수 SW API 사용 — workbox-window 미설치로 새 의존성 추가 불필요
 - registerType 'autoUpdate'와 조합: 새 SW 감지→설치→skipWaiting→자동 리로드까지 완결
 - 검증: pnpm verify 통과(테스트 76/76, 빌드+SW 66 프리캐시)
+
+## T26 — 궁합 고도화 (사용자 지적: 내용이 요약뿐, 출처 있는 체계로)
+
+### 한 일
+- compatScore 재구성: 기본 50점에서 항목별 가감하는 "설명 가능한 점수" — 결과를 aspects[](제목·delta·문장들)로 구조화해 항목별 +N/−N 칩으로 표시
+- 판정 항목 확장(전부 정통 관법): 일간 천간합 5쌍(+20, 삼명통회 명칭 병기 — 중정·인의·위엄·음란·무정지합, 현대 해석으로 정리) / 천간충 4쌍(−10) / 음양 조화(+4) / 십신 상호 역할 양방향(정관·정재·정인·식신 +6, 겁재·상관·편관 −5) / 배우자성 — 남=재성·여=관성 정통 규칙, 성별 반영 정+8·편+4, 성별 미상(초대 링크)이면 정관·정재 통합 +6 / 일지 십신 배우자상(표시용) / 오행 상호 보완 양방향(+5씩)·상대 dominant=내 lacking 용신 보완(+8)·합쳐 5행 완성(+4) / 두 사주 지지가 합쳐 완성하는 삼합 4국(+8) / 연지 띠(±4, 민속 참고 명시) / 도화 교차(+4)
+- content/compat.ts 풀이문 전면 확충(18개 테이블) — 등급 문장·지지 관계문도 2~3문장으로. COMPAT_SOURCE_NOTE 근거 표기 추가(자평명리 체계·삼명통회·자평진전)
+- sinsal.ts: SAMHAP_GROUPS export + element 필드(완성 오행), samhapGroupOf 분리 / meta.ts: TEN_GOD_HANJA
+- compat.tsx: 항목별 카드 섹션+가감 칩+근거 표기, 이름·성별을 compatScore opts로 전달
+- compat.test.ts 재작성 — 실제 일주 조합으로 천간합(癸×戊)·천간충(癸×丁)·배우자성(男癸×女丙 상호 정재·정관)·삼합완성(酉+巳丑→금국) 검증 7건
+
+### 검증
+- pnpm verify 통과 (typecheck·lint·vitest 80/80·build+SW 66)
+- e2e compat 4/4 (desktop+mobile), 초대 링크 모드 정상
+- audit:code — 내 변경 knip 클린·jscpd 클린. 기존 잔여 보고만: tests.ts 퀴즈 상수 7종·QuizQuestion·QuizResultType, filter.ts NICK_MAX_LEN, lotto analysis.ts PICK_SIZE·LOW_CUTOFF·NumberStat, posts.ts 클론 1건
+
+### 발견 사항 (지금 고치지 않고 적어 둠)
+- **AC12 회귀**: e2e viewport 360px — #/card에서 가로 스크롤 ~176px 지속 재현. T25-후속2의 원호 팬(반지름 330px)이 뷰포트 밖으로 나가는 것으로 추정. 내 태스크 범위 밖이라 미수정 — 팬 반경을 뷰포트에 비례 축소하는 방향 검토 필요
+- e2e 전체 실행 중 mobile 워커 크래시 간헐 발생(2건, 재실행 시 통과) — 환경 OOM 계열로 보임

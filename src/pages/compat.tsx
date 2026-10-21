@@ -10,6 +10,7 @@ import { ShareButton } from '../components/share-button.tsx';
 import { ShareImageButton } from '../components/share-image-button.tsx';
 import { calcSaju } from '../lib/engine.ts';
 import { decodeInvite, encodeInvite, sajuFromHanjaPillars } from '../lib/invite.ts';
+import { COMPAT_SOURCE_NOTE } from '../content/compat.ts';
 import type { Profile } from '../lib/types.ts';
 
 export function CompatPage() {
@@ -39,8 +40,14 @@ export function CompatPage() {
     // 초대 모드: 링크 속 상대 × 입력한 나 / 일반: 나 × 입력한 상대
     const a = inviteMode ? inviter.saju : saju;
     const b = rb.data;
-    return a && b ? compatScore(a, b) : 'error';
-  }, [saju, other, inviteMode, inviter]);
+    if (!a || !b) return 'error';
+    return compatScore(a, b, {
+      nameA: inviteMode ? inviter.name : profile!.name,
+      nameB: other.name,
+      genderA: inviteMode ? undefined : profile!.gender,
+      genderB: other.gender,
+    });
+  }, [saju, other, inviteMode, inviter, profile]);
 
   if (!inviteMode && (!saju || !profile)) {
     return <StateView message="먼저 내 사주를 입력해 주세요." linkTo="/onboarding" linkLabel="정보 입력" />;
@@ -112,14 +119,29 @@ export function CompatPage() {
             <p className="mt-3 text-sm leading-6 text-hanji/85">{result.summary}</p>
           </section>
 
-          <section className="rounded-xl border border-hanji/15 bg-night-soft p-5">
-            <h2 className="text-sm text-hanji/60">궁합 해석</h2>
-            <ul className="mt-3 space-y-3">
-              {result.detail.map((line, i) => (
-                <li key={i} className="text-sm leading-6 text-hanji/85">{line}</li>
-              ))}
-            </ul>
-          </section>
+          <h2 className="text-sm text-hanji/60">궁합 해석 — 기본 50점에서 항목별로 가감됩니다</h2>
+          {result.aspects.map((aspect) => (
+            <section key={aspect.title} className="rounded-xl border border-hanji/15 bg-night-soft p-5">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-bold text-gold">{aspect.title}</h3>
+                {aspect.delta !== 0 && (
+                  <span className={`shrink-0 rounded-full border px-2 py-0.5 text-xs font-bold ${
+                    aspect.delta > 0 ? 'border-gold/40 text-gold-bright' : 'border-vermilion/40 text-vermilion'
+                  }`}
+                  >
+                    {aspect.delta > 0 ? '+' : ''}{aspect.delta}
+                  </span>
+                )}
+              </div>
+              <ul className="mt-3 space-y-3">
+                {aspect.lines.map((line, i) => (
+                  <li key={i} className="text-sm leading-6 text-hanji/85">{line}</li>
+                ))}
+              </ul>
+            </section>
+          ))}
+
+          <p className="text-xs leading-5 text-hanji/45">{COMPAT_SOURCE_NOTE}</p>
 
           <div className="flex flex-wrap justify-center gap-2">
             <ShareButton
