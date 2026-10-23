@@ -27,5 +27,5 @@
 
 ## 사람이 할 일 (H)
 - [x] H1 Google AI Studio에서 Gemini API 키 발급 → 프로젝트 `.env`에 `GEMINI_API_KEY=` 입력 (필요 시점: T8, 빠를수록 좋음)
-- [ ] H2 GitHub 공개 저장소 `sajoo` 생성 + remote 연결 + Pages 활성화 (저장소 생성·push 완료 — Settings→Pages에서 GitHub Actions 선택만 남음)
+- [x] H2 GitHub 공개 저장소 `sajoo` 생성 + remote 연결 + Pages 활성화 — Actions 배포 정상 동작 확인
 - [ ] H3 폰에서 배포 URL 열어 홈화면에 추가, 오프라인·카드 뽑기 직접 확인 (필요 시점: T-last)
