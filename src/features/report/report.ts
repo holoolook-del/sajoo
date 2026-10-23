@@ -6,6 +6,7 @@
 import {
   getBranchTenGod,
   getEarthlyBranchElement,
+  getHeavenlyStemElement,
   getTenGod,
   type EarthlyBranch,
   type HeavenlyStem,
@@ -118,7 +119,7 @@ export interface DeepReport {
   summary: string; // 종합 총평 단락
   gyeokguk: { name: string; god: TenGodKey; text: string };
   deukryeong: { verdict: '득령' | '상령' | '실령'; text: string };
-  rooted: { count: number; text: string };
+  rooted: { strong: number; weak: number; count: number; text: string };
   strength: { verdict: Verdict; support: number; drain: number; title: string; text: string };
   yongsin: {
     element: ElementKey;
@@ -220,10 +221,11 @@ function pickYongsin(
 }
 
 const BRANCH_ORDER = ['자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해'];
-/** 지장간 정기(본기) — 지지 안에 깃든 주인 천간. 격국 판정의 기준. */
-const BRANCH_MAIN_STEM_KOR: Record<string, string> = {
-  자: '계', 축: '기', 인: '갑', 묘: '을', 진: '무', 사: '병',
-  오: '정', 미: '기', 신: '경', 유: '신', 술: '무', 해: '임',
+/** 지장간 — 지지 안에 깃든 천간들 (여기→중기→정기 순, 마지막이 본기). 격국·통근 판정의 기준. */
+const HIDDEN_STEMS: Record<string, string[]> = {
+  자: ['임', '계'], 축: ['계', '신', '기'], 인: ['무', '병', '갑'], 묘: ['갑', '을'],
+  진: ['을', '계', '무'], 사: ['무', '경', '병'], 오: ['병', '기', '정'], 미: ['정', '을', '기'],
+  신: ['무', '임', '경'], 유: ['경', '신'], 술: ['신', '정', '무'], 해: ['무', '갑', '임'],
 };
 const YANG_STEMS = ['갑', '병', '무', '경', '임'];
 /** 양간은 지지 순행·음간은 역행 — 일간별 장생(씨앗 자리) 시작 지지 */
@@ -244,7 +246,8 @@ function stageOf(dayStemKorean: string, branchKorean: string): StageName {
 /** 격국 — 월지 정기(지장간 본기)의 십신 */
 function calcGyeokguk(saju: SajuResult): DeepReport['gyeokguk'] {
   const monthBranch = saju.pillars.month.korean.charAt(1);
-  const mainStem = BRANCH_MAIN_STEM_KOR[monthBranch];
+  const hidden = HIDDEN_STEMS[monthBranch] ?? [];
+  const mainStem = hidden[hidden.length - 1];
   const god = (mainStem ? getTenGod(saju.dayMaster.korean as HeavenlyStem, mainStem as HeavenlyStem) : saju.pillars.month.tenGodBranch) as TenGodKey;
   const g = GYEOKGUK_TEXT[god];
   return { name: g.name, god, text: g.text };
@@ -258,13 +261,21 @@ function calcDeukryeong(saju: SajuResult): DeepReport['deukryeong'] {
   return { verdict, text: DEUKRYEONG_TEXT[verdict] };
 }
 
-/** 통근 — 지지 중 일간과 같은 오행의 개수 */
+/** 통근 — 지장간에 일간과 같은 오행의 천간이 깃든 정도. 정기(본기)에 있으면 강한 뿌리, 여기·중기에만 있으면 얕은 뿌리 */
 function calcRoot(saju: SajuResult): DeepReport['rooted'] {
   const my = saju.dayMaster.element as ElementKey;
-  const count = [saju.pillars.year, saju.pillars.month, saju.pillars.day, saju.pillars.hour]
-    .filter((p): p is NonNullable<typeof p> => p !== null)
-    .filter((p) => p.branchElement === my).length;
-  return { count, text: count > 0 ? ROOT_TEXT.rooted : ROOT_TEXT.rootless };
+  let strong = 0;
+  let weak = 0;
+  for (const p of [saju.pillars.year, saju.pillars.month, saju.pillars.day, saju.pillars.hour]) {
+    if (!p) continue;
+    const hidden = HIDDEN_STEMS[p.korean.charAt(1)] ?? [];
+    const els = hidden.map((s) => getHeavenlyStemElement(s as HeavenlyStem) as ElementKey);
+    if (els[els.length - 1] === my) strong++;
+    else if (els.includes(my)) weak++;
+  }
+  const count = strong + weak;
+  const text = strong > 0 ? ROOT_TEXT.rooted : weak > 0 ? ROOT_TEXT.weakRoot : ROOT_TEXT.rootless;
+  return { strong, weak, count, text };
 }
 
 /** 십이운성 목록 — 연지·월지·일지·시지 순 */

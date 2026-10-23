@@ -95,8 +95,9 @@ describe('buildDeepReport', () => {
     expect(r.gyeokguk.god).toBe('정관');
     // 癸일간 술월 — 토 월, 나를 극하는 계절 → 실령
     expect(r.deukryeong.verdict).toBe('실령');
-    // 지지에 수 오행 없음(신금·술토·유금·묘목) → 무근
-    expect(r.rooted.count).toBe(0);
+    // 지지 본기에 수 없음, 다만 연지 신금 지장간(무·임·경) 속 임수 = 얕은 뿌리 1
+    expect(r.rooted.strong).toBe(0);
+    expect(r.rooted.weak).toBe(1);
     // 십이운성 — 4자리, 유효 단계
     expect(r.stages).toHaveLength(4);
     // 계(음간) 유 → 사 단계 (계 장생 묘, 역행: 묘장생·인목욕·축관대·자건록·해제왕·술쇠·유병·신사·미묘·오절·사태·진양)
