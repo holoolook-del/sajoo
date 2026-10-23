@@ -213,22 +213,19 @@ async function render(data: ShareCardData): Promise<Blob> {
 }
 
 /**
- * 결과 이미지를 생성해 공유한다. 파일 공유 미지원이면 PNG 저장.
- * text·url을 넘기면 이미지와 함께 한 번에 공유된다 (카톡 등).
+ * 결과 이미지를 생성해 공유한다. 파일 공유 미지원이면 PNG 저장+텍스트 클립보드 복사.
+ * 파일 공유 시 share 시트의 url 필드는 카톡 등에서 무시되므로 링크는 text 본문에 넣는다.
  */
 export async function shareImageResult(
   data: ShareCardData,
   extra?: { text?: string; url?: string },
-): Promise<'shared' | 'saved' | 'failed'> {
+): Promise<'shared' | 'saved' | 'canceled' | 'failed'> {
   try {
     const blob = await render(data);
     const file = new File([blob], 'saju-result.png', { type: 'image/png' });
+    const body = [extra?.text, extra?.url].filter(Boolean).join('\n');
     if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        ...(extra?.text ? { text: extra.text } : {}),
-        ...(extra?.url ? { url: extra.url } : {}),
-      });
+      await navigator.share({ files: [file], ...(body ? { text: body } : {}) });
       return 'shared';
     }
     const url = URL.createObjectURL(blob);
@@ -237,8 +234,10 @@ export async function shareImageResult(
     a.download = 'saju-result.png';
     a.click();
     URL.revokeObjectURL(url);
+    if (body) await navigator.clipboard.writeText(body).catch(() => {});
     return 'saved';
-  } catch {
+  } catch (e) {
+    if ((e as Error).name === 'AbortError') return 'canceled';
     return 'failed';
   }
 }

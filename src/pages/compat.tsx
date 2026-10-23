@@ -61,7 +61,17 @@ export function CompatPage() {
       : null;
   const resultShareText =
     result && result !== 'error'
-      ? `${nameA} × ${nameB} 궁합 ${result.score}점 「${result.grade}」\n${result.summary}\n너도 사주 궁합 해봐!`
+      ? [
+          `${nameA} × ${nameB} 궁합 ${result.score}점 「${result.grade}」`,
+          result.summary,
+          '',
+          ...result.aspects.map(
+            (a) =>
+              `【${a.title}${a.delta ? ` ${a.delta > 0 ? '+' : ''}${a.delta}` : ''}】\n${a.lines.join('\n')}`,
+          ),
+          '',
+          '너도 사주 궁합 해봐!',
+        ].join('\n')
       : '';
 
   return (

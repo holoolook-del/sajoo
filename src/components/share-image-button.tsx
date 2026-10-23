@@ -23,7 +23,11 @@ export function ShareImageButton({ data, label = '이미지+링크로 공유하�
       text: text ?? `${data.label ? `${data.label} — ` : ''}${data.big ? `${data.big} ` : ''}${data.title}`,
       url: url ?? APP_URL(),
     });
-    setState(r === 'failed' ? 'failed' : r);
+    if (r === 'canceled') {
+      setState('idle');
+      return;
+    }
+    setState(r);
     setTimeout(() => setState('idle'), 2200);
   }
 
@@ -36,7 +40,7 @@ export function ShareImageButton({ data, label = '이미지+링크로 공유하�
     >
       {state === 'busy' && '이미지 만드는 중…'}
       {state === 'shared' && '공유했어요'}
-      {state === 'saved' && '이미지로 저장했어요'}
+      {state === 'saved' && '이미지 저장됨 — 텍스트·링크는 복사했어요'}
       {state === 'failed' && '공유에 실패했어요'}
       {state === 'idle' && label}
     </button>

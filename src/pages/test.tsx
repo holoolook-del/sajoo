@@ -122,6 +122,11 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
       `${quiz.shareLabel} ${title}`,
       result.desc,
       `태그: ${result.tags.join(' · ')}`,
+      ...(result.strong ? [`강점: ${result.strong.join(' / ')}`] : []),
+      ...(result.scenes?.map((s) => `${s.label} — ${s.text}`) ?? []),
+      ...(result.watch ? [`조심: ${result.watch}`] : []),
+      ...(result.good ? [`잘 맞는 타입: ${result.good.join(' · ')}`] : []),
+      ...(result.hard ? [`부딪히기 쉬운 타입: ${result.hard.join(' · ')}`] : []),
       ...(result.jobs ? [`추천 직업: ${result.jobs.join(' · ')}`] : []),
       '너도 해봐!',
     ].join('\n');

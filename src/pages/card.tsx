@@ -27,7 +27,7 @@ export function CardPage() {
   if (drawn) {
     const card = getCardById(drawn.cardId);
     const cardShareText = card
-      ? `${today} 내가 뽑은 운세카드는 「${card.name} ${card.hanja}」(${card.grade})\n${card.message}\n너도 오늘의 카드를 뽑아봐!`
+      ? `${today} 내가 뽑은 운세카드는 「${card.name} ${card.hanja}」(${card.grade})\n${card.message}\n조언 — ${card.advice}\n너도 오늘의 카드를 뽑아봐!`
       : '';
     return (
       <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">

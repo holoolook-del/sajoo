@@ -22,7 +22,20 @@ export function SajuPage() {
 
   const { pillars, dayMaster, lunar, hourIncluded, voidBranches } = saju;
   const maxEl = Math.max(...reading.elementCounts.map((e) => e.count), 1);
-  const charShareText = `${profile?.name ?? '나'}의 사주 캐릭터는 「${reading.dayMaster.title}」(${dayMaster.korean}${dayMaster.hanja}) — ${reading.dayMaster.keywords.map((k) => '#' + k).join(' ')}\n너의 사주 캐릭터도 확인해봐!`;
+  const charShareText = [
+    `${profile?.name ?? '나'}의 사주 캐릭터는 「${reading.dayMaster.title}」(${dayMaster.korean}${dayMaster.hanja})`,
+    `${reading.dayMaster.nature} · ${dayMaster.element}의 ${dayMaster.yinYang} 기운`,
+    '',
+    reading.dayMaster.text,
+    '',
+    `사람들이 보는 나 — ${reading.dayMaster.social.seen}`,
+    `내가 잘하는 것 — ${reading.dayMaster.social.good}`,
+    `조심할 점 — ${reading.dayMaster.social.watch}`,
+    `친해지면 — ${reading.dayMaster.social.bond}`,
+    '',
+    reading.dayMaster.keywords.map((k) => `#${k}`).join(' '),
+    '너의 사주 캐릭터도 확인해봐!',
+  ].join('\n');
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
@@ -91,7 +104,7 @@ export function SajuPage() {
               title: `「${reading.dayMaster.title}」`,
               subtitle: `${dayMaster.korean} — ${reading.dayMaster.nature}`,
               keywords: reading.dayMaster.keywords,
-              lines: [],
+              lines: [reading.dayMaster.text],
             }}
             text={charShareText}
           />

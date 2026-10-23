@@ -95,7 +95,17 @@ export function FortunePage() {
       <div className="flex justify-center">
         <ShareButton
           label="오늘의 운세 공유하기"
-          text={`${today} 나의 운세 「${fortune.grade}」 — 운세 지수 ${fortune.luckIndex}%\n${fortune.summary}\n행운의 색 ${fortune.lucky.color} · 방향 ${fortune.lucky.direction}`}
+          text={[
+            `${today} 나의 운세 「${fortune.grade}」 — 운세 지수 ${fortune.luckIndex}%`,
+            fortune.summary,
+            '',
+            ...fortune.detail,
+            '',
+            `행운의 색 ${fortune.lucky.color} · 방향 ${fortune.lucky.direction} · 아이템 ${fortune.lucky.item}`,
+            ...(fortune.luckyHours.length
+              ? [`좋은 시간 ${fortune.luckyHours.map((h) => `${h.branch}시 ${h.hours}`).join(' · ')}`]
+              : []),
+          ].join('\n')}
         />
       </div>
 
