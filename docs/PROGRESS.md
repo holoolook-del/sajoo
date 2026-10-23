@@ -468,6 +468,24 @@
 - **AC12 회귀**: e2e viewport 360px — #/card에서 가로 스크롤 ~176px 지속 재현. T25-후속2의 원호 팬(반지름 330px)이 뷰포트 밖으로 나가는 것으로 추정. 내 태스크 범위 밖이라 미수정 — 팬 반경을 뷰포트에 비례 축소하는 방향 검토 필요
 - e2e 전체 실행 중 mobile 워커 크래시 간헐 발생(2건, 재실행 시 통과) — 환경 OOM 계열로 보임
 
+## T24-setup — Firebase 실설정 완료 (aside 브라우저 자동화)
+
+### 한 일
+- 기존 `sajoo-ad97c` 프로젝트 재사용 — 웹앱·익명 인증이 이미 설정돼 있었음 (두 번째 프로젝트 `sajoo-266cb`는 미사용)
+- Firestore 생성: Standard·(default)·위치 **asia-northeast3(서울)**·프로덕션 모드 → firestore.rules 게시
+- Realtime DB 생성: 위치 **asia-southeast1(싱가포르)**·잠금 모드 → database.rules.json 게시
+- GitHub repo Actions Variables 5개 등록 — REST API 직접 호출 (브라우저 세션은 다른 계정이라 불가 → 로컬 git 자격증명의 PAT 사용, POST /actions/variables)
+- 로컬 `.env`에 같은 5개 값 기록 (gitignore됨 — 로컬 dev 게시판 동작)
+- workflow_dispatch로 배포 재실행 → 변수 주입된 빌드가 Pages에 배포
+
+### config (공개값 — 클라이언트 번들 포함이 정상, 보안은 rules가 담당)
+- apiKey: AIzaSyAY2mKJB9GqFi84fhWrCuLrW7NKnZ2HWZQ / projectId: sajoo-ad97c
+- databaseURL: https://sajoo-ad97c-default-rtdb.asia-southeast1.firebasedatabase.app
+- appId: 1:40456311491:web:5e823105eb11ed34134876
+
+### 미검증
+- 실기기 글쓰기·댓글·동시접속자 수 — 배포 완료 후 확인 필요
+
 ## T28 — 공유 텍스트 전체 내용화 + 이미지 공유 링크 유실 수정
 
 ### 원인
