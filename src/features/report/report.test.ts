@@ -88,6 +88,28 @@ describe('buildDeepReport', () => {
     expect(noHour.seun.stemGod).toBeTruthy();
   });
 
+  it('격국·득령·통근·십이운성을 판정한다', () => {
+    const r = reportFor();
+    // 계유 일주 — 월지 술(戌) 정기 무(戊) → 癸 기준 정관 → 정관격
+    expect(r.gyeokguk.name).toBe('정관격');
+    expect(r.gyeokguk.god).toBe('정관');
+    // 癸일간 술월 — 토 월, 나를 극하는 계절 → 실령
+    expect(r.deukryeong.verdict).toBe('실령');
+    // 지지에 수 오행 없음(신금·술토·유금·묘목) → 무근
+    expect(r.rooted.count).toBe(0);
+    // 십이운성 — 4자리, 유효 단계
+    expect(r.stages).toHaveLength(4);
+    // 계(음간) 유 → 사 단계 (계 장생 묘, 역행: 묘장생·인목욕·축관대·자건록·해제왕·술쇠·유병·신사·미묘·오절·사태·진양)
+    expect(r.stages.find((s) => s.where === '일지')?.stage).toBe('병'); // 유 = 병
+  });
+
+  it('운의 길흉이 용신과 갈린다 — 세운·대운에 용신운/기신운 판정', () => {
+    const r = reportFor();
+    expect(['용신운', '기신운', '중립운']).toContain(r.seun.favor);
+    expect(r.seun.favorText.length).toBeGreaterThan(20);
+    expect(r.daewoon?.current?.favor).toBeTruthy();
+  });
+
   it('같은 입력은 같은 리포트를 만든다 (결정성)', () => {
     expect(reportFor().summary).toBe(reportFor().summary);
   });

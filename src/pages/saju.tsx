@@ -285,7 +285,7 @@ export function SajuPage() {
         <p className="text-xs tracking-widest text-gold-bright">SAJOO 심층 명식 감정서</p>
         <p className="mt-2 text-lg font-bold text-hanji">심화 사주 리포트 보기 →</p>
         <p className="mt-1 text-xs leading-5 text-hanji/60">
-          신강신약·용신·지지 관계·공망·대운·세운까지 — 9개 장으로 읽는 깊은 해석
+          격국·신강신약·용신·십이운성·대운·세운까지 — 10개 장으로 읽는 깊은 해석
         </p>
       </a>
 

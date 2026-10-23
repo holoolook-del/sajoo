@@ -67,6 +67,22 @@ export function ReportPage() {
         <p className={body}>{report.summary}</p>
         <div className="mt-4 rounded-lg bg-night p-4">
           <p className="text-xs font-bold text-gold-bright">
+            격국(格局) — {report.gyeokguk.name} · {report.gyeokguk.god}
+          </p>
+          <p className="mt-1 text-sm leading-6 text-hanji/85">{report.gyeokguk.text}</p>
+        </div>
+        <dl className="mt-3 space-y-2.5 rounded-lg bg-night p-4">
+          <div className="flex gap-3 text-sm leading-6">
+            <dt className="shrink-0 font-bold text-gold-bright">득령 여부</dt>
+            <dd className="text-hanji/85"><span className="font-bold text-hanji">{report.deukryeong.verdict}.</span> {report.deukryeong.text}</dd>
+          </div>
+          <div className="flex gap-3 text-sm leading-6">
+            <dt className="shrink-0 font-bold text-gold-bright">통근</dt>
+            <dd className="text-hanji/85">{report.rooted.text}</dd>
+          </div>
+        </dl>
+        <div className="mt-3 rounded-lg bg-night p-4">
+          <p className="text-xs font-bold text-gold-bright">
             신강·신약 판정 — {strength.verdict} (돕는 기운 {strength.support} : 새는 기운 {strength.drain})
           </p>
           <p className="mt-1 text-sm leading-6 text-hanji/85">
@@ -126,9 +142,28 @@ export function ReportPage() {
         )}
       </section>
 
-      {/* 제4장 — 지지의 관계망 */}
+      {/* 제4장 — 십이운성: 지지 자리별 인생 단계 */}
       <section className={chapterCls}>
-        <h2 className={chapterH}><span className={chapterNo}>제4장</span> 지지의 관계망 — 합·충·형·해</h2>
+        <h2 className={chapterH}><span className={chapterNo}>제4장</span> 십이운성(十二運星) — 지지 자리의 인생 단계</h2>
+        <p className="mt-2 text-xs leading-5 text-hanji/50">
+          일간이 각 지지 자리에서 맞는 기운의 인생 단계 — 씨앗(장생)부터 왕의 자리(제왕), 저장고(묘), 다시 씨 맺기(태)까지.
+        </p>
+        <ul className="mt-3 space-y-3">
+          {report.stages.map((s) => (
+            <li key={s.where} className="rounded-lg bg-night p-3.5">
+              <p className="text-sm font-bold text-hanji">
+                {s.where} {s.branch} — <span className="text-gold-bright">{s.stage}</span>
+                <span className="ml-2 text-[11px] font-normal text-hanji/50">{s.stageDesc}</span>
+              </p>
+              <p className="mt-1.5 text-sm leading-6 text-hanji/85">{s.text}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* 제5장 — 지지의 관계망 */}
+      <section className={chapterCls}>
+        <h2 className={chapterH}><span className={chapterNo}>제5장</span> 지지의 관계망 — 합·충·형·해</h2>
         {report.relations.length === 0 ? (
           <p className={body}>사주 글자 사이에 뚜렷한 합·충 관계가 없습니다 — 자리 간의 긴장이 적은 편이라, 흐름이 온전히 오행의 균형에 달려 있습니다.</p>
         ) : (
@@ -146,9 +181,9 @@ export function ReportPage() {
         )}
       </section>
 
-      {/* 제5장 — 신살과 공망 */}
+      {/* 제6장 — 신살과 공망 */}
       <section className={chapterCls}>
-        <h2 className={chapterH}><span className={chapterNo}>제5장</span> 사주에 박힌 별 — 신살·공망</h2>
+        <h2 className={chapterH}><span className={chapterNo}>제6장</span> 사주에 박힌 별 — 신살·공망</h2>
         {report.sinsal.length === 0 && report.voids.length === 0 ? (
           <p className={body}>눈에 띄는 신살·공망이 없습니다 — 뚜렷한 별의 흔적보다 오행과 십신의 흐름으로 읽는 사주입니다.</p>
         ) : (
@@ -180,9 +215,9 @@ export function ReportPage() {
         )}
       </section>
 
-      {/* 제6장 — 대운의 물줄기 */}
+      {/* 제7장 — 대운의 물줄기 */}
       <section className={chapterCls}>
-        <h2 className={chapterH}><span className={chapterNo}>제6장</span> 인생의 큰 물줄기 — 대운(大運)</h2>
+        <h2 className={chapterH}><span className={chapterNo}>제7장</span> 인생의 큰 물줄기 — 대운(大運)</h2>
         {daewoon ? (
           <>
             <p className="mt-2 text-xs text-hanji/50">{daewoon.directionLabel} · {daewoon.startAge}세부터 시작</p>
@@ -208,12 +243,24 @@ export function ReportPage() {
                 <p className="text-sm font-bold text-gold-bright">
                   지금의 대운 — {daewoon.current.korean}({daewoon.current.hanja}) · {daewoon.current.age}세~{daewoon.current.age + 9}세
                 </p>
+                <span
+                  className={`mt-1.5 inline-block rounded-full border px-2 py-0.5 text-[10px] ${
+                    daewoon.current.favor === '용신운'
+                      ? 'border-gold bg-gold/15 text-gold-bright'
+                      : daewoon.current.favor === '기신운'
+                        ? 'border-hanji/30 text-hanji/60'
+                        : 'border-hanji/15 text-hanji/50'
+                  }`}
+                >
+                  {daewoon.current.favor}
+                </span>
                 <p className="mt-2 text-sm leading-6 text-hanji/85">{daewoon.current.stemText}</p>
                 {daewoon.current.branchGod !== daewoon.current.stemGod && (
                   <p className="mt-1.5 text-sm leading-6 text-hanji/70">
                     <span className="font-bold text-hanji/80">속의 흐름 — {daewoon.current.branchGod}:</span> {daewoon.current.branchText}
                   </p>
                 )}
+                <p className="mt-1.5 text-xs leading-5 text-hanji/55">{daewoon.current.favorText}</p>
               </div>
             )}
             {daewoon.next && (
@@ -227,9 +274,9 @@ export function ReportPage() {
         )}
       </section>
 
-      {/* 제7장 — 올해와 내년 */}
+      {/* 제8장 — 올해와 내년 */}
       <section className={chapterCls}>
-        <h2 className={chapterH}><span className={chapterNo}>제7장</span> 올해와 내년 — 세운(歲運)</h2>
+        <h2 className={chapterH}><span className={chapterNo}>제8장</span> 올해와 내년 — 세운(歲運)</h2>
         {([seun, nextYear] as const).map((s, i) => (
           <div key={s.year} className="mt-3 rounded-lg bg-night p-4">
             <div className="flex items-center gap-4">
@@ -237,21 +284,33 @@ export function ReportPage() {
                 <span className="text-xl font-bold text-hanji">{s.hanja}</span>
                 <span className="text-[11px] text-gold-bright">{s.korean}</span>
               </div>
-              <p className="text-sm font-bold text-hanji">
+              <div className="text-sm font-bold text-hanji">
                 {s.year}년{i === 0 ? ' — 올해' : ' — 내년'}
                 <span className="block text-xs font-normal text-hanji/50">
                   {s.stemGod}·{s.branchGod}의 기운
                 </span>
-              </p>
+                <span
+                  className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[10px] font-normal ${
+                    s.favor === '용신운'
+                      ? 'border-gold bg-gold/15 text-gold-bright'
+                      : s.favor === '기신운'
+                        ? 'border-hanji/30 text-hanji/60'
+                        : 'border-hanji/15 text-hanji/50'
+                  }`}
+                >
+                  {s.favor}
+                </span>
+              </div>
             </div>
             <p className="mt-2.5 text-sm leading-6 text-hanji/85">{s.text}</p>
+            <p className="mt-1 text-xs leading-5 text-hanji/55">{s.favorText}</p>
           </div>
         ))}
       </section>
 
-      {/* 제8장 — 고민별 상담소 */}
+      {/* 제9장 — 고민별 상담소 */}
       <section className={chapterCls}>
-        <h2 className={chapterH}><span className={chapterNo}>제8장</span> 고민별 상담소</h2>
+        <h2 className={chapterH}><span className={chapterNo}>제9장</span> 고민별 상담소</h2>
         <dl className="mt-3 space-y-4">
           {reading.concerns.map((c) => (
             <div key={c.key}>
@@ -262,9 +321,9 @@ export function ReportPage() {
         </dl>
       </section>
 
-      {/* 제9장 — 종합 조언 */}
+      {/* 제10장 — 종합 조언 */}
       <section className="rounded-xl border-2 border-gold/50 bg-night-soft p-5 shadow-[0_0_24px_rgba(201,162,39,0.12)]">
-        <h2 className={chapterH}><span className={chapterNo}>제9장</span> 종합 조언</h2>
+        <h2 className={chapterH}><span className={chapterNo}>제10장</span> 종합 조언</h2>
         <ul className="mt-3 space-y-3">
           {report.advice.map((a, i) => (
             <li key={i} className="rounded-lg bg-night p-4 text-sm leading-6 text-hanji/85">{a}</li>

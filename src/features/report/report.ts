@@ -5,17 +5,25 @@
  */
 import {
   getBranchTenGod,
+  getEarthlyBranchElement,
   getTenGod,
   type EarthlyBranch,
   type HeavenlyStem,
 } from 'manseryeok';
 import {
+  DEUKRYEONG_TEXT,
+  GYEOKGUK_TEXT,
+  LUCK_FAVOR_TEXT,
   LUCK_GOD_TEXT,
   POSITION_MEANING,
   RELATION_KIND_TEXT,
+  ROOT_TEXT,
+  STAGE_NAMES,
+  STAGE_TEXT,
   STRENGTH_TEXT,
   VOID_GOD_TEXT,
   YONGSIN_TIPS,
+  type StageName,
 } from '../../content/report.ts';
 import {
   ELEMENT_CONTROLS,
@@ -59,11 +67,14 @@ export interface ReportVoid {
   text: string;
 }
 
+/** 운의 오행이 내 사주에 유리한지 — 용신(필요한 기운) / 기신(불균형을 키우는 기운) / 중립 */
+export type LuckFavor = '용신운' | '기신운' | '중립운';
+
 export interface LuckChapter {
   directionLabel: string;
   startAge: number;
   list: { age: number; korean: string; hanja: string; stemGod: TenGodKey; current: boolean }[];
-  current: { age: number; korean: string; hanja: string; stemGod: TenGodKey; branchGod: TenGodKey; stemText: string; branchText: string } | null;
+  current: { age: number; korean: string; hanja: string; stemGod: TenGodKey; branchGod: TenGodKey; stemText: string; branchText: string; favor: LuckFavor; favorText: string } | null;
   next: { age: number; korean: string; hanja: string; stemGod: TenGodKey; stemText: string } | null;
 }
 
@@ -74,11 +85,25 @@ export interface YearLuck {
   stemGod: TenGodKey;
   branchGod: TenGodKey;
   text: string;
+  favor: LuckFavor;
+  favorText: string;
+}
+
+/** 십이운성 — 지지 자리별 일간의 인생 단계 기운 */
+export interface StageEntry {
+  where: string;
+  branch: string; // 한글 지지
+  stage: StageName;
+  stageDesc: string;
+  text: string;
 }
 
 export interface DeepReport {
   headline: string; // 한 줄 총평 제목
   summary: string; // 종합 총평 단락
+  gyeokguk: { name: string; god: TenGodKey; text: string };
+  deukryeong: { verdict: '득령' | '상령' | '실령'; text: string };
+  rooted: { count: number; text: string };
   strength: { verdict: Verdict; support: number; drain: number; title: string; text: string };
   yongsin: {
     element: ElementKey;
@@ -91,6 +116,7 @@ export interface DeepReport {
     text: string;
   };
   missingGodGroups: { group: string; text: string }[];
+  stages: StageEntry[]; // 십이운성 — 지지 자리별
   relations: ReportRelation[];
   voids: ReportVoid[];
   sinsal: Sinsal[];
@@ -174,6 +200,91 @@ function pickYongsin(
   };
 }
 
+const BRANCH_ORDER = ['자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해'];
+/** 지장간 정기(본기) — 지지 안에 깃든 주인 천간. 격국 판정의 기준. */
+const BRANCH_MAIN_STEM_KOR: Record<string, string> = {
+  자: '계', 축: '기', 인: '갑', 묘: '을', 진: '무', 사: '병',
+  오: '정', 미: '기', 신: '경', 유: '신', 술: '무', 해: '임',
+};
+const YANG_STEMS = ['갑', '병', '무', '경', '임'];
+/** 양간은 지지 순행·음간은 역행 — 일간별 장생(씨앗 자리) 시작 지지 */
+const JANGSAENG: Record<string, string> = {
+  갑: '해', 을: '오', 병: '인', 정: '유', 무: '인',
+  기: '유', 경: '사', 신: '자', 임: '신', 계: '묘',
+};
+
+/** 일간이 지지 자리에서 맞는 십이운성 단계 */
+function stageOf(dayStemKorean: string, branchKorean: string): StageName {
+  const start = BRANCH_ORDER.indexOf(JANGSAENG[dayStemKorean] ?? '자');
+  const at = BRANCH_ORDER.indexOf(branchKorean);
+  if (start < 0 || at < 0) return '장생';
+  const yang = YANG_STEMS.includes(dayStemKorean);
+  return STAGE_NAMES[(((yang ? at - start : start - at) % 12) + 12) % 12] ?? '장생';
+}
+
+/** 격국 — 월지 정기(지장간 본기)의 십신 */
+function calcGyeokguk(saju: SajuResult): DeepReport['gyeokguk'] {
+  const monthBranch = saju.pillars.month.korean.charAt(1);
+  const mainStem = BRANCH_MAIN_STEM_KOR[monthBranch];
+  const god = (mainStem ? getTenGod(saju.dayMaster.korean as HeavenlyStem, mainStem as HeavenlyStem) : saju.pillars.month.tenGodBranch) as TenGodKey;
+  const g = GYEOKGUK_TEXT[god];
+  return { name: g.name, god, text: g.text };
+}
+
+/** 득령 — 일간이 월지(계절)의 힘을 받는가 */
+function calcDeukryeong(saju: SajuResult): DeepReport['deukryeong'] {
+  const monthEl = saju.pillars.month.branchElement as ElementKey;
+  const my = saju.dayMaster.element as ElementKey;
+  const verdict = monthEl === my ? '득령' : ELEMENT_GENERATES[monthEl] === my ? '상령' : '실령';
+  return { verdict, text: DEUKRYEONG_TEXT[verdict] };
+}
+
+/** 통근 — 지지 중 일간과 같은 오행의 개수 */
+function calcRoot(saju: SajuResult): DeepReport['rooted'] {
+  const my = saju.dayMaster.element as ElementKey;
+  const count = [saju.pillars.year, saju.pillars.month, saju.pillars.day, saju.pillars.hour]
+    .filter((p): p is NonNullable<typeof p> => p !== null)
+    .filter((p) => p.branchElement === my).length;
+  return { count, text: count > 0 ? ROOT_TEXT.rooted : ROOT_TEXT.rootless };
+}
+
+/** 십이운성 목록 — 연지·월지·일지·시지 순 */
+function calcStages(saju: SajuResult): StageEntry[] {
+  const dayStem = saju.dayMaster.korean;
+  const out: StageEntry[] = [];
+  for (const [where, p] of [
+    ['연지', saju.pillars.year], ['월지', saju.pillars.month],
+    ['일지', saju.pillars.day], ['시지', saju.pillars.hour],
+  ] as const) {
+    if (!p) continue;
+    const branch = p.korean.charAt(1);
+    const stage = stageOf(dayStem, branch);
+    const meta = STAGE_TEXT[stage];
+    out.push({ where, branch, stage, stageDesc: meta.stage, text: meta.text });
+  }
+  return out;
+}
+
+/** 운의 기운이 내 사주에 유리한지 — 대운·세운은 지지를 주심으로 봄 */
+function luckFavor(
+  branchKorean: string,
+  yongsin: ElementKey,
+  verdict: Verdict,
+  myEl: ElementKey,
+): LuckFavor {
+  const branchEl = getEarthlyBranchElement(branchKorean as EarthlyBranch) as ElementKey;
+  // 기신 오행 — 판정별 불균형을 키우는 쪽
+  const gisin: ElementKey[] =
+    verdict === '신약'
+      ? [ELEMENT_GENERATES[myEl], ELEMENT_CONTROLS[myEl], controllingElement(myEl)]
+      : verdict === '신강'
+        ? [generatingElement(myEl), myEl]
+        : [];
+  if (branchEl === yongsin) return '용신운';
+  if (gisin.includes(branchEl)) return '기신운';
+  return '중립운';
+}
+
 /** 사주 안 지지 관계(合沖刑害 등) — 모든 자리 쌍을 검사 */
 function findRelations(saju: SajuResult): ReportRelation[] {
   const positions: { label: string; p: SajuPillar }[] = [];
@@ -227,13 +338,20 @@ function findVoids(saju: SajuResult): ReportVoid[] {
     });
 }
 
-function yearLuck(dayStemKorean: string, year: number): YearLuck {
+function yearLuck(
+  dayStemKorean: string,
+  year: number,
+  yongsin: ElementKey,
+  verdict: Verdict,
+  myEl: ElementKey,
+): YearLuck {
   const p = yearPillarOf(year);
   const stemGod = getTenGod(dayStemKorean as HeavenlyStem, p.korean.charAt(0) as HeavenlyStem) as TenGodKey;
   const branchGod = getBranchTenGod(
     dayStemKorean as HeavenlyStem,
     p.korean.charAt(1) as EarthlyBranch,
   ) as TenGodKey;
+  const favor = luckFavor(p.korean.charAt(1), yongsin, verdict, myEl);
   return {
     year,
     korean: p.korean,
@@ -241,6 +359,8 @@ function yearLuck(dayStemKorean: string, year: number): YearLuck {
     stemGod,
     branchGod,
     text: LUCK_GOD_TEXT[stemGod].year,
+    favor,
+    favorText: LUCK_FAVOR_TEXT[favor].text,
   };
 }
 
@@ -254,7 +374,12 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
   const strengthText = STRENGTH_TEXT[verdict];
   const yongsinPick = pickYongsin(saju, verdict);
   const yongsinTip = YONGSIN_TIPS[yongsinPick.element];
+  const myEl = saju.dayMaster.element as ElementKey;
 
+  const gyeokguk = calcGyeokguk(saju);
+  const deukryeong = calcDeukryeong(saju);
+  const rooted = calcRoot(saju);
+  const stages = calcStages(saju);
   const relations = findRelations(saju);
   const voids = findVoids(saju);
   const sinsal = findSinsal(saju);
@@ -283,6 +408,8 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
                 ...cur,
                 stemText: LUCK_GOD_TEXT[cur.stemGod].decade,
                 branchText: LUCK_GOD_TEXT[cur.branchGod].decade,
+                favor: luckFavor(cur.korean.charAt(1), yongsinPick.element, verdict, myEl),
+                favorText: LUCK_FAVOR_TEXT[luckFavor(cur.korean.charAt(1), yongsinPick.element, verdict, myEl)].text,
               }
             : null,
           next: nxt
@@ -292,13 +419,14 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
       })()
     : null;
 
-  const seun = yearLuck(saju.dayMaster.korean, year);
-  const nextYear = yearLuck(saju.dayMaster.korean, year + 1);
+  const seun = yearLuck(saju.dayMaster.korean, year, yongsinPick.element, verdict, myEl);
+  const nextYear = yearLuck(saju.dayMaster.korean, year + 1, yongsinPick.element, verdict, myEl);
 
-  const headline = `${saju.dayMaster.hanja}(${saju.dayMaster.korean}) — ${reading.dayMaster.title}, ${verdict}의 사주`;
+  const headline = `${gyeokguk.name} — ${saju.dayMaster.hanja}(${saju.dayMaster.korean}) ${reading.dayMaster.title}, ${verdict}의 사주`;
 
   const summary = [
-    `일간 ${saju.dayMaster.hanja}(${saju.dayMaster.korean}) — ${reading.dayMaster.nature}의 기운을 타고난 ${verdict} 사주입니다.`,
+    `일간 ${saju.dayMaster.hanja}(${saju.dayMaster.korean}) — ${reading.dayMaster.nature}의 기운을 타고난 ${verdict} 사주이며, 사주의 격은 ${gyeokguk.name}입니다.`,
+    `${deukryeong.text} ${rooted.text}`,
     strengthText.text,
     `오행 분포는 ${reading.dominant} 기운이 가장 강하고${
       reading.lacking.length > 0 ? ` ${reading.lacking.join('·')} 기운이 비어 있어,` : ' 골고루 퍼져 있어,'
@@ -324,6 +452,10 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
   return {
     headline,
     summary,
+    gyeokguk,
+    deukryeong,
+    rooted,
+    stages,
     strength: { verdict, support, drain, title: strengthText.title, text: strengthText.text },
     yongsin: { element: yongsinPick.element, reason: yongsinPick.reason, ...yongsinTip },
     missingGodGroups,
