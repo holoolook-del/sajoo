@@ -277,6 +277,18 @@ export function SajuPage() {
         </dl>
       </section>
 
+      {/* 심화 리포트 진입 — 이 페이지보다 10배 깊은 분량 */}
+      <a
+        href="#/report"
+        className="block rounded-xl border-2 border-gold/50 bg-night-soft p-5 text-center transition-colors hover:border-gold"
+      >
+        <p className="text-xs tracking-widest text-gold-bright">SAJOO 심층 명식 감정서</p>
+        <p className="mt-2 text-lg font-bold text-hanji">심화 사주 리포트 보기 →</p>
+        <p className="mt-1 text-xs leading-5 text-hanji/60">
+          신강신약·용신·지지 관계·공망·대운·세운까지 — 9개 장으로 읽는 깊은 해석
+        </p>
+      </a>
+
       <p className="text-center text-[10px] leading-4 text-hanji/30">
         만세력 계산 — 한국천문연구원 간지 데이터 기반 · 해석 — 전통 명리 체계(십신·오행·합충형해) 정리
       </p>

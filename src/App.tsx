@@ -13,6 +13,7 @@ import { LotsPage } from './pages/lots.tsx';
 import { LuckPage } from './pages/luck.tsx';
 import { MoktakPage } from './pages/moktak.tsx';
 import { OnboardingPage } from './pages/onboarding.tsx';
+import { ReportPage } from './pages/report.tsx';
 import { SajuPage } from './pages/saju.tsx';
 import { SchoolPage } from './pages/school.tsx';
 import { SleepPage } from './pages/sleep.tsx';
@@ -55,6 +56,14 @@ export function App() {
           element={
             <RequireProfile>
               <SajuPage />
+            </RequireProfile>
+          }
+        />
+        <Route
+          path="/report"
+          element={
+            <RequireProfile>
+              <ReportPage />
             </RequireProfile>
           }
         />

@@ -1,0 +1,94 @@
+import { describe, expect, it } from 'vitest';
+import { calcSaju, type SajuBirthInput } from '../../lib/engine.ts';
+import type { Profile } from '../../lib/types.ts';
+import { buildDeepReport } from './report.ts';
+import { ELEMENT_KEYS } from '../../content/meta.ts';
+
+const birth: SajuBirthInput = {
+  year: 1992, month: 10, day: 24, hour: 5, minute: 30,
+  calendar: 'solar', isLeapMonth: false, gender: 'male',
+};
+
+const profile: Profile = {
+  v: 1, name: '테스트', calendar: 'solar', isLeapMonth: false,
+  year: 1992, month: 10, day: 24, hour: 5, minute: 30,
+  gender: 'male', createdAt: '2026-01-01T00:00:00.000Z',
+};
+
+const TODAY = '2026-10-23';
+
+function reportFor(input: SajuBirthInput = birth, prof: Profile = profile, today = TODAY) {
+  const r = calcSaju(input);
+  if (!r.ok) throw new Error('사주 계산 실패');
+  return buildDeepReport(r.data, prof, today);
+}
+
+describe('buildDeepReport', () => {
+  it('9개장 분량의 리포트 구조를 만든다', () => {
+    const r = reportFor();
+    expect(r.headline).toContain('癸');
+    expect(r.summary.length).toBeGreaterThan(200);
+    expect(r.strength.text.length).toBeGreaterThan(50);
+    expect(r.yongsin.label).toBeTruthy();
+    expect(r.advice.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('신강신약은 세 판정 중 하나이고 가중 합이 양수다', () => {
+    const r = reportFor();
+    expect(['신강', '중화', '신약']).toContain(r.strength.verdict);
+    expect(r.strength.support + r.strength.drain).toBe(12); // 천간4 + 지지(2+3+2+2) - 일간 제외
+  });
+
+  it('용신은 유효한 오행이고 판정에 맞는 근거를 준다', () => {
+    const r = reportFor();
+    expect(ELEMENT_KEYS).toContain(r.yongsin.element);
+    expect(r.yongsin.reason).toContain(r.yongsin.element);
+    expect(r.yongsin.color).toBeTruthy();
+    expect(r.yongsin.items).toBeTruthy();
+  });
+
+  it('지지 관계·공망 결과가 유효한 형식이다', () => {
+    const r = reportFor();
+    for (const rel of r.relations) {
+      expect(['육합', '삼합', '충', '형', '해', '원진', '파']).toContain(rel.kind);
+      expect(rel.pair).toMatch(/지×.지/);
+    }
+    for (const v of r.voids) {
+      expect(v.god).toBeTruthy();
+      expect(v.text.length).toBeGreaterThan(10);
+    }
+  });
+
+  it('대운에서 현재 시기의 대운을 찾아 해석을 붙인다', () => {
+    const r = reportFor();
+    expect(r.daewoon).not.toBeNull();
+    // 1992년생·세는나이 기준 2026년 = 35세 → 35세 대운이 current
+    const cur = r.daewoon!.current;
+    expect(cur?.age).toBe(35);
+    expect(cur?.stemText.length).toBeGreaterThan(30);
+    expect(r.daewoon!.list.length).toBeGreaterThan(5);
+    // 다음 대운이 있으면 시작 나이가 현재+10
+    if (r.daewoon!.next) expect(r.daewoon!.next!.age).toBe(cur!.age + 10);
+  });
+
+  it('세운은 해당 연도·내년 두 개의 해석을 준다', () => {
+    const r = reportFor();
+    expect(r.seun.year).toBe(2026);
+    expect(r.seun.korean).toBe('병오'); // 2026년 세운
+    expect(r.nextYear.year).toBe(2027);
+    expect(r.seun.text).toContain('해');
+    expect(r.seun.stemGod).toBeTruthy();
+    expect(r.seun.branchGod).toBeTruthy();
+  });
+
+  it('생시가 없어도 리포트를 만들되 대운 장은 비운다', () => {
+    const noHour = reportFor({ ...birth, hour: null, minute: null }, { ...profile, hour: null, minute: null });
+    expect(noHour.summary.length).toBeGreaterThan(200);
+    expect(noHour.strength.support + noHour.strength.drain).toBe(9); // 시주 가중치 3 제외
+    expect(noHour.seun.stemGod).toBeTruthy();
+  });
+
+  it('같은 입력은 같은 리포트를 만든다 (결정성)', () => {
+    expect(reportFor().summary).toBe(reportFor().summary);
+  });
+});

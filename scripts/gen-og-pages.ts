@@ -134,5 +134,14 @@ pages.push({
   route: '/school',
 });
 
+// 심화 리포트 — 개인 사주 결과라 랜딩만
+pages.push({
+  path: 'report',
+  title: '심화 사주 리포트 — SAJOO',
+  desc: '신강신약·용신·대운·세운까지 — 9개 장으로 읽는 깊은 명식 감정서. 너도 받아봐!',
+  image: 'assets/illust/menu-saju.webp',
+  route: '/report',
+});
+
 for (const p of pages) emit(p);
 console.log(`OG pages: ${pages.length}개 생성 → dist/og/`);
