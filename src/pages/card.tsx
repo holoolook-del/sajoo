@@ -60,6 +60,7 @@ export function CardPage() {
                 label="오늘의 카드 공유하기"
                 text={cardShareText}
                 url={ogUrl(`card/${card.id}`)}
+                kakao={false}
               />
               <ShareImageButton
                 data={{

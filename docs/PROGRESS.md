@@ -648,3 +648,14 @@
 ### 검증
 - vitest 17/17 — 신규 퀴즈는 위치 편향·가중치 유효성 테스트를 자동 통과, school-fortune.test.ts 5건(결정성·4카테고리·유효성·날짜별 변동·총평)
 - pnpm verify — 아래 전체 결과 확인
+
+## T35 — 카카오 SDK 공유 전 페이지 통일
+
+### 한 일
+- `shareToKakao`의 `imageBlob`을 선택 인자로 확장 — 없으면 이미지 없는 텍스트+링크 feed 전송
+- `ShareButton`에 '카톡으로 공유' 버튼 통합(kakaoReady 시 자동 표시) — 운세·목탁·제비·로또·숙면·게시판·궁합초대에 SDK 경로 자동 적용
+- ShareImageButton과 나란히 쓰는 페이지(saju/card/compat결과/test)는 `kakao={false}`로 중복 방지
+- 결과: 모든 공유 지점에 카카오 SDK 경로 존재 — OS 공유 시트는 보조로 유지
+
+### 검증
+- pnpm verify — typecheck·lint(기존 warning 2)·vitest 14파일 87/87·build+OG 114

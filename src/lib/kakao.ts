@@ -49,18 +49,20 @@ function loadSdk(): Promise<KakaoSdk> {
 export async function shareToKakao(args: {
   title: string;
   description: string;
-  imageBlob: Blob;
+  imageBlob?: Blob;
   url: string;
 }): Promise<'shared' | 'failed'> {
   try {
     const Kakao = await loadSdk();
-    const up = await Kakao.Share.uploadImage({ file: [args.imageBlob] });
+    const up = args.imageBlob
+      ? await Kakao.Share.uploadImage({ file: [args.imageBlob] })
+      : null;
     Kakao.Share.sendDefault({
       objectType: 'feed',
       content: {
         title: args.title,
         description: args.description.slice(0, 200),
-        imageUrl: up.infos.original.url,
+        ...(up ? { imageUrl: up.infos.original.url } : {}),
         link: { webUrl: args.url, mobileWebUrl: args.url },
       },
       buttons: [

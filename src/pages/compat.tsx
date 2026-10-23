@@ -159,6 +159,7 @@ export function CompatPage() {
               label="궁합 결과 공유하기"
               text={resultShareText}
               url={ogUrl(`compat/${GRADE_OG[result.grade] ?? 'pyeong'}`)}
+              kakao={false}
             />
             <ShareImageButton
               data={{

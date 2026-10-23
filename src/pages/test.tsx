@@ -429,6 +429,7 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
               label="결과 공유하기"
               text={shareText}
               url={ogUrl(`test/${quiz.id}/${result.code}`)}
+              kakao={false}
             />
             <ShareImageButton
               data={{

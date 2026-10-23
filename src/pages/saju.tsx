@@ -97,6 +97,7 @@ export function SajuPage() {
             label="내 사주 캐릭터 공유하기"
             text={charShareText}
             url={ogUrl(`saju/${STEM_OG[dayMaster.hanja] ?? ''}`)}
+            kakao={false}
           />
           <ShareImageButton
             data={{

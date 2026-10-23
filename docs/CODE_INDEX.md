@@ -78,9 +78,9 @@
 | BoardPage | src/pages/board.tsx | 자유 게시판 — 글·댓글·접속자 수·'내 결과 자랑' 카드 첨부. 프로필 불필요, 미설정 시 준비 중 화면. 라우트 /board | — |
 | timeAgo | src/lib/date.ts | 상대 시각 — 방금 전/N분 전/N시간 전/M월 D일 | ts → 라벨 |
 | readRecord/writeRecord/boardLastWrite/boardStampWrite/boardFlag/boardMarkFlag | src/lib/storage.ts | record 헬퍼 export + 게시판 도배 방지용 작성 시각 + 좋아요·신고 기기당 1회 플래그 | key → 저장값 |
-| ShareButton | src/components/share-button.tsx | 공유 버튼 (shareResult 호출 + 복사 피드백) | text,label? → 버튼 |
+| ShareButton | src/components/share-button.tsx | 공유 버튼 — '카톡으로 공유'(SDK 텍스트+링크 피드, ShareImageButton과 함께 쓰는 페이지는 kakao=false로 중복 방지) + shareResult 호출·복사 피드백 | text,label?,url?,kakao? → 버튼들 |
 | ShareImageButton | src/components/share-image-button.tsx | 결과 이미지 공유 버튼 — '카톡으로 공유'(Kakao.Share 피드: 이미지+설명+링크 한 메시지) + 일반 파일 공유(설명+링크 클립보드 선복사). 미지원 시 PNG 저장. 캔버스는 내용량만큼 동적 높이 | data,text?,url? → 버튼들 |
-| kakaoReady / shareToKakao | src/lib/kakao.ts | 카카오톡 공유 — JS SDK 지연 로드 + uploadImage→sendDefault feed. JS 키는 공개용(도메인 제한, kakao 콘솔 앱 1619487). env VITE_KAKAO_JS_KEY로 오버라이드 가능 | {title,description,imageBlob,url} → 'shared'\|'failed' |
+| kakaoReady / shareToKakao | src/lib/kakao.ts | 카카오톡 공유 — JS SDK 지연 로드 + sendDefault feed. imageBlob 있으면 uploadImage 후 첨부, 없으면 텍스트+링크 피드. JS 키는 공개용(도메인 제한, kakao 콘솔 앱 1619487). env VITE_KAKAO_JS_KEY로 오버라이드 가능 | {title,description,imageBlob?,url} → 'shared'\|'failed' |
 | renderShareImage / shareImageResult | src/lib/share-image.ts | 결과 이미지 캔버스 렌더(동적 높이, 워터마크 푸터) → PNG Blob / 공유 시트 or 저장 | ShareCardData → Blob / 'shared'\|'saved'\|'canceled'\|'failed' |
 | ogUrl / STEM_OG / GRADE_OG | src/lib/og.ts | 공유 링크용 정적 OG 페이지 경로 — hash 라우트는 크롤러 미리보기 불가라 결과별 /sajoo/og/{route}/…/ 정적 HTML로 연결. 슬러그는 scripts/gen-og-pages.ts가 빌드 시 생성 | path → 절대 URL |
 | TestHubPage | src/pages/test.tsx | 심리테스트 허브 — QUIZZES 전체 목록(썸네일·문항수·지난결과 칩), 프로필 불필요. 라우트 /test | — |
