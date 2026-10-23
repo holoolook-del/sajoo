@@ -169,6 +169,7 @@ export function BoardPage() {
 
 function WriteBox({ onError }: { onError: (m: string) => void }) {
   const [nick, setNick] = useState(boardNickname());
+  const [nickErr, setNickErr] = useState('');
   const [editingNick, setEditingNick] = useState(false);
   const [text, setText] = useState('');
   const [card, setCard] = useState<ResultCard | null>(null);
@@ -224,7 +225,13 @@ function WriteBox({ onError }: { onError: (m: string) => void }) {
           <input
             value={nick}
             onChange={(e) => setNick(e.target.value)}
-            onBlur={() => { const t = nick.trim(); if (t) { saveNickname(t); setNick(t); } else setNick(boardNickname()); setEditingNick(false); }}
+            onBlur={() => {
+              const t = nick.trim();
+              const saved = t.length > 0 && saveNickname(t);
+              setNick(saved ? t : boardNickname());
+              setNickErr(t && !saved ? '사용할 수 없는 닉네임이에요' : '');
+              setEditingNick(false);
+            }}
             onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
             maxLength={12}
             autoFocus
@@ -233,7 +240,7 @@ function WriteBox({ onError }: { onError: (m: string) => void }) {
         ) : (
           <button
             type="button"
-            onClick={() => setEditingNick(true)}
+            onClick={() => { setNickErr(''); setEditingNick(true); }}
             className="text-xs font-bold text-gold-bright"
             title="닉네임 바꾸기"
           >
@@ -242,6 +249,7 @@ function WriteBox({ onError }: { onError: (m: string) => void }) {
         )}
         <span className="text-[10px] text-hanji/40">{text.length}/{POST_MAX_LEN}</span>
       </div>
+      {nickErr && <p className="mt-1 text-[10px] text-[#e0705a]">{nickErr}</p>}
 
       <textarea
         value={text}

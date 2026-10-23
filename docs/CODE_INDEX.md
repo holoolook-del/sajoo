@@ -73,7 +73,7 @@
 | FIREBASE_CFG / firebaseReady | src/lib/firebase.ts | Firebase env 플래그 — SDK import 없음(초기 번들 분리). 미설정 시 게시판은 준비 중 화면 | — → bool |
 | watchPosts/watchComments/addPost/addComment/removePost/deviceUid/startPresence/watchPresence/likePost/reportPost/HIDE_AT_REPORTS | src/features/board/posts.ts | 게시판 데이터 — Firestore posts+comments, RTDB presence. /board 라우트와 함께 지연 로드. likes·reports·comments 카운터는 rules가 +1 증분만 허용 | 콜백·텍스트 ↔ 스트림/Promise |
 | checkText/POST_MAX_LEN/COMMENT_MAX_LEN | src/features/board/filter.ts | 게시판 텍스트 검사 — 욕설·링크·도배 차단 | text → {ok,reason?} |
-| boardNickname/saveNickname/genNickname | src/features/board/nickname.ts | 기기별 익명 닉네임 생성·저장(사용자 수정 가능) | — → 닉네임 |
+| boardNickname/saveNickname/genNickname | src/features/board/nickname.ts | 기기별 익명 닉네임 생성·저장(사용자 수정 가능, save는 checkText 필터 적용 후 성공 여부 반환) | — → 닉네임 |
 | BoardPage | src/pages/board.tsx | 자유 게시판 — 글·댓글·접속자 수·'내 결과 자랑' 카드 첨부. 프로필 불필요, 미설정 시 준비 중 화면. 라우트 /board | — |
 | timeAgo | src/lib/date.ts | 상대 시각 — 방금 전/N분 전/N시간 전/M월 D일 | ts → 라벨 |
 | readRecord/writeRecord/boardLastWrite/boardStampWrite/boardFlag/boardMarkFlag | src/lib/storage.ts | record 헬퍼 export + 게시판 도배 방지용 작성 시각 + 좋아요·신고 기기당 1회 플래그 | key → 저장값 |

@@ -1,4 +1,5 @@
 import { readRecord, writeRecord } from '../../lib/storage.ts';
+import { checkText, NICK_MAX_LEN } from './filter.ts';
 
 /**
  * 게시판 익명 닉네임 — 기기당 하나, localStorage에 유지.
@@ -23,6 +24,10 @@ export function boardNickname(): string {
   return nick;
 }
 
-export function saveNickname(nick: string): void {
-  writeRecord('board:nick', nick.trim().slice(0, 12));
+/** 저장 성공 여부 — 본문과 같은 욕설·광고 필터를 닉네임에도 적용 */
+export function saveNickname(nick: string): boolean {
+  const t = nick.trim().slice(0, NICK_MAX_LEN);
+  if (!checkText(t, NICK_MAX_LEN).ok) return false;
+  writeRecord('board:nick', t);
+  return true;
 }

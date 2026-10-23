@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { checkText, POST_MAX_LEN } from './filter.ts';
-import { genNickname } from './nickname.ts';
+import { genNickname, saveNickname } from './nickname.ts';
 
 describe('checkText', () => {
   it('정상 텍스트는 통과', () => {
@@ -43,5 +43,16 @@ describe('genNickname', () => {
     for (const r of [0, 0.99, 0.1]) {
       expect(genNickname(() => r).length).toBeLessThanOrEqual(12);
     }
+  });
+});
+
+describe('saveNickname', () => {
+  it('정상 닉네임은 저장', () => {
+    expect(saveNickname('달빛나그네')).toBe(true);
+  });
+  it('욕설·광고 닉네임은 거부 — 저장도 안 됨', () => {
+    expect(saveNickname('ㅅㅂ놈')).toBe(false);
+    expect(saveNickname('텔레그램방')).toBe(false);
+    expect(saveNickname('')).toBe(false);
   });
 });
