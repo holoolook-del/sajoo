@@ -189,6 +189,24 @@ const jobs: Job[] = [
     mp: '0.25',
   },
   {
+    file: 'illust/test-dino.webp',
+    prompt: `a friendly group of cute dinosaurs for children — a small T-rex, a triceratops, a long-neck brachiosaurus and a pteranodon — standing together under a full moon, round and colorful, gentle smiling faces, not scary, playful kids quiz concept${STYLE}`,
+    aspect: '16:9',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/test-game.webp',
+    prompt: `a glowing magical game controller floating above dark clouds surrounded by tiny sparkling game symbols — hearts, stars, a small sword and a shield — playful children's game style quiz concept${STYLE}`,
+    aspect: '16:9',
+    mp: '0.25',
+  },
+  {
+    file: 'illust/menu-school.webp',
+    prompt: `a cozy Korean elementary school building at night under a full moon, four small glowing symbols floating above the roof — a lunch tray, a pencil, two joined hands and a game controller — warm playful mood for kids${STYLE}`,
+    aspect: '1:1',
+    mp: '0.25',
+  },
+  {
     file: 'illust/menu-moktak.webp',
     prompt: `a round wooden fish drum (moktak) resting on a silk cushion, warm polished wood with carved scales, golden glow, temple stillness${STYLE}`,
     aspect: '1:1',

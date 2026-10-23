@@ -17,7 +17,7 @@ const MENUS = [
   { to: '/lots', img: 'menu-lots', title: '제비뽑기', desc: '모임에서 돌아가며 하나씩' },
   { to: '/lotto', img: 'menu-lotto', title: '로또 번호 분석소', desc: '실제 당첨번호 통계로 뽑는 조합' },
   { to: '/test', img: 'menu-test', title: '심리테스트', desc: 'MBTI·연애·동물까지 — 정답 없는 질문들' },
-  { to: '/school', img: 'menu-lots', title: '오늘의 학교 운세', desc: '급식·숙제·친구·게임 — 오늘 운은?' },
+  { to: '/school', img: 'menu-school', title: '오늘의 학교 운세', desc: '급식·숙제·친구·게임 — 오늘 운은?' },
   { to: '/board', img: 'menu-board', title: '자유 게시판', desc: '지금 접속한 사람들과 운세 수다' },
   { to: 'https://holoolook-del.github.io/necut/', img: 'menu-necut', title: '민화네컷', desc: '내 사진이 민화가 되는 네 컷' },
   { to: '/sleep', img: 'menu-sleep', title: '숙면 사운드', desc: '잠이 올 때까지 틀어두는 밤의 소리' },

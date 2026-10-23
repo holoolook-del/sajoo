@@ -1243,7 +1243,7 @@ export const DINO_QUIZ: QuizDef = {
   title: '나는 어떤 공룡?',
   subtitle: '24가지 선택으로 알아보는 내 안의 공룡',
   neutral: '둘 다 아니다 · 잘 모르겠다',
-  img: 'test-animal',
+  img: 'test-dino',
   note: '공룡 성격 매칭은 재미용 자체 제작 — 진단이 아닌 놀이입니다',
   shareLabel: '나는 이런 공룡이래',
   resolve: (score) =>
@@ -1364,7 +1364,7 @@ export const GAME_QUIZ: QuizDef = {
   title: '게임 스타일 테스트',
   subtitle: '24가지 선택으로 보는 나의 게임 플레이 성향',
   neutral: '둘 다 아니다 · 잘 모르겠다',
-  img: 'menu-lots',
+  img: 'test-game',
   note: '게임 성향 매칭은 재미용 자체 제작 — 진단이 아닌 놀이입니다',
   shareLabel: '내 게임 스타일은',
   resolve: (score) =>

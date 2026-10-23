@@ -659,3 +659,15 @@
 
 ### 검증
 - pnpm verify — typecheck·lint(기존 warning 2)·vitest 14파일 87/87·build+OG 114
+
+## T36 — 공룡·게임·학교운세 전용 이미지 생성 (재사용 이미지 교체)
+
+### 한 일
+- `REPLICATE_API_TOKEN`을 `/c/app01/.env`에서 sajoo `.env`로 복사 (관리자 자격증명 저장 시 .env 재작성되며 유실됐던 것 복구)
+- `gen-images.ts`에 작업 3개 추가 → `pnpm gen:images`로 생성: `test-dino.webp`(달빛 아래 귀여운 공룡 4마리)·`test-game.webp`(빛나는 게임패드, 1차 결과에 글자형 문양 있어 재생성)·`menu-school.webp`(달 아래 학교 건물+급식·숙제·게임 아이콘)
+- 참조 교체: DINO_QUIZ `img: test-animal→test-dino`, GAME_QUIZ `img: menu-lots→test-game`, 홈 학교 메뉴 `menu-lots→menu-school`, OG school 페이지 이미지도 교체
+- 테스트 결과 OG 페이지는 `q.img`를 자동 참조하므로 별도 수정 불필요
+
+### 검증
+- 이미지 육안 확인 (공룡·학교 양호, 게임은 재생성본 채택)
+- pnpm verify — typecheck·lint(기존 warning 2)·vitest 14파일 87/87·build+OG 114, dist에 3파일 포함 확인

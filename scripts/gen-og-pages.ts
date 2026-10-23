@@ -130,7 +130,7 @@ pages.push({
   path: 'school',
   title: '오늘의 학교 운세 — SAJOO',
   desc: '급식·숙제·친구·게임 — 오늘 학교 운은? 너도 확인해 봐!',
-  image: 'assets/illust/menu-lots.webp',
+  image: 'assets/illust/menu-school.webp',
   route: '/school',
 });
 
