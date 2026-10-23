@@ -3,6 +3,14 @@ rules_version = '2';
 // Firebase 콘솔 → Firestore Database → 규칙 탭에 붙여넣기
 // 게시판: 읽기는 모두, 쓰기는 익명 인증 uid 소유만. 필드·길이 검증으로 악용 방지.
 service cloud.firestore {
+  // 욕설·혐오·광고 유도·링크 서버 차단 — 클라이언트 checkText(src/features/board/filter.ts)와 같은 목적.
+  // RE2는 백레퍼런스 미지원이라 도배 반복 검사는 클라이언트만 담당.
+  function cleanText(s) {
+    return !s.matches('.*(시발|씨발|ㅅㅂ|ㅆㅂ|개새끼|개새|지랄|병신|ㅂㅅ|좆|보지|자지|섹스|sex|fuck|미친놈|미친년|니애미|느금마|창녀|걸레).*')
+      && !s.matches('.*https?://.*')
+      && !s.matches('.*(텔레그램|카톡방|오픈채팅).*')
+      && !s.matches('.*(대출|투자|코인|수익률|부업|재테크).*(문의|상담|링크|연락).*');
+  }
   match /databases/{db}/documents {
     match /posts/{postId} {
       allow read: if true;
@@ -13,6 +21,8 @@ service cloud.firestore {
         && request.resource.data.nick.size() <= 12
         && request.resource.data.text is string
         && request.resource.data.text.size() <= 300
+        && cleanText(request.resource.data.nick)
+        && cleanText(request.resource.data.text)
         && request.resource.data.get('likes', 0) == 0
         && request.resource.data.get('reports', 0) == 0
         && request.resource.data.get('comments', 0) == 0
@@ -37,6 +47,8 @@ service cloud.firestore {
           && request.resource.data.nick.size() <= 12
           && request.resource.data.text is string
           && request.resource.data.text.size() <= 150
+          && cleanText(request.resource.data.nick)
+          && cleanText(request.resource.data.text)
           && request.resource.data.ts == request.time;
         allow update, delete: if false;
       }
