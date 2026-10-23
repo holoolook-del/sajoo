@@ -214,7 +214,8 @@ async function paint(ctx: CanvasRenderingContext2D, data: ShareCardData): Promis
 
 const FOOTER_H = 150;
 
-async function render(data: ShareCardData): Promise<Blob> {
+/** 결과 카드를 PNG Blob으로 렌더링 — 공유(shareImageResult)·카톡 업로드(shareToKakao) 공용 */
+export async function renderShareImage(data: ShareCardData): Promise<Blob> {
   // 카톡은 이미지 공유 시 텍스트를 버리므로 이미지가 내용을 담아야 한다 —
   // 본문 길이만큼 캔버스를 늘려 넘침 없이 담는다 (1차 측정 패스 → 실제 그리기)
   const scratch = document.createElement('canvas');
@@ -243,7 +244,7 @@ export async function shareImageResult(
   extra?: { text?: string; url?: string },
 ): Promise<'shared' | 'saved' | 'canceled' | 'failed'> {
   try {
-    const blob = await render(data);
+    const blob = await renderShareImage(data);
     const file = new File([blob], 'saju-result.png', { type: 'image/png' });
     const body = [extra?.text, extra?.url].filter(Boolean).join('\n');
     if (navigator.canShare?.({ files: [file] })) {

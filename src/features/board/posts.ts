@@ -1,15 +1,15 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 import {
-  addDoc, collection, deleteDoc, doc, getFirestore, limit, onSnapshot, orderBy, query,
-  serverTimestamp, type Firestore, type Unsubscribe,
+  addDoc, collection, deleteDoc, doc, getFirestore, increment, limit, onSnapshot, orderBy,
+  query, serverTimestamp, updateDoc, type Firestore, type Unsubscribe,
 } from 'firebase/firestore';
 import {
   getDatabase, onDisconnect, onValue, ref, remove, set, serverTimestamp as rtdbTs,
   type Database,
 } from 'firebase/database';
 import { FIREBASE_CFG } from '../../lib/firebase.ts';
-import { boardLastWrite, boardStampWrite } from '../../lib/storage.ts';
+import { boardLastWrite, boardMarkFlag, boardStampWrite } from '../../lib/storage.ts';
 import { checkText, COMMENT_MAX_LEN, POST_MAX_LEN } from './filter.ts';
 
 /**
@@ -57,8 +57,14 @@ export interface Post {
   nick: string;
   text: string;
   card?: ResultCard;
+  likes: number;    // 좋아요 수 — likePost가 +1
+  reports: number;  // 신고 수 — HIDE_AT_REPORTS 이상이면 클라이언트에서 가림
+  comments: number; // 댓글 수 — addComment가 +1
   ts: number;      // ms epoch (serverTimestamp 해석 후)
 }
+
+/** 신고 이 수 이상이면 목록에서 가린다 */
+export const HIDE_AT_REPORTS = 5;
 
 export interface Comment {
   id: string;
@@ -95,6 +101,9 @@ export function watchPosts(cb: (posts: Post[]) => void, onErr?: (e: unknown) => 
         nick: String(v.nick ?? '익명'),
         text: String(v.text ?? ''),
         card: v.card as ResultCard | undefined,
+        likes: Number(v.likes ?? 0),
+        reports: Number(v.reports ?? 0),
+        comments: Number(v.comments ?? 0),
         ts: (v.ts?.toMillis?.() ?? Date.now()) as number,
       };
     }));
@@ -133,7 +142,8 @@ export async function addPost(nick: string, text: string, card?: ResultCard): Pr
   if (card && text.trim().length > POST_MAX_LEN) throw new BoardError('내용이 너무 깁니다');
   const uid = await deviceUid();
   await addDoc(collection(firestore(), 'posts'), {
-    uid, nick, text: text.trim(), ...(card ? { card } : {}), ts: serverTimestamp(),
+    uid, nick, text: text.trim(), ...(card ? { card } : {}),
+    likes: 0, reports: 0, comments: 0, ts: serverTimestamp(),
   });
   boardStampWrite('post');
 }
@@ -143,10 +153,26 @@ export async function addComment(postId: string, nick: string, text: string): Pr
   const check = checkText(text, COMMENT_MAX_LEN);
   if (!check.ok) throw new BoardError(check.reason);
   const uid = await deviceUid();
-  await addDoc(collection(firestore(), 'posts', postId, 'comments'), {
+  const fs = firestore();
+  await addDoc(collection(fs, 'posts', postId, 'comments'), {
     uid, nick, text: text.trim(), ts: serverTimestamp(),
   });
+  await updateDoc(doc(fs, 'posts', postId), { comments: increment(1) });
   boardStampWrite('comment');
+}
+
+/** 좋아요 +1 — 기기당 1회 플래그는 storage가, 증분 제한은 rules가 막는다 */
+export async function likePost(postId: string): Promise<void> {
+  await deviceUid();
+  await updateDoc(doc(firestore(), 'posts', postId), { likes: increment(1) });
+  boardMarkFlag('like', postId);
+}
+
+/** 신고 +1 — 누적 HIDE_AT_REPORTS 이상이면 클라이언트가 글을 가린다 */
+export async function reportPost(postId: string): Promise<void> {
+  await deviceUid();
+  await updateDoc(doc(firestore(), 'posts', postId), { reports: increment(1) });
+  boardMarkFlag('report', postId);
 }
 
 /** 내 기기에서 쓴 글만 삭제 가능 — 서버 측은 rules가 uid를 검증 */

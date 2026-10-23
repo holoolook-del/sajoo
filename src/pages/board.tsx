@@ -1,16 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { BackHome } from '../components/back-home.tsx';
 import { SoundToggle } from '../components/sound-toggle.tsx';
 import { ShareButton } from '../components/share-button.tsx';
 import { QUIZZES } from '../content/tests.ts';
+import { getCardById } from '../content/cards.ts';
 import { firebaseReady } from '../lib/firebase.ts';
-import { loadTestResult } from '../lib/storage.ts';
-import { timeAgo } from '../lib/date.ts';
+import {
+  boardFlag, loadCardDraw, loadFortune, loadTestResult,
+} from '../lib/storage.ts';
+import { todayKST, timeAgo } from '../lib/date.ts';
+import { APP_URL } from '../lib/share.ts';
+import { useSaju } from '../features/saju/use-saju.ts';
+import { interpretSaju } from '../lib/interpret.ts';
 import { boardNickname, saveNickname } from '../features/board/nickname.ts';
 import {
-  addComment, addPost, deviceUid, removePost, watchComments, watchPosts, watchPresence,
-  BoardError, type Comment, type Post, type ResultCard,
+  addComment, addPost, deviceUid, likePost, removePost, reportPost,
+  watchComments, watchPosts, watchPresence,
+  BoardError, HIDE_AT_REPORTS, type Comment, type Post, type ResultCard,
 } from '../features/board/posts.ts';
 import { checkText, COMMENT_MAX_LEN, POST_MAX_LEN } from '../features/board/filter.ts';
 
@@ -26,6 +33,7 @@ export function BoardPage() {
   const [error, setError] = useState('');
   const [loadErr, setLoadErr] = useState('');
   const [retryKey, setRetryKey] = useState(0);
+  const [sort, setSort] = useState<'new' | 'hot'>('new');
   const gotData = useRef(false);
 
   useEffect(() => {
@@ -42,6 +50,13 @@ export function BoardPage() {
     }, 12_000);
     return () => { un1(); un2(); clearTimeout(slow); };
   }, [retryKey]);
+
+  const shown = useMemo(() => {
+    const list = posts ?? [];
+    return sort === 'hot'
+      ? [...list].sort((a, b) => b.likes - a.likes || b.ts - a.ts)
+      : list;
+  }, [posts, sort]);
 
   if (!firebaseReady) {
     return (
@@ -108,13 +123,38 @@ export function BoardPage() {
           아직 글이 없어요 — 첫 글을 남겨보세요
         </p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          <AnimatePresence initial={false}>
-            {posts.map((p) => (
-              <PostItem key={p.id} post={p} mine={p.uid !== '' && p.uid === myUid} onError={setError} />
+        <>
+          <div className="flex gap-2">
+            {(['new', 'hot'] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setSort(s)}
+                className={`rounded-full px-3 py-1 text-[11px] font-bold transition-colors ${
+                  sort === s ? 'bg-gold text-night' : 'border border-hanji/20 text-hanji/50'
+                }`}
+              >
+                {s === 'new' ? '최신' : '인기'}
+              </button>
             ))}
-          </AnimatePresence>
-        </ul>
+          </div>
+          <ul className="flex flex-col gap-3">
+            <AnimatePresence initial={false}>
+              {shown.map((p) =>
+                p.reports >= HIDE_AT_REPORTS ? (
+                  <li
+                    key={p.id}
+                    className="rounded-xl border border-hanji/8 bg-night-soft/50 px-4 py-3 text-center text-xs text-hanji/30"
+                  >
+                    신고로 가려진 글이에요
+                  </li>
+                ) : (
+                  <PostItem key={p.id} post={p} mine={p.uid !== '' && p.uid === myUid} onError={setError} />
+                ),
+              )}
+            </AnimatePresence>
+          </ul>
+        </>
       )}
 
       <p className="text-center text-[10px] leading-4 text-hanji/30">
@@ -135,17 +175,32 @@ function WriteBox({ onError }: { onError: (m: string) => void }) {
   const [picker, setPicker] = useState(false);
   const [busy, setBusy] = useState(false);
   const live = checkText(text, POST_MAX_LEN);
+  const { saju } = useSaju();
+  const reading = saju ? interpretSaju(saju) : null;
+  const fortune = loadFortune(todayKST());
+  const dayCard = (() => { const d = loadCardDraw(todayKST()); return d ? getCardById(d.cardId) : undefined; })();
 
-  /** 완료한 테스트 결과를 카드로 올린다 — 바이럴용 '내 결과 자랑' */
-  const myResults = Object.values(QUIZZES)
-    .map((q) => {
-      const code = loadTestResult(q.id);
-      const t = code ? q.types[code] : null;
-      return code && t
-        ? { label: q.title, big: code, title: `「${t.name}」`, accent: t.accent ?? '#e8c766' }
-        : null;
-    })
-    .filter((c): c is ResultCard => c !== null);
+  /** 저장된 내 결과들을 카드로 올린다 — 바이럴용 '내 결과 자랑' */
+  const myResults = [
+    ...(reading && saju
+      ? [{ label: '나의 사주 캐릭터', big: saju.dayMaster.hanja, title: `「${reading.dayMaster.title}」`, accent: '#e8c766' }]
+      : []),
+    ...(fortune
+      ? [{ label: '오늘의 운세', big: fortune.grade, title: `${fortune.iljin} — ${fortune.summary}`, accent: '#e8c766' }]
+      : []),
+    ...(dayCard
+      ? [{ label: '오늘의 운세카드', big: dayCard.name, title: `${dayCard.grade} · ${dayCard.hanja}`, accent: '#e8c766' }]
+      : []),
+    ...Object.values(QUIZZES)
+      .map((q) => {
+        const code = loadTestResult(q.id);
+        const t = code ? q.types[code] : null;
+        return code && t
+          ? { label: q.title, big: code, title: `「${t.name}」`, accent: t.accent ?? '#e8c766' }
+          : null;
+      })
+      .filter((c): c is ResultCard => c !== null),
+  ];
 
   async function submit() {
     if (!live.ok) { onError(live.reason ?? ''); return; }
@@ -253,6 +308,8 @@ function PostItem({ post, mine, onError }: { post: Post; mine: boolean; onError:
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [cText, setCText] = useState('');
   const [cBusy, setCBusy] = useState(false);
+  const [liked, setLiked] = useState(() => boardFlag('like', post.id));
+  const [reported, setReported] = useState(() => boardFlag('report', post.id));
   const unref = useRef<(() => void) | null>(null);
 
   function toggleComments() {
@@ -311,15 +368,46 @@ function PostItem({ post, mine, onError }: { post: Post; mine: boolean; onError:
       )}
 
       <div className="mt-2 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={toggleComments}
-          className="text-[11px] text-hanji/50"
-        >
-          {open ? '댓글 닫기' : '댓글'}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            disabled={liked}
+            onClick={() => {
+              void likePost(post.id)
+                .then(() => setLiked(true))
+                .catch(() => onError('좋아요를 누르지 못했어요'));
+            }}
+            className={`text-[11px] ${liked ? 'text-[#e0705a]' : 'text-hanji/50'}`}
+          >
+            {liked ? '♥' : '♡'} 좋아요{post.likes > 0 ? ` ${post.likes}` : ''}
+          </button>
+          <button
+            type="button"
+            onClick={toggleComments}
+            className="text-[11px] text-hanji/50"
+          >
+            {open ? '댓글 닫기' : `댓글${post.comments > 0 ? ` ${post.comments}` : ''}`}
+          </button>
+          {!mine && (
+            <button
+              type="button"
+              disabled={reported}
+              onClick={() => {
+                if (!window.confirm('이 글을 신고할까요?')) return;
+                void reportPost(post.id)
+                  .then(() => setReported(true))
+                  .catch(() => onError('신고하지 못했어요'));
+              }}
+              className={`text-[11px] ${reported ? 'text-hanji/30' : 'text-hanji/40'}`}
+              title="신고"
+            >
+              {reported ? '신고됨' : '신고'}
+            </button>
+          )}
+        </div>
         <ShareButton
           label="공유"
+          url={`${APP_URL()}#/board`}
           text={`${post.nick}: ${post.text}${post.card ? `\n${post.card.label} ${post.card.big} ${post.card.title}` : ''}\n— 사주 게시판에서`}
         />
       </div>

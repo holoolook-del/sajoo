@@ -535,6 +535,26 @@
 - 배포본에서 aside 재확인 필요 — push 후 자동 배포
 - 미해결 가능성: 사용자가 본 실제 화면 미확인 — 준비 중/불러오는 중/에러 중 무엇이었는지 확인 필요
 
+## T30 — 카카오 SDK 연동 + 게시판 고도화 + 바이럴 (사용자 요청)
+
+### 카카오 콘솔 설정 (aside로 완료)
+- developers.kakao.com에 **SAJOO 전용 새 앱 생성** (ID 1619487, 엔터테인먼트) — 기존 lawtiphub 앱들과 분리
+- 플랫폼 키 > JavaScript 키 > **JS SDK 도메인**: `https://holoolook-del.github.io`, `http://localhost:5173`
+- 제품 링크 관리 > **웹 도메인**: `https://holoolook-del.github.io` (기본)
+- JS 키 `b63d94e3…326e` — 공개용 도메인 제한 키라 `kakao.ts` LITERAL에 직접 포함 (firebase.ts 패턴 동일)
+
+### 한 일
+- `src/lib/kakao.ts` 신규 — SDK 지연 로드 + `shareToKakao`(uploadImage→sendDefault feed: 이미지+설명+링크버튼 한 메시지)
+- `share-image.ts` — render를 `renderShareImage`로 export (공유/카톡 업로드 공용)
+- `share-image-button.tsx` — kakaoReady 시 노란 '카톡으로 공유' 버튼 추가 (기존 일반 공유 버튼 유지)
+- 게시판 고도화 — `likes`·`reports`·`comments` 카운터 필드, likePost/reportPost(+1 증분, 기기당 1회 boardFlag), 댓글 수 표시, 최신/인기 정렬 탭, 신고 5회 이상 글 자동 가림('신고로 가려진 글이에요'), 글 공유에 #/board 딥링크
+- '내 결과 자랑' 카드 확장 — 사주 캐릭터·오늘의 운세·오늘의 운세카드 + 기존 테스트 결과
+- `firestore.rules` — create에 카운터 0 검증 + update를 카운터 +1 증분만 허용 (콘솔 게시 완료)
+
+### 검증
+- pnpm verify 통과 (vitest 80/80, build+SW 67)
+- 실기기에서 카톡 공유·좋아요 동작 확인 필요
+
 ## T27 — 카드 팬 360px 가로 스크롤 회귀 수정 (AC12)
 
 ### 원인 (디버그로 확정)

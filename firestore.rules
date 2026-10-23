@@ -7,15 +7,26 @@ service cloud.firestore {
     match /posts/{postId} {
       allow read: if true;
       allow create: if request.auth != null
-        && request.resource.data.keys().hasOnly(['uid', 'nick', 'text', 'card', 'ts'])
+        && request.resource.data.keys().hasOnly(['uid', 'nick', 'text', 'card', 'ts', 'likes', 'reports', 'comments'])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.nick is string
         && request.resource.data.nick.size() <= 12
         && request.resource.data.text is string
         && request.resource.data.text.size() <= 300
+        && request.resource.data.get('likes', 0) == 0
+        && request.resource.data.get('reports', 0) == 0
+        && request.resource.data.get('comments', 0) == 0
         && request.resource.data.ts == request.time;
       allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
-      allow update: if false;
+      // 좋아요·신고·댓글수 카운터만 +1 증분 허용 — 다른 필드 수정 불가
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'reports', 'comments'])
+        && request.resource.data.get('likes', 0) >= resource.data.get('likes', 0)
+        && request.resource.data.get('reports', 0) >= resource.data.get('reports', 0)
+        && request.resource.data.get('comments', 0) >= resource.data.get('comments', 0)
+        && request.resource.data.get('likes', 0) <= resource.data.get('likes', 0) + 1
+        && request.resource.data.get('reports', 0) <= resource.data.get('reports', 0) + 1
+        && request.resource.data.get('comments', 0) <= resource.data.get('comments', 0) + 1;
 
       match /comments/{commentId} {
         allow read: if true;

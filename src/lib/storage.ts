@@ -75,6 +75,14 @@ export function boardStampWrite(kind: 'post' | 'comment'): void {
   writeRecord(`board:last:${kind}`, Date.now());
 }
 
+/** 좋아요·신고 — 기기당 1회만 누르게 하는 클라이언트 플래그 (서버 방어는 rules) */
+export function boardFlag(kind: 'like' | 'report', postId: string): boolean {
+  return readRecord<boolean>(`board:${kind}:${postId}`) === true;
+}
+export function boardMarkFlag(kind: 'like' | 'report', postId: string): void {
+  writeRecord(`board:${kind}:${postId}`, true);
+}
+
 /** cutoff('YYYY-MM-DD') 이전의 운세·카드 기록을 지운다 — 히스토리는 최근만 유지 */
 export function pruneHistory(beforeDate: string): void {
   const stale: string[] = [];
