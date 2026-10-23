@@ -58,36 +58,45 @@ function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxW: number): s
   return out;
 }
 
-async function render(data: ShareCardData): Promise<Blob> {
-  const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d')!;
-
+/** 배경·테두리·푸터 — 캔버스 높이 H에 맞춰 그린다 */
+function drawChrome(ctx: CanvasRenderingContext2D, data: ShareCardData, h: number) {
   // 배경 — 밤하늘 그래디언트 + 상단 달빛 글로우
-  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  const bg = ctx.createLinearGradient(0, 0, 0, h);
   bg.addColorStop(0, '#07060d');
   bg.addColorStop(0.55, '#12101d');
   bg.addColorStop(1, '#0d0b14');
   ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillRect(0, 0, W, h);
 
-  const glow = ctx.createRadialGradient(W * 0.82, H * 0.12, 0, W * 0.82, H * 0.12, 340);
+  const glow = ctx.createRadialGradient(W * 0.82, h * 0.12, 0, W * 0.82, h * 0.12, 340);
   glow.addColorStop(0, `${data.accent ?? GOLD}44`);
   glow.addColorStop(1, 'transparent');
   ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillRect(0, 0, W, h);
 
   // 골드 이중 테두리
   ctx.strokeStyle = GOLD;
   ctx.lineWidth = 3;
-  roundRect(ctx, 36, 36, W - 72, H - 72, 28);
+  roundRect(ctx, 36, 36, W - 72, h - 72, 28);
   ctx.stroke();
   ctx.strokeStyle = `${GOLD}66`;
   ctx.lineWidth = 1;
-  roundRect(ctx, 52, 52, W - 104, H - 104, 20);
+  roundRect(ctx, 52, 52, W - 104, h - 104, 20);
   ctx.stroke();
 
+  // 푸터 — 앱 표시
+  ctx.textAlign = 'center';
+  const font = '"Noto Serif KR", "Malgun Gothic", "Apple SD Gothic Neo", serif';
+  ctx.fillStyle = `${HANJI}55`;
+  ctx.font = `400 26px ${font}`;
+  ctx.fillText('사주 · 나를 보는 밤', W / 2, h - 110);
+  ctx.fillStyle = `${GOLD}77`;
+  ctx.font = `500 24px ${font}`;
+  ctx.fillText('holoolook-del.github.io/sajoo', W / 2, h - 72);
+}
+
+/** 본문을 그리고 끝 y 좌표를 돌려준다 — 높이 측정(스크래치)과 실제 그리기에 공용 */
+async function paint(ctx: CanvasRenderingContext2D, data: ShareCardData): Promise<number> {
   const font = '"Noto Serif KR", "Malgun Gothic", "Apple SD Gothic Neo", serif';
   ctx.textAlign = 'center';
 
@@ -197,15 +206,28 @@ async function render(data: ShareCardData): Promise<Blob> {
       ctx.fillText(c, cx + w / 2, y);
       cx += w + 16;
     });
+    y += 70;
   }
 
-  // 푸터 — 앱 표시
-  ctx.fillStyle = `${HANJI}55`;
-  ctx.font = `400 26px ${font}`;
-  ctx.fillText('사주 · 나를 보는 밤', W / 2, H - 110);
-  ctx.fillStyle = `${GOLD}77`;
-  ctx.font = `500 24px ${font}`;
-  ctx.fillText('holoolook-del.github.io/sajoo', W / 2, H - 72);
+  return y;
+}
+
+const FOOTER_H = 150;
+
+async function render(data: ShareCardData): Promise<Blob> {
+  // 카톡은 이미지 공유 시 텍스트를 버리므로 이미지가 내용을 담아야 한다 —
+  // 본문 길이만큼 캔버스를 늘려 넘침 없이 담는다 (1차 측정 패스 → 실제 그리기)
+  const scratch = document.createElement('canvas');
+  scratch.width = W;
+  const yEnd = await paint(scratch.getContext('2d')!, data);
+  const h = Math.max(H, Math.ceil(yEnd) + FOOTER_H);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d')!;
+  drawChrome(ctx, data, h);
+  await paint(ctx, data);
 
   return new Promise((res, rej) =>
     canvas.toBlob((b) => (b ? res(b) : rej(new Error('canvas 실패'))), 'image/png'),

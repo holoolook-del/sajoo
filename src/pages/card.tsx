@@ -66,7 +66,7 @@ export function CardPage() {
                   title: `${card.name} ${card.hanja}`,
                   grade: card.grade,
                   accent: ELEMENT_COLOR[card.element as ElementKey],
-                  lines: [card.message],
+                  lines: [card.message, `조언 — ${card.advice}`],
                 }}
                 text={cardShareText}
               />

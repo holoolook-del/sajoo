@@ -165,7 +165,13 @@ export function CompatPage() {
                 accent: '#e8c766',
                 title: `${nameA} × ${nameB}`,
                 grade: result.grade,
-                lines: [result.summary],
+                lines: [
+                  result.summary,
+                  ...result.aspects.map(
+                    (a) =>
+                      `【${a.title}${a.delta ? ` ${a.delta > 0 ? '+' : ''}${a.delta}` : ''}】 ${a.lines[0]}`,
+                  ),
+                ],
               }}
               text={resultShareText}
             />

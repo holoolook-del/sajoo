@@ -78,7 +78,7 @@
 | timeAgo | src/lib/date.ts | 상대 시각 — 방금 전/N분 전/N시간 전/M월 D일 | ts → 라벨 |
 | readRecord/writeRecord/boardLastWrite/boardStampWrite | src/lib/storage.ts | record 헬퍼 export + 게시판 도배 방지용 작성 시각 | key → 저장값 |
 | ShareButton | src/components/share-button.tsx | 공유 버튼 (shareResult 호출 + 복사 피드백) | text,label? → 버튼 |
-| ShareImageButton | src/components/share-image-button.tsx | 결과 이미지+텍스트+링크를 한 번에 공유 — 링크는 text 본문에 포함(파일 공유 시 url 필드는 카톡 등에서 무시됨). 미지원 시 PNG 저장+텍스트·링크 클립보드 복사 | data,text?,url? → 버튼 |
+| ShareImageButton | src/components/share-image-button.tsx | 결과 이미지 공유 버튼 — 클릭 시 설명+링크 클립보드 선복사(카톡은 이미지 공유 텍스트를 버림) 후 파일 공유. 미지원 시 PNG 저장. 이미지 캔버스는 내용량만큼 동적 높이 | data,text?,url? → 버튼 |
 | TestHubPage | src/pages/test.tsx | 심리테스트 허브 — QUIZZES 전체 목록(썸네일·문항수·지난결과 칩), 프로필 불필요. 라우트 /test | — |
 | TestPage | src/pages/test.tsx | 설문형 테스트 공용 러너 (인트로→진행바→양택일·이전문항→결과+공유, 프로필 불필요). 라우트 /test/:id | — |
 | QUIZZES / QuizDef | src/content/tests.ts | 테스트 콘텐츠 DB — mbti(축당10문 40문→16타입)·job(RIASEC 24문→6형+보조)·love·animal(축당8문 24문→6유형)·color(색당8문 24문)·stress(20문→4단계 지수). QuizDef.neutral로 문항별 "모르겠다" 선택지(N, 득점 없음). 축별 문항 균등·선택지 방향 혼합(위치 편향 제거). 유형은 strong·scenes·note 포함, QuizDef.confidence로 결과 확신도 산출 | score → code → QuizResultType |

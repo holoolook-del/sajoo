@@ -104,7 +104,13 @@ export function SajuPage() {
               title: `「${reading.dayMaster.title}」`,
               subtitle: `${dayMaster.korean} — ${reading.dayMaster.nature}`,
               keywords: reading.dayMaster.keywords,
-              lines: [reading.dayMaster.text],
+              lines: [
+                reading.dayMaster.text,
+                `사람들이 보는 나 — ${reading.dayMaster.social.seen}`,
+                `내가 잘하는 것 — ${reading.dayMaster.social.good}`,
+                `조심할 점 — ${reading.dayMaster.social.watch}`,
+                `친해지면 — ${reading.dayMaster.social.bond}`,
+              ],
             }}
             text={charShareText}
           />

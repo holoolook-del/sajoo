@@ -435,7 +435,11 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
                 big: secondType ? `${result.code}+${secondType.code}` : result.code,
                 accent,
                 title: result.name,
-                lines: [result.desc, result.tags.join(' · ')],
+                lines: [
+                  result.desc,
+                  result.tags.join(' · '),
+                  ...(result.strong?.map((s) => `강점 — ${s}`) ?? []),
+                ],
               }}
               text={shareText}
               url={`${location.origin}${A}#/test/${quiz.id}`}
