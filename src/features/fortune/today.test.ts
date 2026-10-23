@@ -50,6 +50,17 @@ describe('dailyFortune — 일진×내 사주 조합', () => {
     expect(f.summary.length).toBeGreaterThan(5);
   });
 
+  it('일진의 오행이 내 용신·기신과 만나는지 개인화해 판정한다', () => {
+    const saju = calcSaju({ ...profile });
+    if (!saju.ok) throw new Error('calc 실패');
+    const f = dailyFortune(saju.data, '2026-10-08');
+    expect(['용신운', '기신운', '중립운']).toContain(f.favor);
+    // 일진 천간이 일간과 합을 이루거나 용신·기신운이면 그 근거 문장이 detail에 들어간다
+    if (f.favor !== '중립운' || f.stemHap) {
+      expect(f.detail.some((l) => l.includes('용신') || l.includes('기신') || l.includes('합'))).toBe(true);
+    }
+  });
+
   it('운세 지수(23~97%)와 행운 요소를 만든다', () => {
     const saju = calcSaju({ ...profile });
     if (!saju.ok) throw new Error('calc 실패');

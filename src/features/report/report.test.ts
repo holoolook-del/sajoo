@@ -175,6 +175,80 @@ describe('buildDeepReport', () => {
     expect(r.daewoon?.current?.favor).toBeTruthy();
   });
 
+  it('조후용신 — 태어난 계절이 요구하는 기운을 억부용신과 대조한다', () => {
+    // 1992-10-24 술월 — 조후 압박이 약한 계절이라 조후 없음
+    expect(reportFor().joho).toBeNull();
+    // 1985-01-01 갑자 병자 경자 임오 — 자월 한겨울 → 조후 화
+    const winter = reportFor(
+      { year: 1985, month: 1, day: 1, hour: 11, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1985, month: 1, day: 1, hour: 11, minute: 0 },
+    );
+    expect(winter.joho?.element).toBe('화');
+    expect(winter.joho!.text.length).toBeGreaterThan(20);
+    expect(typeof winter.joho!.sameAsYongsin).toBe('boolean');
+    // 1985-02-04 인월 — 입춘 직후 잔한 → 조후 화
+    const ichun = reportFor(
+      { year: 1985, month: 2, day: 4, hour: 11, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1985, month: 2, day: 4, hour: 11, minute: 0 },
+    );
+    expect(ichun.joho?.element).toBe('화');
+  });
+
+  it('천간 상극 — 합충 없는 천간의 극제를 판정한다', () => {
+    // 을축 무인 갑술 경오 — 을극무(연간×월간)·갑극무(월간×일간) 인접 극 2건
+    const r = reportFor(
+      { year: 1985, month: 2, day: 4, hour: 11, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1985, month: 2, day: 4, hour: 11, minute: 0 },
+    );
+    const geuk = r.stemRelations.filter((s) => s.kind === '극');
+    expect(geuk).toHaveLength(2);
+    expect(geuk.every((g) => g.adjacent)).toBe(true);
+    expect(geuk.some((g) => g.name === '갑극무')).toBe(true);
+    expect(geuk.some((g) => g.name === '을극무')).toBe(true);
+  });
+
+  it('파국 — 완성된 국의 멤버가 충을 받아 깨지는지 판정한다', () => {
+    // 경신 무인 무오 임술 — 인오술 화국 완성 + 연지 신이 생지 인과 인신충
+    const r = reportFor(
+      { year: 1980, month: 2, day: 15, hour: 19, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1980, month: 2, day: 15, hour: 19, minute: 0 },
+    );
+    const guk = r.formations.find((f) => f.name.includes('인오술'));
+    expect(guk).toBeTruthy();
+    expect(guk!.damage).toBeTruthy();
+    expect(guk!.damage).toContain('신');
+    // 픽스처 기준 — 인오술 완성 + 충하는 글자 없음 → damage null
+    const clean = reportFor(
+      { year: 1985, month: 2, day: 4, hour: 11, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1985, month: 2, day: 4, hour: 11, minute: 0 },
+    );
+    expect(clean.formations.find((f) => f.name.includes('인오술'))!.damage).toBeNull();
+  });
+
+  it('십신 과다 — 넘치는 십신 그룹을 짚는다', () => {
+    // 갑자 병자 경자 임오 — 식상 4개(상관 자×3 + 식신 임) 과다
+    const r = reportFor(
+      { year: 1985, month: 1, day: 1, hour: 11, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1985, month: 1, day: 1, hour: 11, minute: 0 },
+    );
+    const excess = r.excessGodGroups.find((g) => g.group === '식상');
+    expect(excess).toBeTruthy();
+    expect(excess!.count).toBe(4);
+    expect(excess!.text.length).toBeGreaterThan(20);
+  });
+
+  it('운의 지지가 원국 지지와 맺는 관계를 판정한다', () => {
+    // 1992-10-24: 현재 대운 갑인(35세) — 인이 연지 신과 인신충
+    const r = reportFor();
+    const chung = r.luckRelations.find((l) => l.kind === '충' && l.source === '대운');
+    expect(chung).toBeTruthy();
+    expect(chung!.pair).toContain('신');
+    // 올해 세운 병오 — 오가 월지 술과 삼합
+    const hap = r.luckRelations.find((l) => l.source === '세운');
+    expect(hap).toBeTruthy();
+    expect(hap!.kind).toBe('삼합');
+  });
+
   it('같은 입력은 같은 리포트를 만든다 (결정성)', () => {
     expect(reportFor().summary).toBe(reportFor().summary);
   });

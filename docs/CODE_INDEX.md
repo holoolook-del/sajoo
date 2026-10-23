@@ -38,10 +38,10 @@
 | drawToday / canDrawOn / todaysDraw | src/features/card/draw.ts | 하루 1장 뽑기 기록·조회 (멱등) | Profile,date? → CardDraw |
 | interpretSaju | src/lib/interpret.ts | SajuResult → 일간·일지·오행 분포·십신·고민별 해석 조합 | SajuResult → SajuReading |
 | branchRelation | src/lib/relations.ts | 지지 두 글자의 관계 (육합→삼합→충→형→해→원진→파) | 지지,지지 → BranchRelation\|null |
-| dailyFortune | src/features/fortune/today.ts | 일진×사주 조합(십신·관계·상생상극)→등급·해석 | SajuResult,date → DailyFortune |
+| dailyFortune | src/features/fortune/today.ts | 일진×사주 조합(십신·관계·상생상극·용신운/기신운·일간합)→등급·해석 | SajuResult,date → DailyFortune |
 | saveTodaysFortune | src/features/fortune/today.ts | 오늘 운세를 FortuneRecord로 기록 (멱등) | SajuResult,date → FortuneRecord |
 | buildLuckView | src/features/luck/luck.ts | 대운 타임라인+세운+월운 12개월 (현재 표시·십신) | SajuResult,Profile,date → LuckView |
-| buildDeepReport | src/features/report/report.ts | 심화 리포트 — 신강신약 가중 판정(천간1·지지2·월지3)·용신 선택(억부)·지지관계·공망 십신 해석·대운·세운(올해+내년)·없는 십신군·총평·조언 조립 | SajuResult,Profile,date → DeepReport |
+| buildDeepReport / personalBalance | src/features/report/report.ts | 심화 리포트 — 격국(투간)·득령·통근·신강신약·용신·조후·십이운성·천간합충극·삼합국/방합(+파국)·지지관계·공망·신살·십신 과다/결핍·대운·세운·월운·운×원국 관계·총평·조언. personalBalance: 판정·용신·기신만 뽑는 경량 진입점 (오늘의 운세 개인화 등 공용) | SajuResult(,Profile,date) → DeepReport / {verdict,yongsin,gisin} |
 | compatScore / pairOf | src/features/compat/compat.ts | compatScore: 두 사주 궁합 — 기본 50점에서 전통 항목 가감: 일간 천간합·천간충·상생상극·음양 / 일지 관계 / 십신 상호 역할·배우자성(남=재성·여=관성) / 오행 상호 보완·용신 / 합쳐 완성하는 삼합 / 연지·도화. 결과는 항목별 aspects(제목·가감점 delta·문장들)로 반환. pairOf: 천간 쌍 매칭 공용 헬퍼 (리포트의 천간합충 판정에도 사용) | compatScore: SajuResult,SajuResult,{nameA?,nameB?,genderA?,genderB?} → CompatResult / pairOf: list,x,y → 매칭 항목\|null |
 | buildHistory | src/features/history/history.ts | 최근 30일 운세·카드 기록 날짜별 병합+옛 기록 정리 | today?,days → HistoryEntry[] |
 | findSinsal | src/lib/sinsal.ts | 신살 판정 (도화·역마·화개·양인·괴강 — 일지 삼합 표준표 기준) | SajuResult → Sinsal[] |
@@ -101,8 +101,8 @@
 ## 콘텐츠·풀이문
 | 이름 | 경로 | 하는 일 | 입력 → 출력 |
 | --- | --- | --- | --- |
-| ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey / TEN_GOD_HANJA | src/content/meta.ts | 오행·십신 공용 메타 (색상·한자·타입) | 오행·십신 → 색상/한자 |
+| ELEMENT_COLOR / ELEMENT_HANJA / ElementKey / TenGodKey / TEN_GOD_HANJA / HIDDEN_STEMS / ELEMENT_GENERATES / ELEMENT_CONTROLS | src/content/meta.ts | 오행·십신·지장간 공용 도메인 상수 (색상·한자·상생상극·지장간 표) | 오행·십신·지지 → 색상/한자/상생극/지장간 |
 | DAY_MASTER_TEXT / DayMasterSocial / DAY_BRANCH_TEXT / ELEMENT_TEXT / ELEMENT_BALANCE / TEN_GOD_TEXT / CONCERN_TEXT / ELEMENT_HEALTH / HOUR_GUESS / GLOSSARY | src/content/interpret.ts | 풀이문 DB (일간 캐릭터·사회적 면모·일지 12지지·오행·균형·십신·고민 6종·건강 보완·생시 유추·용어 평어) | 키 → 해석 문장 |
 | BRANCH_RELATIONS / DAY_GOD_TEXT / RELATION_TEXT / GRADE_SUMMARY / LUCKY / MONTH_GOD_READING | src/content/fortune.ts | 지지 관계 테이블 + 오늘운세·이번 달 풀이문 + 행운 색·방향·아이템 | 지지쌍/십신/등급/오행 → 문장 |
 | STEM_HAP / STEM_CLASH / STEM_RELATION_TEXT / STEM_CLASH_TEXT / YINYANG_TEXT / COMPAT_RELATION_TEXT / ROLE_TEXT / SPOUSE_STAR_TEXT / SPOUSE_PALACE_TEXT / ELEMENT_FILL_TEXT / SAMHAP_COMPLETE / FIVE_ELEMENT_COMPLETE / SAME_DOMINANT_TEXT / DOHWA_CROSS_TEXT / BRANCH_ANIMAL / COMPAT_GRADE_TEXT / ADVICE_TEXT / COMPAT_SOURCE_NOTE | src/content/compat.ts | 궁합 풀이문 DB — 천간합 5쌍·천간충 4쌍·일간 관계·음양·지지 관계·십신 역할·배우자성·배우자상·오행 보완·삼합 완성·도화·띠·등급·조언·근거 표기 | 키/쌍 → 해석 문장 |
-| STRENGTH_TEXT / YONGSIN_TIPS / LUCK_GOD_TEXT / RELATION_KIND_TEXT / POSITION_MEANING / VOID_GOD_TEXT / GYEOKGUK_TEXT / DEUKRYEONG_TEXT / STAGE_NAMES / STAGE_TEXT / LUCK_FAVOR_TEXT / ROOT_TEXT / STEM_HAP_CHART_TEXT / STEM_CLASH_CHART_TEXT / FORMATION_TEXT | src/content/report.ts | 심화 리포트 풀이문 DB — 신강신약 3판정·용신 오행 보완법(색·방향·계절·유리한 달·습관·실전 개운법)·십신별 대운(10년)/세운(1년) 테마·지지관계 7종·지지 자리 의미·공망 십신군·격국 10종·득령 3판정·십이운성 12단계·용신운/기신운 길흉·통근 3단·천간 간합(合絆)/천간충·삼합국/방합 완성 해석 | 키 → 해석 문장 |
+| STRENGTH_TEXT / YONGSIN_TIPS / LUCK_GOD_TEXT / RELATION_KIND_TEXT / POSITION_MEANING / VOID_GOD_TEXT / GYEOKGUK_TEXT / DEUKRYEONG_TEXT / STAGE_NAMES / STAGE_TEXT / LUCK_FAVOR_TEXT / ROOT_TEXT / STEM_HAP_CHART_TEXT / STEM_CLASH_CHART_TEXT / FORMATION_TEXT | src/content/report.ts | 심화 리포트 풀이문 DB — 신강신약 3판정·용신 오행 보완법(색·방향·계절·유리한 달·습관·실전 개운법)·십신별 대운(10년)/세운(1년) 테마·지지관계 7종·지지 자리 의미·공망 십신군·격국 10종·득령 3판정·십이운성 12단계·용신운/기신운 길흉·통근 3단·천간 간합(合絆)/천간충/상극(+상관견관·도식·재극인·비겁탈재·식신제살 특례)·삼합국/방합 완성·파국·조후용신·십신 과다·운×원국 관계 해석 | 키 → 해석 문장 |

@@ -46,6 +46,17 @@ export function FortunePage() {
         <div className="min-w-0 flex-1">
           <p className="text-xs text-hanji/50">오늘의 일진(日辰)</p>
           <p className={`mt-1 text-3xl font-bold ${GRADE_COLOR[fortune.grade]}`}>{fortune.grade}</p>
+          <span
+            className={`mt-1.5 inline-block rounded-full border px-2 py-0.5 text-[10px] ${
+              fortune.favor === '용신운'
+                ? 'border-gold bg-gold/15 text-gold-bright'
+                : fortune.favor === '기신운'
+                  ? 'border-hanji/30 text-hanji/60'
+                  : 'border-hanji/15 text-hanji/50'
+            }`}
+          >
+            {fortune.favor === '용신운' ? '오늘은 내 용신의 날' : fortune.favor === '기신운' ? '오늘은 기신운 — 지키는 운영' : '중립운'}
+          </span>
           <div className="mt-2">
             <div className="flex items-baseline justify-between">
               <span className="text-xs text-hanji/50">운세 지수</span>

@@ -1,4 +1,4 @@
-import { ELEMENT_COLOR, type ElementKey } from '../../content/meta.ts';
+import { ELEMENT_COLOR, HIDDEN_STEMS, type ElementKey } from '../../content/meta.ts';
 import type { SajuPillar } from '../../lib/engine.ts';
 
 const COLS = [
@@ -13,6 +13,7 @@ const ROWS = [
   { kind: 'stem' as const, cls: '' },
   { kind: 'tenGodBranch' as const, cls: 'text-[11px] text-hanji/60' },
   { kind: 'branch' as const, cls: '' },
+  { kind: 'hidden' as const, cls: 'text-[10px] text-hanji/45' },
   { kind: 'korean' as const, cls: 'text-sm font-bold text-gold-bright' },
 ];
 
@@ -38,6 +39,7 @@ function Cell({ p, kind }: { p: SajuPillar | null; kind: (typeof ROWS)[number]['
   switch (kind) {
     case 'tenGodStem': return <>{p.tenGodStem}</>;
     case 'tenGodBranch': return <>{p.tenGodBranch}</>;
+    case 'hidden': return <>지장간 {(HIDDEN_STEMS[p.korean.charAt(1)] ?? []).join('·')}</>;
     case 'korean': return <>{p.korean}</>;
     case 'stem': return <Char hanja={p.stemHanja} element={p.stemElement} yinYang={p.stemYinYang} />;
     case 'branch': return <Char hanja={p.branchHanja} element={p.branchElement} yinYang={p.branchYinYang} />;

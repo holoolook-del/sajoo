@@ -10,12 +10,19 @@ import { StateView } from '../components/state-view.tsx';
 import { ShareButton } from '../components/share-button.tsx';
 import { ShareImageButton } from '../components/share-image-button.tsx';
 import { ogUrl, STEM_OG } from '../lib/og.ts';
+import { todayKST } from '../lib/date.ts';
+import { buildDeepReport } from '../features/report/report.ts';
 import { useMemo } from 'react';
 
 export function SajuPage() {
   const { profile, saju } = useSaju();
   const reading = useMemo(() => (saju ? interpretSaju(saju) : null), [saju]);
   const sinsal = useMemo(() => (saju ? findSinsal(saju) : []), [saju]);
+  // 명식 요약 칩 — 심화 리포트와 같은 판정을 미리 보여주고 리포트로 연결한다
+  const report = useMemo(
+    () => (saju && profile ? buildDeepReport(saju, profile, todayKST()) : null),
+    [saju, profile],
+  );
 
   if (!saju || !reading) {
     return <StateView message="사주를 계산할 수 없습니다." linkTo="/onboarding" linkLabel="정보 다시 입력" />;
@@ -277,15 +284,23 @@ export function SajuPage() {
         </dl>
       </section>
 
-      {/* 심화 리포트 진입 — 이 페이지보다 10배 깊은 분량 */}
+      {/* 심화 리포트 진입 — 명식 요약을 미리 보여주고 10개 장의 깊은 해석으로 연결 */}
       <a
         href="#/report"
         className="block rounded-xl border-2 border-gold/50 bg-night-soft p-5 text-center transition-colors hover:border-gold"
       >
         <p className="text-xs tracking-widest text-gold-bright">SAJOO 심층 명식 감정서</p>
+        {report && (
+          <div className="mt-2.5 flex flex-wrap justify-center gap-1.5">
+            <span className="rounded-full border border-gold/40 px-2.5 py-0.5 text-[11px] text-gold-bright">{report.gyeokguk.name}</span>
+            <span className="rounded-full border border-hanji/25 px-2.5 py-0.5 text-[11px] text-hanji/70">{report.strength.verdict}</span>
+            <span className="rounded-full border border-hanji/25 px-2.5 py-0.5 text-[11px] text-hanji/70">용신 {report.yongsin.element}</span>
+            <span className="rounded-full border border-hanji/25 px-2.5 py-0.5 text-[11px] text-hanji/70">{report.deukryeong.verdict}</span>
+          </div>
+        )}
         <p className="mt-2 text-lg font-bold text-hanji">심화 사주 리포트 보기 →</p>
         <p className="mt-1 text-xs leading-5 text-hanji/60">
-          격국·신강신약·용신·십이운성·천간합충·대운·세운까지 — 10개 장으로 읽는 깊은 해석
+          격국·신강신약·용신·조후·십이운성·천간합충극·국(局)·대운·세운·월운까지 — 10개 장으로 읽는 깊은 해석
         </p>
       </a>
 

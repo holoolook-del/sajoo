@@ -117,6 +117,18 @@ export function ReportPage() {
             <span className="font-bold text-hanji">실전 개운법 —</span> {yongsin.practice}
           </p>
         </div>
+        {report.joho && (
+          <div
+            className="mt-3 rounded-lg border-l-4 bg-night p-4"
+            style={{ borderColor: ELEMENT_COLOR[report.joho.element] }}
+          >
+            <p className="text-sm font-bold" style={{ color: ELEMENT_COLOR[report.joho.element] }}>
+              조후용신(調候用神) — {report.joho.element}({ELEMENT_HANJA[report.joho.element]})
+              {report.joho.sameAsYongsin && ' · 균형용신과 일치'}
+            </p>
+            <p className="mt-1.5 text-sm leading-6 text-hanji/80">{report.joho.text}</p>
+          </div>
+        )}
         <p className="mt-3 text-sm leading-6 text-hanji/85">{reading.balanceText}</p>
       </section>
 
@@ -141,6 +153,16 @@ export function ReportPage() {
             {report.missingGodGroups.map((g) => (
               <p key={g.group} className="mt-1.5 text-sm leading-6 text-hanji/80">
                 <span className="font-bold text-hanji">{g.group}</span> — {g.text}
+              </p>
+            ))}
+          </div>
+        )}
+        {report.excessGodGroups.length > 0 && (
+          <div className="mt-3 rounded-lg bg-night p-4">
+            <p className="text-xs font-bold text-hanji/60">넘쳐서 문제가 되는 기운 — 십신 과다(過多)</p>
+            {report.excessGodGroups.map((g) => (
+              <p key={g.group} className="mt-1.5 text-sm leading-6 text-hanji/80">
+                <span className="font-bold text-hanji">{g.group} {g.count}개</span> — {g.text}
               </p>
             ))}
           </div>
@@ -195,6 +217,11 @@ export function ReportPage() {
                       </p>
                       <p className="mt-0.5 text-[11px] text-hanji/50">{f.members} → {f.god}의 기운으로 결집</p>
                       <p className="mt-1.5 text-sm leading-6 text-hanji/85">{f.text}</p>
+                      {f.damage && (
+                        <p className="mt-1.5 rounded bg-dancheong/10 px-2.5 py-1.5 text-xs leading-5 text-dancheong">
+                          {f.damage}
+                        </p>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -319,6 +346,16 @@ export function ReportPage() {
                 <p className="mt-1.5 text-xs leading-5 text-hanji/55">{daewoon.current.favorText}</p>
               </div>
             )}
+            {report.luckRelations.filter((l) => l.source === '대운').length > 0 && (
+              <div className="mt-3 rounded-lg bg-night p-4">
+                <p className="text-xs font-bold text-hanji/60">이 대운이 건드리는 내 사주의 자리</p>
+                {report.luckRelations.filter((l) => l.source === '대운').map((l) => (
+                  <p key={l.pair} className="mt-1.5 text-sm leading-6 text-hanji/80">
+                    <span className="font-bold text-hanji">{l.pair} — {l.kind}</span><br />{l.text}
+                  </p>
+                ))}
+              </div>
+            )}
             {daewoon.next && (
               <p className="mt-3 text-sm leading-6 text-hanji/70">
                 <span className="font-bold text-hanji/80">다음 대운 예고 — {daewoon.next.age}세부터 {daewoon.next.korean}:</span> {daewoon.next.stemText}
@@ -362,6 +399,16 @@ export function ReportPage() {
             <p className="mt-1 text-xs leading-5 text-hanji/55">{s.favorText}</p>
           </div>
         ))}
+        {report.luckRelations.filter((l) => l.source === '세운').length > 0 && (
+          <div className="mt-3 rounded-lg bg-night p-4">
+            <p className="text-xs font-bold text-hanji/60">올해의 기운이 건드리는 내 사주의 자리</p>
+            {report.luckRelations.filter((l) => l.source === '세운').map((l) => (
+              <p key={l.pair} className="mt-1.5 text-sm leading-6 text-hanji/80">
+                <span className="font-bold text-hanji">{l.pair} — {l.kind}</span><br />{l.text}
+              </p>
+            ))}
+          </div>
+        )}
         {report.wolun && (
           <div className="mt-4">
             <p className="text-xs font-bold text-hanji/60">올해의 달별 흐름 — {seun.year}년 월운(月運)</p>

@@ -1,6 +1,7 @@
-import { getBranchTenGod, getTenGod } from 'manseryeok';
+import { getBranchTenGod, getEarthlyBranchElement, getTenGod } from 'manseryeok';
 import type { EarthlyBranch, HeavenlyStem } from 'manseryeok';
 import { DAY_GOD_TEXT, GRADE_SUMMARY, LUCKY, RELATION_TEXT } from '../../content/fortune.ts';
+import { STEM_HAP } from '../../content/compat.ts';
 import { branchRelation, type BranchRelation } from '../../lib/relations.ts';
 import {
   ELEMENT_CONTROLS,
@@ -10,6 +11,8 @@ import {
 } from '../../content/meta.ts';
 import { iljinOf, type Iljin, type SajuResult } from '../../lib/engine.ts';
 import { saveFortune } from '../../lib/storage.ts';
+import { personalBalance, type LuckFavor } from '../report/report.ts';
+import { pairOf } from '../compat/compat.ts';
 import type { FortuneRecord, Grade } from '../../lib/types.ts';
 
 export interface DailyFortune {
@@ -24,6 +27,10 @@ export interface DailyFortune {
   detail: string[];
   /** 운세 지수 0~100 — score를 사람 친화적인 퍼센트로 환산 */
   luckIndex: number;
+  /** 일진 지지 오행이 내 용신·기신과 만나는 개인 판정 (심화 리포트와 같은 모델) */
+  favor: LuckFavor;
+  /** 일진 천간이 내 일간과 이루는 천간합 이름 — 합이 없으면 null */
+  stemHap: string | null;
   /** 행운 색·방향·아이템 (일진 오행 기준) */
   lucky: { color: string; direction: string; item: string };
   /** 오늘 기운이 잘 통하는 시간대 — 일진 지지와 삼합되는 두 시진 */
@@ -96,11 +103,24 @@ export function dailyFortune(saju: SajuResult, date: string): DailyFortune {
   const relation = branchRelation(myBranch, iljin.branch);
   const el = elementRelation(iljin.stemElement, saju.dayMaster.element);
 
+  // 개인화 — 일진의 기운이 내 용신/기신과 만나는지 (심화 리포트와 같은 판정 모델)
+  const bal = personalBalance(saju);
+  const iljinBranchEl = getEarthlyBranchElement(iljin.branch as EarthlyBranch) as ElementKey;
+  const favor: LuckFavor = iljinBranchEl === bal.yongsin
+    ? '용신운'
+    : bal.gisin.includes(iljinBranchEl)
+      ? '기신운'
+      : '중립운';
+  // 일간합 — 일진 천간이 내 일간과 손을 잡는 날
+  const stemHapHit = pairOf(STEM_HAP, iljin.stemHanja, saju.dayMaster.hanja);
+
   const score =
     GOD_SCORE[stemGod] +
     GOD_SCORE[branchGod] +
     (relation ? RELATION_SCORE[relation] : 0) +
-    (el?.score ?? 0);
+    (el?.score ?? 0) +
+    (favor === '용신운' ? 1 : favor === '기신운' ? -1 : 0) +
+    (stemHapHit ? 1 : 0);
   const grade = scoreToGrade(score);
 
   const detail = [
@@ -108,6 +128,15 @@ export function dailyFortune(saju: SajuResult, date: string): DailyFortune {
     `일진 지지는 ${branchGod} — ${DAY_GOD_TEXT[branchGod].branch}`,
     ...(relation ? [RELATION_TEXT[relation]] : []),
     ...(el ? [el.text] : []),
+    ...(favor === '용신운'
+      ? [`오늘의 지지 오행 ${iljinBranchEl}은 내 사주의 용신 — 하루 종일 돕는 바람이 붑니다. 미뤄둔 결정·도전을 오늘로 옮기세요.`]
+      : []),
+    ...(favor === '기신운'
+      ? [`오늘의 지지 오행 ${iljinBranchEl}은 내 사주의 기신 — 욕심이 앞서거나 힘이 빠지기 쉬운 날. 무리한 확장보다 지키는 운영이 맞습니다.`]
+      : []),
+    ...(stemHapHit
+      ? [`오늘의 천간 ${iljin.stem}이 내 일간과 ${stemHapHit.name}(${stemHapHit.hanja})을 이룹니다 — 마음이 끌리고 인연이 닿는 날입니다.`]
+      : []),
   ];
 
   return {
@@ -121,6 +150,8 @@ export function dailyFortune(saju: SajuResult, date: string): DailyFortune {
     summary: GRADE_SUMMARY[grade],
     detail,
     luckIndex: Math.min(97, Math.max(23, 62 + score * 5)),
+    favor,
+    stemHap: stemHapHit?.name ?? null,
     lucky: LUCKY[iljin.stemElement] ?? LUCKY['토']!,
     luckyHours: (SAMHAP_GROUPS.find((g) => g.includes(iljin.branchHanja)) ?? [])
       .filter((b) => b !== iljin.branchHanja)
