@@ -103,6 +103,34 @@ describe('buildDeepReport', () => {
     expect(r.stages.find((s) => s.where === '일지')?.stage).toBe('병'); // 유 = 병
   });
 
+  it('사주 안 천간의 합충을 판정한다 — 격합·인접합·일간 참여', () => {
+    // 임신·경술·계유·을묘 — 월간 庚 × 시간 乙 = 을경합, 한 자리 건너 비인접(격합)
+    const r = reportFor();
+    expect(r.stemRelations).toHaveLength(1);
+    expect(r.stemRelations[0]).toMatchObject({ kind: '합', name: '을경합', adjacent: false });
+    expect(r.stemRelations[0]!.gods).toBe('정인×식신');
+    expect(r.stemRelations[0]!.text).toContain('合絆');
+
+    // 갑자·정축·을사·경진 — 일간 乙 × 시간 庚 = 을경합(인접·일간 참여) + 연간 甲 × 시간 庚 = 갑경충(비인접)
+    const adj = reportFor(
+      { year: 1985, month: 1, day: 6, hour: 7, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1985, month: 1, day: 6, hour: 7, minute: 0 },
+    );
+    const hap = adj.stemRelations.find((s) => s.kind === '합');
+    expect(hap).toMatchObject({ name: '을경합', adjacent: true, pair: '일간×시간' });
+    expect(hap!.text).toContain('일간');
+    const clash = adj.stemRelations.find((s) => s.kind === '충');
+    expect(clash).toMatchObject({ name: '갑경충', adjacent: false });
+    for (const s of adj.stemRelations) expect(s.text.length).toBeGreaterThan(30);
+  });
+
+  it('용신 보완법에 유리한 달·생활 습관·실전 개운법이 들어있다', () => {
+    const r = reportFor();
+    expect(r.yongsin.months.length).toBeGreaterThan(10);
+    expect(r.yongsin.habit.length).toBeGreaterThan(10);
+    expect(r.yongsin.practice.length).toBeGreaterThan(50);
+  });
+
   it('운의 길흉이 용신과 갈린다 — 세운·대운에 용신운/기신운 판정', () => {
     const r = reportFor();
     expect(['용신운', '기신운', '중립운']).toContain(r.seun.favor);

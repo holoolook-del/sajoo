@@ -108,9 +108,14 @@ export function ReportPage() {
             <div className="flex gap-3"><dt className="shrink-0 font-bold text-gold-bright">색</dt><dd className="text-hanji/85">{yongsin.color}</dd></div>
             <div className="flex gap-3"><dt className="shrink-0 font-bold text-gold-bright">방향</dt><dd className="text-hanji/85">{yongsin.direction}</dd></div>
             <div className="flex gap-3"><dt className="shrink-0 font-bold text-gold-bright">계절</dt><dd className="text-hanji/85">{yongsin.season}</dd></div>
+            <div className="flex gap-3"><dt className="shrink-0 font-bold text-gold-bright">유리한 달</dt><dd className="text-hanji/85">{yongsin.months}</dd></div>
+            <div className="flex gap-3"><dt className="shrink-0 font-bold text-gold-bright">습관</dt><dd className="text-hanji/85">{yongsin.habit}</dd></div>
             <div className="flex gap-3"><dt className="shrink-0 font-bold text-gold-bright">보완</dt><dd className="text-hanji/85">{yongsin.items}</dd></div>
           </dl>
           <p className="mt-2 text-sm leading-6 text-hanji/80">{yongsin.text}</p>
+          <p className="mt-2 text-sm leading-6 text-hanji/80">
+            <span className="font-bold text-hanji">실전 개운법 —</span> {yongsin.practice}
+          </p>
         </div>
         <p className="mt-3 text-sm leading-6 text-hanji/85">{reading.balanceText}</p>
       </section>
@@ -161,23 +166,47 @@ export function ReportPage() {
         </ul>
       </section>
 
-      {/* 제5장 — 지지의 관계망 */}
+      {/* 제5장 — 원국의 관계망: 천간 합충 + 지지 합형 */}
       <section className={chapterCls}>
-        <h2 className={chapterH}><span className={chapterNo}>제5장</span> 지지의 관계망 — 합·충·형·해</h2>
-        {report.relations.length === 0 ? (
+        <h2 className={chapterH}><span className={chapterNo}>제5장</span> 원국의 관계망 — 천간의 합충·지지의 합형</h2>
+        {report.stemRelations.length === 0 && report.relations.length === 0 ? (
           <p className={body}>사주 글자 사이에 뚜렷한 합·충 관계가 없습니다 — 자리 간의 긴장이 적은 편이라, 흐름이 온전히 오행의 균형에 달려 있습니다.</p>
         ) : (
-          <ul className="mt-3 space-y-3">
-            {report.relations.map((r) => (
-              <li key={r.pair} className="rounded-lg bg-night p-3.5">
-                <p className="text-sm font-bold text-hanji">
-                  {r.pair} — <span className="text-gold-bright">{r.kind}</span>
-                </p>
-                <p className="mt-0.5 text-[11px] text-hanji/50">{r.positionText}</p>
-                <p className="mt-1.5 text-sm leading-6 text-hanji/85">{r.text}</p>
-              </li>
-            ))}
-          </ul>
+          <>
+            {report.stemRelations.length > 0 && (
+              <div className="mt-3">
+                <p className="text-xs font-bold text-hanji/60">천간(天干) — 하늘의 글자끼리 맺는 결</p>
+                <ul className="mt-2 space-y-3">
+                  {report.stemRelations.map((r) => (
+                    <li key={`${r.pair}-${r.name}`} className="rounded-lg bg-night p-3.5">
+                      <p className="text-sm font-bold text-hanji">
+                        {r.pair} — <span className="text-gold-bright">{r.name}</span>
+                        <span className="ml-2 text-[11px] font-normal text-hanji/50">{r.hanja}</span>
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-hanji/50">{r.gods}의 결 · {r.adjacent ? '이웃한 자리 — 강하게 작용' : '떨어진 자리 — 약하게 작용'}</p>
+                      <p className="mt-1.5 text-sm leading-6 text-hanji/85">{r.text}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {report.relations.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-bold text-hanji/60">지지(地支) — 땅의 글자끼리 맺는 결</p>
+                <ul className="mt-2 space-y-3">
+                  {report.relations.map((r) => (
+                    <li key={r.pair} className="rounded-lg bg-night p-3.5">
+                      <p className="text-sm font-bold text-hanji">
+                        {r.pair} — <span className="text-gold-bright">{r.kind}</span>
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-hanji/50">{r.positionText}</p>
+                      <p className="mt-1.5 text-sm leading-6 text-hanji/85">{r.text}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
         )}
       </section>
 

@@ -20,11 +20,15 @@ import {
   ROOT_TEXT,
   STAGE_NAMES,
   STAGE_TEXT,
+  STEM_CLASH_CHART_TEXT,
+  STEM_HAP_CHART_TEXT,
   STRENGTH_TEXT,
   VOID_GOD_TEXT,
   YONGSIN_TIPS,
   type StageName,
 } from '../../content/report.ts';
+import { STEM_CLASH, STEM_HAP } from '../../content/compat.ts';
+import { pairOf } from '../compat/compat.ts';
 import {
   ELEMENT_CONTROLS,
   ELEMENT_GENERATES,
@@ -64,6 +68,17 @@ export interface ReportVoid {
   where: string; // '연지' 등
   branch: string;
   god: TenGodKey;
+  text: string;
+}
+
+/** 천간 관계 — 한 사주 안의 간합(合絆 포함)·천간충 */
+export interface ReportStemRelation {
+  pair: string; // '월간×시간'
+  gods: string; // '정인×식신' — 두 글자의 십신
+  kind: '합' | '충';
+  name: string; // '을경합' / '갑경충'
+  hanja: string;
+  adjacent: boolean; // 이웃한 글자끼리의 관계는 힘이 강하다
   text: string;
 }
 
@@ -112,11 +127,15 @@ export interface DeepReport {
     color: string;
     direction: string;
     season: string;
+    months: string;
+    habit: string;
     items: string;
     text: string;
+    practice: string;
   };
   missingGodGroups: { group: string; text: string }[];
   stages: StageEntry[]; // 십이운성 — 지지 자리별
+  stemRelations: ReportStemRelation[]; // 천간 합충
   relations: ReportRelation[];
   voids: ReportVoid[];
   sinsal: Sinsal[];
@@ -265,6 +284,13 @@ function calcStages(saju: SajuResult): StageEntry[] {
   return out;
 }
 
+/** 판정별 기신(忌神) 오행 — 불균형을 키우는 쪽 */
+function gisinElements(verdict: Verdict, myEl: ElementKey): ElementKey[] {
+  if (verdict === '신약') return [ELEMENT_GENERATES[myEl], ELEMENT_CONTROLS[myEl], controllingElement(myEl)];
+  if (verdict === '신강') return [generatingElement(myEl), myEl];
+  return [];
+}
+
 /** 운의 기운이 내 사주에 유리한지 — 대운·세운은 지지를 주심으로 봄 */
 function luckFavor(
   branchKorean: string,
@@ -273,16 +299,70 @@ function luckFavor(
   myEl: ElementKey,
 ): LuckFavor {
   const branchEl = getEarthlyBranchElement(branchKorean as EarthlyBranch) as ElementKey;
-  // 기신 오행 — 판정별 불균형을 키우는 쪽
-  const gisin: ElementKey[] =
-    verdict === '신약'
-      ? [ELEMENT_GENERATES[myEl], ELEMENT_CONTROLS[myEl], controllingElement(myEl)]
-      : verdict === '신강'
-        ? [generatingElement(myEl), myEl]
-        : [];
   if (branchEl === yongsin) return '용신운';
-  if (gisin.includes(branchEl)) return '기신운';
+  if (gisinElements(verdict, myEl).includes(branchEl)) return '기신운';
   return '중립운';
+}
+
+/** 사주 안 천간 관계 — 간합(合絆)·천간충. 이웃한 글자일수록 힘이 강하다 */
+function findStemRelations(saju: SajuResult, yongsin: ElementKey, gisin: ElementKey[]): ReportStemRelation[] {
+  const stems: { label: string; p: SajuPillar; isDay: boolean }[] = [];
+  for (const [key, label] of [
+    ['year', '연간'], ['month', '월간'], ['day', '일간'], ['hour', '시간'],
+  ] as const) {
+    const p = saju.pillars[key];
+    if (p) stems.push({ label, p, isDay: key === 'day' });
+  }
+
+  const found: ReportStemRelation[] = [];
+  for (let i = 0; i < stems.length; i++) {
+    for (let j = i + 1; j < stems.length; j++) {
+      const a = stems[i]!;
+      const b = stems[j]!;
+      const ah = a.p.hanja.charAt(0);
+      const bh = b.p.hanja.charAt(0);
+      const adjacent = j - i === 1;
+      const gods = `${a.p.tenGodStem}×${b.p.tenGodStem}`;
+      const hap = pairOf(STEM_HAP, ah, bh);
+      const clash = hap ? null : pairOf(STEM_CLASH, ah, bh);
+      if (hap) {
+        const parts = [
+          STEM_HAP_CHART_TEXT.base
+            .replace('{name}', hap.name)
+            .replace('{hanja}', hap.hanja)
+            .replace('{godA}', a.p.tenGodStem)
+            .replace('{godB}', b.p.tenGodStem)
+            .replaceAll('{element}', hap.element),
+          adjacent ? STEM_HAP_CHART_TEXT.adjacent : STEM_HAP_CHART_TEXT.far,
+        ];
+        if (hap.element === yongsin) parts.push(STEM_HAP_CHART_TEXT.good);
+        else if (gisin.includes(hap.element)) parts.push(STEM_HAP_CHART_TEXT.bad);
+        if (a.isDay || b.isDay) {
+          const other = a.isDay ? b : a;
+          parts.push(STEM_HAP_CHART_TEXT.dayMaster.replace('{god}', other.p.tenGodStem));
+        }
+        found.push({ pair: `${a.label}×${b.label}`, gods, kind: '합', name: hap.name, hanja: hap.hanja, adjacent, text: parts.join(' ') });
+      } else if (clash) {
+        found.push({
+          pair: `${a.label}×${b.label}`,
+          gods,
+          kind: '충',
+          name: clash.name,
+          hanja: clash.hanja,
+          adjacent,
+          text: [
+            STEM_CLASH_CHART_TEXT.base
+              .replace('{name}', clash.name)
+              .replace('{hanja}', clash.hanja)
+              .replace('{godA}', a.p.tenGodStem)
+              .replace('{godB}', b.p.tenGodStem),
+            adjacent ? STEM_CLASH_CHART_TEXT.adjacent : STEM_CLASH_CHART_TEXT.far,
+          ].join(' '),
+        });
+      }
+    }
+  }
+  return found;
 }
 
 /** 사주 안 지지 관계(合沖刑害 등) — 모든 자리 쌍을 검사 */
@@ -380,6 +460,8 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
   const deukryeong = calcDeukryeong(saju);
   const rooted = calcRoot(saju);
   const stages = calcStages(saju);
+  const gisin = gisinElements(verdict, myEl);
+  const stemRelations = findStemRelations(saju, yongsinPick.element, gisin);
   const relations = findRelations(saju);
   const voids = findVoids(saju);
   const sinsal = findSinsal(saju);
@@ -424,6 +506,7 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
 
   const headline = `${gyeokguk.name} — ${saju.dayMaster.hanja}(${saju.dayMaster.korean}) ${reading.dayMaster.title}, ${verdict}의 사주`;
 
+  const dmHap = stemRelations.find((s) => s.kind === '합' && s.pair.includes('일간'));
   const summary = [
     `일간 ${saju.dayMaster.hanja}(${saju.dayMaster.korean}) — ${reading.dayMaster.nature}의 기운을 타고난 ${verdict} 사주이며, 사주의 격은 ${gyeokguk.name}입니다.`,
     `${deukryeong.text} ${rooted.text}`,
@@ -431,13 +514,18 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
     `오행 분포는 ${reading.dominant} 기운이 가장 강하고${
       reading.lacking.length > 0 ? ` ${reading.lacking.join('·')} 기운이 비어 있어,` : ' 골고루 퍼져 있어,'
     } 균형의 열쇠는 용신 ${yongsinPick.element}(${ELEMENT_HANJA[yongsinPick.element]})에 있습니다 — ${yongsinPick.reason}.`,
+    dmHap
+      ? `천간에는 ${dmHap.pair}의 ${dmHap.name}이 맺어져 있어, 합으로 묶인 인연의 기운이 이 사주의 성향에 깊이 스며 있습니다.`
+      : null,
     daewoon?.current
       ? `지금은 ${daewoon.current.age}세부터 이어지는 ${daewoon.current.korean}(${daewoon.current.hanja}) 대운의 시기 — ${daewoon.current.stemGod}의 기운이 흐르고, ${year}년은 ${seun.korean}(${seun.hanja})년으로 ${seun.stemGod}의 해입니다.`
       : `${year}년은 ${seun.korean}(${seun.hanja})년으로 ${seun.stemGod}의 해가 펼쳐집니다.`,
-  ].join(' ');
+  ]
+    .filter((s): s is string => s !== null)
+    .join(' ');
 
   const advice = [
-    `기운의 균형 — ${yongsinTip.label}: ${yongsinTip.items}. ${yongsinTip.text}`,
+    `기운의 균형 — ${yongsinTip.label}: ${yongsinTip.items}. ${yongsinTip.practice}`,
     daewoon?.current
       ? `이 시기의 운 — ${daewoon.current.korean} 대운의 ${daewoon.current.stemGod} 기운: ${LUCK_GOD_TEXT[daewoon.current.stemGod].decade}`
       : null,
@@ -459,6 +547,7 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
     strength: { verdict, support, drain, title: strengthText.title, text: strengthText.text },
     yongsin: { element: yongsinPick.element, reason: yongsinPick.reason, ...yongsinTip },
     missingGodGroups,
+    stemRelations,
     relations,
     voids,
     sinsal,

@@ -77,7 +77,7 @@ function branchesOf(saju: SajuResult): string[] {
     .map((p) => p.branchHanja);
 }
 
-function pairOf<T extends { stems: [string, string] }>(list: T[], x: string, y: string): T | null {
+export function pairOf<T extends { stems: [string, string] }>(list: T[], x: string, y: string): T | null {
   return list.find((h) => h.stems.includes(x) && h.stems.includes(y)) ?? null;
 }
 
