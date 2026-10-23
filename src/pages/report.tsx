@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { BackHome } from '../components/back-home.tsx';
 import { ShareButton } from '../components/share-button.tsx';
+import { ShareImageButton } from '../components/share-image-button.tsx';
 import { StateView } from '../components/state-view.tsx';
-import { ELEMENT_COLOR, ELEMENT_HANJA } from '../content/meta.ts';
+import { ELEMENT_COLOR, ELEMENT_HANJA, type ElementKey } from '../content/meta.ts';
 import { buildDeepReport } from '../features/report/report.ts';
 import { PillarTable } from '../features/saju/pillar-table.tsx';
 import { useSaju } from '../features/saju/use-saju.ts';
@@ -49,8 +50,8 @@ export function ReportPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
       <header className="pt-6">
-        <BackHome />
-        <p className="mt-2 text-xs tracking-widest text-gold-bright">SAJOO 심층 명식 감정서</p>
+        <div className="no-print"><BackHome /></div>
+        <p className="no-print mt-2 text-xs tracking-widest text-gold-bright">SAJOO 심층 명식 감정서</p>
         <h1 className="mt-1 text-2xl font-bold text-gold">「{profile?.name}」님의 심화 사주 리포트</h1>
         <p className="mt-1 text-sm text-hanji/60">
           음력 {saju.lunar.year}년 {saju.lunar.month}월 {saju.lunar.day}일 · 만세력 + 명리 해석 · {today} 기준
@@ -88,6 +89,11 @@ export function ReportPage() {
           <p className="mt-1 text-sm leading-6 text-hanji/85">
             <span className="font-bold text-hanji">{strength.title}.</span> {strength.text}
           </p>
+          {strength.extreme && (
+            <p className="mt-2 rounded-lg border border-gold/40 bg-gold/10 p-3 text-sm leading-6 text-gold-bright/90">
+              <span className="font-bold">특수격 후보 — {strength.extreme}.</span> {strength.extremeText}
+            </p>
+          )}
         </div>
       </section>
 
@@ -344,6 +350,9 @@ export function ReportPage() {
                   </p>
                 )}
                 <p className="mt-1.5 text-xs leading-5 text-hanji/55">{daewoon.current.favorText}</p>
+                <p className="mt-1.5 text-xs leading-5 text-hanji/55">
+                  이 대운에서 내 기운의 단계 — <span className="font-bold text-hanji/75">{daewoon.current.stage}({daewoon.current.stageDesc})</span>. {daewoon.current.stageText}
+                </p>
               </div>
             )}
             {report.luckRelations.filter((l) => l.source === '대운').length > 0 && (
@@ -472,8 +481,35 @@ export function ReportPage() {
             <li key={i} className="rounded-lg bg-night p-4 text-sm leading-6 text-hanji/85">{a}</li>
           ))}
         </ul>
-        <div className="mt-4 flex justify-center">
+        <div className="no-print mt-4 flex flex-wrap justify-center gap-2">
           <ShareButton label="내 심화 리포트 공유하기" text={shareText} url={ogUrl('report')} />
+          <ShareImageButton
+            label="감정서 이미지로 공유하기"
+            data={{
+              label: '심화 사주 리포트',
+              big: saju.dayMaster.hanja,
+              accent: ELEMENT_COLOR[saju.dayMaster.element as ElementKey],
+              title: report.gyeokguk.name,
+              subtitle: `${saju.dayMaster.korean} — ${strength.verdict}의 사주`,
+              lines: [
+                `용신 — ${yongsin.element}(${ELEMENT_HANJA[yongsin.element]}): ${yongsin.label}`,
+                daewoon?.current
+                  ? `지금의 대운 — ${daewoon.current.korean}: ${daewoon.current.stemGod}의 기운`
+                  : '',
+                `올해(${seun.year}) — ${seun.korean}: ${seun.stemGod}의 해`,
+                report.summary.slice(0, 90) + '…',
+              ].filter(Boolean),
+            }}
+            text={shareText}
+            url={ogUrl('report')}
+          />
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="rounded-full border border-gold/40 bg-night px-5 py-2 text-sm font-bold text-gold-bright transition hover:bg-gold/10"
+          >
+            인쇄·PDF로 저장
+          </button>
         </div>
       </section>
 

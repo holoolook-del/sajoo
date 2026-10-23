@@ -14,6 +14,7 @@ import {
 import {
   DEUKRYEONG_TEXT,
   EXCESS_GOD_TEXT,
+  EXTREME_TEXT,
   FORMATION_DAMAGE_TEXT,
   FORMATION_TEXT,
   GYEOKGUK_TEXT,
@@ -21,6 +22,7 @@ import {
   LUCK_FAVOR_TEXT,
   LUCK_GOD_TEXT,
   LUCK_RELATION_TEXT,
+  LUCK_STEM_RELATION_TEXT,
   POSITION_MEANING,
   RELATION_KIND_TEXT,
   ROOT_TEXT,
@@ -107,7 +109,7 @@ export interface ReportFormation {
 export interface ReportLuckRelation {
   source: '대운' | '세운';
   pair: string; // '대운 인×연지 신'
-  kind: BranchRelation;
+  kind: BranchRelation | '간합' | '간충'; // 간합·간충 = 운의 천간이 일간과 맺는 관계
   text: string;
 }
 
@@ -118,7 +120,7 @@ export interface LuckChapter {
   directionLabel: string;
   startAge: number;
   list: { age: number; korean: string; hanja: string; stemGod: TenGodKey; current: boolean }[];
-  current: { age: number; korean: string; hanja: string; stemGod: TenGodKey; branchGod: TenGodKey; stemText: string; branchText: string; favor: LuckFavor; favorText: string } | null;
+  current: { age: number; korean: string; hanja: string; stemGod: TenGodKey; branchGod: TenGodKey; stemText: string; branchText: string; favor: LuckFavor; favorText: string; stage: StageName; stageDesc: string; stageText: string } | null;
   next: { age: number; korean: string; hanja: string; stemGod: TenGodKey; stemText: string } | null;
 }
 
@@ -148,7 +150,12 @@ export interface DeepReport {
   gyeokguk: { name: string; god: TenGodKey; source: string; text: string };
   deukryeong: { verdict: '득령' | '상령' | '실령'; text: string };
   rooted: { strong: number; weak: number; count: number; text: string };
-  strength: { verdict: Verdict; support: number; drain: number; title: string; text: string };
+  strength: {
+    verdict: Verdict; support: number; drain: number; title: string; text: string;
+    /** 극단 판정 — 종격류 특수격 후보 (유파별 이론 갈림 영역이라 후보 표시) */
+    extreme: '종격후보' | '종왕후보' | null;
+    extremeText: string;
+  };
   yongsin: {
     element: ElementKey;
     label: string;
@@ -194,11 +201,15 @@ function controllingElement(my: ElementKey): ElementKey {
 }
 
 /** 신강·중화·신약 — 비겁·인성의 가중 합 ÷ 전체 가중 합. 지장간 얕은 뿌리는 가중치에 안 잡히는 추가 지원으로 보정 */
-function calcStrength(saju: SajuResult, weakRoots: number): { verdict: Verdict; support: number; drain: number } {
+function calcStrength(
+  saju: SajuResult,
+  weakRoots: number,
+): { verdict: Verdict; support: number; drain: number; ratio: number; dominantDrain: string } {
   const positions = [saju.pillars.year, saju.pillars.month, saju.pillars.day, saju.pillars.hour]
     .filter((p): p is NonNullable<typeof p> => p !== null);
   let support = 0;
   let drain = 0;
+  const drainGroups = new Map<string, number>();
   positions.forEach((p, i) => {
     // 천간 1, 지지 2, 월지(계절)는 3
     const entries: [string, number][] = [
@@ -208,13 +219,18 @@ function calcStrength(saju: SajuResult, weakRoots: number): { verdict: Verdict; 
     for (const [god, w] of entries) {
       if (god === '일간') continue;
       if (SUPPORT_GODS.includes(god as TenGodKey)) support += w;
-      else drain += w;
+      else {
+        drain += w;
+        const g = GOD_GROUP[god as TenGodKey];
+        drainGroups.set(g, (drainGroups.get(g) ?? 0) + w);
+      }
     }
   });
   // 본기 뿌리는 tenGodBranch 가중치에 이미 반영됨 — 여기·중기 뿌리만 0.5씩 보정 (중복 계산 방지)
   support += weakRoots * 0.5;
   const ratio = support / (support + drain || 1);
-  return { verdict: ratio >= 0.58 ? '신강' : ratio <= 0.42 ? '신약' : '중화', support, drain };
+  const dominantDrain = [...drainGroups.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '식상';
+  return { verdict: ratio >= 0.58 ? '신강' : ratio <= 0.42 ? '신약' : '중화', support, drain, ratio, dominantDrain };
 }
 
 /** 용신 오행과 이유 문장 */
@@ -593,10 +609,10 @@ function findFormations(saju: SajuResult, yongsin: ElementKey, gisin: ElementKey
   return found;
 }
 
-/** 운(대운·세운)의 지지가 원국 지지와 맺는 관계 — 들어오는 운이 어느 자리를 건드리는가 */
+/** 운(대운·세운)이 원국과 맺는 관계 — 천간은 일간과의 간합·간충, 지지는 각 자리와의 합충형해 */
 function findLuckRelations(
   saju: SajuResult,
-  lucks: { source: '대운' | '세운'; korean: string }[],
+  lucks: { source: '대운' | '세운'; korean: string; hanja: string }[],
 ): ReportLuckRelation[] {
   const positions: { label: string; branch: string }[] = [];
   for (const [key, label] of [
@@ -607,7 +623,27 @@ function findLuckRelations(
   }
 
   const found: ReportLuckRelation[] = [];
+  const dayStemHanja = saju.dayMaster.hanja;
   for (const luck of lucks) {
+    // 운의 천간 × 일간 — 운의 기운이 나 자신과 직접 맺는 인연·충돌
+    const luckStem = luck.hanja.charAt(0);
+    const hap = pairOf(STEM_HAP, luckStem, dayStemHanja);
+    const stemClash = hap ? null : pairOf(STEM_CLASH, luckStem, dayStemHanja);
+    if (hap || stemClash) {
+      const rel = hap ?? stemClash!;
+      const kind = hap ? '간합' : '간충';
+      found.push({
+        source: luck.source,
+        pair: `${luck.source} ${luck.korean.charAt(0)}×일간`,
+        kind,
+        text: LUCK_STEM_RELATION_TEXT[kind]
+          .replace('{luck}', `${luck.source} ${luck.korean}`)
+          .replace('{stem}', luck.korean.charAt(0))
+          .replace('{name}', rel.name)
+          .replace('{hanja}', rel.hanja),
+      });
+    }
+
     const lb = luck.korean.charAt(1);
     for (const pos of positions) {
       const kind = branchRelation(lb, pos.branch);
@@ -713,8 +749,17 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
   const year = y ?? new Date().getFullYear();
 
   const rooted = calcRoot(saju);
-  const { verdict, support, drain } = calcStrength(saju, rooted.weak);
+  const { verdict, support, drain, ratio, dominantDrain } = calcStrength(saju, rooted.weak);
   const strengthText = STRENGTH_TEXT[verdict];
+  // 극단 판정 — 균형이 한쪽으로 심하게 기울면 일반 억부 관법이 아닌 종격류(순응 관법)의 후보
+  const extreme =
+    ratio <= 0.22 ? '종격후보' : ratio >= 0.78 ? '종왕후보' : null;
+  const extremeText =
+    extreme === '종격후보'
+      ? EXTREME_TEXT.jong.replace('{group}', dominantDrain)
+      : extreme === '종왕후보'
+        ? EXTREME_TEXT.wang
+        : '';
   const yongsinPick = pickYongsin(saju, verdict);
   const yongsinTip = YONGSIN_TIPS[yongsinPick.element];
   const myEl = saju.dayMaster.element as ElementKey;
@@ -755,13 +800,21 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
           startAge: luck.startAge,
           list: luck.daewoon,
           current: cur
-            ? {
-                ...cur,
-                stemText: LUCK_GOD_TEXT[cur.stemGod].decade,
-                branchText: LUCK_GOD_TEXT[cur.branchGod].decade,
-                favor: luckFavor(cur.korean.charAt(1), yongsinPick.element, verdict, myEl),
-                favorText: LUCK_FAVOR_TEXT[luckFavor(cur.korean.charAt(1), yongsinPick.element, verdict, myEl)].text,
-              }
+            ? (() => {
+                const stage = stageOf(saju.dayMaster.korean, cur.korean.charAt(1));
+                const stageMeta = STAGE_TEXT[stage];
+                const favor = luckFavor(cur.korean.charAt(1), yongsinPick.element, verdict, myEl);
+                return {
+                  ...cur,
+                  stemText: LUCK_GOD_TEXT[cur.stemGod].decade,
+                  branchText: LUCK_GOD_TEXT[cur.branchGod].decade,
+                  favor,
+                  favorText: LUCK_FAVOR_TEXT[favor].text,
+                  stage,
+                  stageDesc: stageMeta.stage,
+                  stageText: stageMeta.text,
+                };
+              })()
             : null,
           next: nxt
             ? { ...nxt, stemText: LUCK_GOD_TEXT[nxt.stemGod].decade }
@@ -783,12 +836,14 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
       }))
     : null;
 
-  // 운의 지지가 원국의 어느 자리를 건드리는가 — 현재 대운 + 올해 세운
+  // 운이 원국을 건드리는 자리 — 현재 대운 + 올해 세운의 천간(×일간)과 지지(×각 자리)
   const luckRelations = findLuckRelations(
     saju,
     [
-      ...(daewoon?.current ? [{ source: '대운' as const, korean: daewoon.current.korean }] : []),
-      { source: '세운' as const, korean: seun.korean },
+      ...(daewoon?.current
+        ? [{ source: '대운' as const, korean: daewoon.current.korean, hanja: daewoon.current.hanja }]
+        : []),
+      { source: '세운' as const, korean: seun.korean, hanja: seun.hanja },
     ],
   );
 
@@ -832,7 +887,7 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
     deukryeong,
     rooted,
     stages,
-    strength: { verdict, support, drain, title: strengthText.title, text: strengthText.text },
+    strength: { verdict, support, drain, title: strengthText.title, text: strengthText.text, extreme, extremeText },
     yongsin: { element: yongsinPick.element, reason: yongsinPick.reason, ...yongsinTip },
     missingGodGroups,
     excessGodGroups,

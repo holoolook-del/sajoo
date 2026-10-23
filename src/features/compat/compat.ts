@@ -5,6 +5,7 @@ import {
   BRANCH_ANIMAL,
   COMPAT_GRADE_TEXT,
   COMPAT_RELATION_TEXT,
+  CROSS_BRANCH_TEXT,
   DOHWA_CROSS_TEXT,
   ELEMENT_FILL_TEXT,
   FIVE_ELEMENT_COMPLETE,
@@ -18,8 +19,11 @@ import {
   STEM_HAP,
   STEM_RELATION_TEXT,
   YINYANG_TEXT,
+  YONGSIN_FIT_TEXT,
   type StemRelation,
 } from '../../content/compat.ts';
+import { POSITION_MEANING } from '../../content/report.ts';
+import type { BranchRelation } from '../../content/fortune.ts';
 import { ELEMENT_GENERATES, TEN_GOD_HANJA, type ElementKey, type TenGodKey } from '../../content/meta.ts';
 import { interpretSaju } from '../../lib/interpret.ts';
 import { branchRelation } from '../../lib/relations.ts';
@@ -42,12 +46,21 @@ export interface CompatResult {
   aspects: CompatAspect[];
 }
 
+/** 개인 명식의 용신·기신 — report.personalBalance 결과와 같은 형태(구조적 타이핑으로 순환 참조 방지) */
+export interface ElementBalance {
+  yongsin: ElementKey;
+  gisin: ElementKey[];
+}
+
 export interface CompatOpts {
   nameA?: string;
   nameB?: string;
   /** 성별을 알면 배우자성(남=재성·여=관성)을 정확히 판정 — 모르면 정재·정관 통합 판정 */
   genderA?: Gender;
   genderB?: Gender;
+  /** 각자의 용신·기신 — 넣으면 '용신 관점' 장이 열린다 (personalBalance 결과를 넘기면 됨) */
+  balanceA?: ElementBalance;
+  balanceB?: ElementBalance;
 }
 
 function stemRelation(a: string, b: string): StemRelation {
@@ -107,8 +120,8 @@ export function compatScore(a: SajuResult, b: SajuResult, opts: CompatOpts = {})
 
   let score = 50;
   const aspects: CompatAspect[] = [];
-  const push = (title: string, entries: { line: string; delta: number }[]) => {
-    const delta = entries.reduce((s, e) => s + e.delta, 0);
+  const push = (title: string, entries: { line: string; delta: number }[], deltaOverride?: number) => {
+    const delta = deltaOverride ?? entries.reduce((s, e) => s + e.delta, 0);
     score += delta;
     aspects.push({ title, delta, lines: entries.map((e) => e.line) });
   };
@@ -147,6 +160,56 @@ export function compatScore(a: SajuResult, b: SajuResult, opts: CompatOpts = {})
       }
     }
     push('배우자궁 — 일지의 인연', e);
+  }
+
+  // ── 2.5) 얼기설기 — 일지 외 지지 전체의 교차 관계 (일지×일지는 위에서 별도 해석) ──
+  {
+    const positionsOf = (saju: SajuResult): { label: string; branch: string }[] => {
+      const out: { label: string; branch: string }[] = [];
+      for (const [label, p] of [
+        ['연지', saju.pillars.year], ['월지', saju.pillars.month],
+        ['일지', saju.pillars.day], ['시지', saju.pillars.hour],
+      ] as const) {
+        if (p) out.push({ label, branch: p.korean.charAt(1) });
+      }
+      return out;
+    };
+    const posA = positionsOf(a);
+    const posB = positionsOf(b);
+    const HARMONY: BranchRelation[] = ['육합', '삼합'];
+    const entries: { line: string; delta: number }[] = [];
+    let h = 0;
+    let f = 0;
+    for (const pa of posA) {
+      for (const pb of posB) {
+        if (pa.label === '일지' && pb.label === '일지') continue; // 배우자궁 장에서 해석한 쌍 제외
+        const kind = branchRelation(pa.branch, pb.branch);
+        if (!kind) continue;
+        const harmony = HARMONY.includes(kind);
+        if (harmony) h += 1; else f += 1;
+        entries.push({
+          line: CROSS_BRANCH_TEXT.line
+            .replace('{a}', nameA).replace('{b}', nameB)
+            .replace('{posA}', pa.label).replace('{posB}', pb.label)
+            .replace('{bA}', pa.branch).replace('{bB}', pb.branch)
+            .replace('{kind}', kind)
+            .replace('{posTextA}', POSITION_MEANING[pa.label] ?? pa.label)
+            .replace('{posTextB}', POSITION_MEANING[pb.label] ?? pb.label),
+          delta: 0, // 점수는 아래 요약에서 캡을 씌워 반영
+        });
+      }
+    }
+    if (entries.length === 0) {
+      entries.push({ line: CROSS_BRANCH_TEXT.none, delta: 0 });
+    }
+    // 얽힘이 많아도 과대 가점하지 않게 쌍별 ±4, 총 ±8로 캡
+    const capped = Math.max(-8, Math.min(8, h * 4 - f * 4));
+    if (entries[0] && entries[0].line !== CROSS_BRANCH_TEXT.none) {
+      const summary = (h >= f ? CROSS_BRANCH_TEXT.moreHarmony : CROSS_BRANCH_TEXT.moreFriction)
+        .replace('{h}', String(h)).replace('{f}', String(f));
+      entries.push({ line: summary, delta: 0 });
+    }
+    push('얼기설기 — 지지 전체의 엮임', entries, capped);
   }
 
   // ── 3) 십신 상호 역할 + 배우자성 ──
@@ -213,6 +276,29 @@ export function compatScore(a: SajuResult, b: SajuResult, opts: CompatOpts = {})
       e.push({ line: '서로의 오행이 크게 부딪히거나 비어 있는 곳이 없는 결 — 다른 강점으로 채워가는 관계입니다.', delta: 0 });
     }
     push('기운의 보완 — 오행과 삼합', e);
+  }
+
+  // ── 4.5) 용신 관점 — 상대의 기운이 내게 필요한 기운인가 (balance 데이터가 있을 때만) ──
+  if (opts.balanceA || opts.balanceB) {
+    const e: { line: string; delta: number }[] = [];
+    const fit = (bal: ElementBalance | undefined, partner: typeof ra, me: string, other: string) => {
+      if (!bal) return;
+      const tpl = (s: string) =>
+        s.replaceAll('{other}', other).replaceAll('{me}', me).replaceAll('{el}', bal.yongsin);
+      if (partner.dominant === bal.yongsin) {
+        e.push({ line: tpl(YONGSIN_FIT_TEXT.fills), delta: 8 });
+      } else if (bal.gisin.includes(partner.dominant as ElementKey)) {
+        const g = YONGSIN_FIT_TEXT.gisin
+          .replaceAll('{other}', other).replaceAll('{me}', me).replaceAll('{el}', partner.dominant);
+        e.push({ line: g, delta: -6 });
+      } else if ((partner.elementCounts.find((x) => x.element === bal.yongsin)?.count ?? 0) > 0) {
+        e.push({ line: tpl(YONGSIN_FIT_TEXT.carries), delta: 4 });
+      }
+    };
+    fit(opts.balanceA, rb, nameA, nameB);
+    fit(opts.balanceB, ra, nameB, nameA);
+    if (e.length === 0) e.push({ line: YONGSIN_FIT_TEXT.neutral, delta: 0 });
+    push('용신 관점 — 상대가 내게 필요한 기운인가', e);
   }
 
   // ── 5) 참고 — 띠(연지)·도화 교차 ──

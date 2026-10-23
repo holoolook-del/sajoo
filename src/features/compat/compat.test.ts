@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { calcSaju } from '../../lib/engine.ts';
+import { interpretSaju } from '../../lib/interpret.ts';
+import type { ElementKey } from '../../content/meta.ts';
 import { compatScore, type CompatResult } from './compat.ts';
 
 // A: 1992-10-24 계유일주 (일지 유, 일간 계수) — 지지 申·戌·酉·卯
@@ -74,5 +76,33 @@ describe('compatScore — 고전 궁합 항목', () => {
   it('둘의 지지가 합쳐 삼합을 완성하면 반영된다', () => {
     const r = compatScore(sajuA, sajuOf(B_SAMHAP));
     expect(allLines(r)).toMatch(/금국|삼합/);
+  });
+
+  it('얼기설기 — 일지 외 지지 전체의 합·충도 해석한다 (A월지 戌 × B일지 卯 = 육합)', () => {
+    const r = compatScore(sajuA, sajuOf(B_CHUNG));
+    const aspect = r.aspects.find((a) => a.title.includes('얼기설기'));
+    expect(aspect).toBeTruthy();
+    expect(aspect!.lines.join(' ')).toMatch(/육합/);
+    expect(aspect!.lines.join(' ')).toContain('월지');
+  });
+
+  it('용신 관점 — 상대의 가장 강한 기운이 내 용신이면 표기한다', () => {
+    const b = sajuOf(B_HAP);
+    const dom = interpretSaju(b).dominant as ElementKey;
+    const r = compatScore(sajuA, b, { balanceA: { yongsin: dom, gisin: [] } });
+    expect(r.aspects.find((a) => a.title.includes('용신'))).toBeTruthy();
+    expect(allLines(r)).toMatch(/용신/);
+  });
+
+  it('용신 관점 — 상대의 가장 강한 기운이 내 기신이면 마찰로 표기한다', () => {
+    const b = sajuOf(B_HAP);
+    const dom = interpretSaju(b).dominant as ElementKey;
+    const r = compatScore(sajuA, b, { balanceA: { yongsin: '수', gisin: [dom] } });
+    expect(allLines(r)).toMatch(/기신/);
+  });
+
+  it('용신 데이터가 없으면 용신 관점 장을 생략한다', () => {
+    const r = compatScore(sajuA, sajuOf(B_HAP));
+    expect(r.aspects.find((a) => a.title.includes('용신'))).toBeUndefined();
   });
 });

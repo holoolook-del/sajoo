@@ -249,6 +249,37 @@ describe('buildDeepReport', () => {
     expect(hap!.kind).toBe('삼합');
   });
 
+  it('극단 판정은 종격류 특수격 후보로 표시한다', () => {
+    // 갑자 병자 경자 임오 — 경금 일간에 돕는 기운 0 (모두 설기·극제) → 종식격 후보
+    const r = reportFor(
+      { year: 1985, month: 1, day: 1, hour: 11, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1985, month: 1, day: 1, hour: 11, minute: 0 },
+    );
+    expect(r.strength.extreme).toBe('종격후보');
+    expect(r.strength.extremeText).toContain('식상');
+    // 일반 픽스처는 극단 아님
+    expect(reportFor().strength.extreme).toBeNull();
+  });
+
+  it('운의 천간이 일간과 합·충을 이루는지 판정한다', () => {
+    // 1985-01-01 경 일간 — 2025년 을사 세운: 천간 乙이 일간 庚과 을경합
+    const r = reportFor(
+      { year: 1985, month: 1, day: 1, hour: 11, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1985, month: 1, day: 1, hour: 11, minute: 0 },
+      '2025-06-15',
+    );
+    const stemRel = r.luckRelations.find((l) => l.kind === '간합' && l.source === '세운');
+    expect(stemRel).toBeTruthy();
+    expect(stemRel!.text).toContain('을경합');
+  });
+
+  it('현재 대운의 십이운성 — 그 시기의 인생 단계를 붙인다', () => {
+    const r = reportFor();
+    // 계 일간 대운 인지 — 음간 역행으로 목욕 단계
+    expect(r.daewoon?.current?.stage).toBe('목욕');
+    expect(r.daewoon?.current?.stageText.length).toBeGreaterThan(20);
+  });
+
   it('같은 입력은 같은 리포트를 만든다 (결정성)', () => {
     expect(reportFor().summary).toBe(reportFor().summary);
   });

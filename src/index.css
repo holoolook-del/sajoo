@@ -22,3 +22,18 @@ body {
 }
 
 
+
+/* 인쇄/PDF — 심화 리포트를 백지 감정서로 출력. 버튼·내비는 no-print로 숨긴다 */
+@media print {
+  body { background: #fff; color: #111; }
+  .no-print { display: none !important; }
+  *, *::before, *::after {
+    color: #111 !important;
+    background: transparent !important;
+    border-color: #bbb !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+  section, li { break-inside: avoid-page; }
+  main { max-width: 100% !important; padding: 0 !important; }
+}

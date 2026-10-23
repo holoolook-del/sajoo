@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { BackHome } from '../components/back-home.tsx';
 import { compatScore } from '../features/compat/compat.ts';
+import { personalBalance } from '../features/report/report.ts';
 import { GRADE_COLOR } from '../features/card/card-frame.tsx';
 import { ProfileForm } from '../features/saju/profile-form.tsx';
 import { useSaju } from '../features/saju/use-saju.ts';
@@ -47,6 +48,9 @@ export function CompatPage() {
       nameB: other.name,
       genderA: inviteMode ? undefined : profile!.gender,
       genderB: other.gender,
+      // 개인 용신·기신 — '용신 관점' 장을 여는 심화 궁합 데이터
+      balanceA: personalBalance(a),
+      balanceB: personalBalance(b),
     });
   }, [saju, other, inviteMode, inviter, profile]);
 
