@@ -24,14 +24,24 @@ export function BoardPage() {
   const [online, setOnline] = useState(0);
   const [myUid, setMyUid] = useState('');
   const [error, setError] = useState('');
+  const [loadErr, setLoadErr] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
+  const gotData = useRef(false);
 
   useEffect(() => {
     if (!firebaseReady) return;
-    const un1 = watchPosts(setPosts);
-    const un2 = watchPresence(setOnline);
+    gotData.current = false;
+    const un1 = watchPosts(
+      (ps) => { gotData.current = true; setPosts(ps); },
+      () => setLoadErr('목록을 불러오지 못했어요'),
+    );
+    const un2 = watchPresence(setOnline, () => {});
     void deviceUid().then(setMyUid).catch(() => setError('연결에 실패했어요 — 잠시 후 다시 열어주세요'));
-    return () => { un1(); un2(); };
-  }, []);
+    const slow = setTimeout(() => {
+      if (!gotData.current) setLoadErr('연결이 느려요 — 네트워크를 확인하거나 다시 시도해주세요');
+    }, 12_000);
+    return () => { un1(); un2(); clearTimeout(slow); };
+  }, [retryKey]);
 
   if (!firebaseReady) {
     return (
@@ -48,7 +58,10 @@ export function BoardPage() {
           <p className="mt-3 font-bold text-gold-bright">게시판을 여는 중이에요</p>
           <p className="mt-2 text-sm leading-6 text-hanji/60">
             운세 이야기를 나누는 익명 광장을 준비하고 있습니다.<br />
-            조금만 기다려 주세요.
+            조금만 기다려 주세요.<br />
+            <span className="text-xs text-hanji/40">
+              계속 이 화면이 보이면 앱을 완전히 닫고 다시 열어주세요.
+            </span>
           </p>
         </section>
       </main>
@@ -77,7 +90,18 @@ export function BoardPage() {
       <WriteBox onError={setError} />
       {error && <p className="text-center text-xs text-[#e0705a]">{error}</p>}
 
-      {posts === null ? (
+      {loadErr && posts === null ? (
+        <div className="rounded-xl border border-[#e0705a]/40 bg-night-soft py-10 text-center">
+          <p className="text-sm text-hanji/70">{loadErr}</p>
+          <button
+            type="button"
+            onClick={() => { setPosts(null); setLoadErr(''); setRetryKey((k) => k + 1); }}
+            className="mt-3 rounded-lg bg-gold px-4 py-2 text-xs font-bold text-night"
+          >
+            다시 시도
+          </button>
+        </div>
+      ) : posts === null ? (
         <p className="py-10 text-center text-sm text-hanji/40">불러오는 중…</p>
       ) : posts.length === 0 ? (
         <p className="rounded-xl border border-hanji/10 bg-night-soft py-10 text-center text-sm text-hanji/40">
@@ -233,7 +257,7 @@ function PostItem({ post, mine, onError }: { post: Post; mine: boolean; onError:
 
   function toggleComments() {
     if (open) { unref.current?.(); unref.current = null; setOpen(false); return; }
-    unref.current = watchComments(post.id, setComments);
+    unref.current = watchComments(post.id, setComments, () => onError('댓글을 불러오지 못했어요'));
     setOpen(true);
   }
   useEffect(() => () => unref.current?.(), []);

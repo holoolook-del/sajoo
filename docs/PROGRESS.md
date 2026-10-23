@@ -518,6 +518,23 @@
 ### 남은 옵션
 - 카카오 SDK(Kakao.Share) 연동 시 이미지+텍스트+링크를 한 메시지로 전송 가능 — developers.kakao.com 앱 등록+JS 키+도메인 필요, 별도 작업
 
+## T29 — 게시판 무한 "불러오는 중…" 수정 (사용자 제보: 게시판 이용 불가)
+
+### 재현·원인
+- aside에서 사이트 저장소 초기화 후 첫 방문 재현: 글 목록 영원히 "불러오는 중…" + "0명 접속 중", 콘솔 에러 없음
+- `watchPosts`/`watchComments`/`watchPresence`에 **에러 콜백 부재** — 구독 실패가 조용히 삼켜져 posts가 영원히 null
+- `deviceUid()` 실패·멈춤 시 `authPromise`가 실패 상태로 영구 캐시 → 재시도 불가. 익명 인증이 멈추는 환경(인앱 브라우저·저장소 제한)에서 Firestore listen이 auth 토큰을 기다리며 함께 멈춤
+
+### 한 일
+- `posts.ts` — watchPosts/watchComments/watchPresence에 onErr 콜백 추가. deviceUid에 15초 타임아웃 + 실패 시 authPromise 리셋(재시도 가능)
+- `board.tsx` — watchPosts 실패 또는 12초 무응답 시 에러 박스 + "다시 시도" 버튼 (retryKey로 구독·인증 전체 재시도). 댓글 구독 실패도 에러 표시
+- '준비 중' 화면에 "계속 보이면 앱을 닫고 다시 열어주세요" 안내 추가 (구버전 SW 캐시 케이스)
+
+### 검증
+- pnpm verify 통과 (vitest 80/80, build+SW 66)
+- 배포본에서 aside 재확인 필요 — push 후 자동 배포
+- 미해결 가능성: 사용자가 본 실제 화면 미확인 — 준비 중/불러오는 중/에러 중 무엇이었는지 확인 필요
+
 ## T27 — 카드 팬 360px 가로 스크롤 회귀 수정 (AC12)
 
 ### 원인 (디버그로 확정)

@@ -28,9 +28,19 @@ function realtimeDb(): Database {
   return getDatabase(app());
 }
 let authPromise: Promise<string> | null = null;
-/** 익명 인증 — 로그인 UI 없이 기기별 uid. 글 작성·삭제 소유권 확인용. */
+const AUTH_TIMEOUT_MS = 15_000;
+/** 익명 인증 — 로그인 UI 없이 기기별 uid. 글 작성·삭제 소유권 확인용.
+ *  인앱 브라우저 등 저장소 제한 환경에서 인증이 멈출 수 있어 타임아웃을 두고,
+ *  실패 시 캐시를 비워 다시 시도할 수 있게 한다. */
 export function deviceUid(): Promise<string> {
-  authPromise ??= signInAnonymously(getAuth(app())).then((c) => c.user.uid);
+  if (!authPromise) {
+    authPromise = Promise.race([
+      signInAnonymously(getAuth(app())).then((c) => c.user.uid),
+      new Promise<string>((_, rej) =>
+        setTimeout(() => rej(new BoardError('연결 시간이 초과됐어요')), AUTH_TIMEOUT_MS)),
+    ]);
+    authPromise.catch(() => { authPromise = null; });
+  }
   return authPromise;
 }
 
@@ -73,8 +83,8 @@ function throttle(kind: 'post' | 'comment'): void {
 
 // ── 읽기 ──
 
-/** 최신 글 스트림 — 반환값으로 구독 해제 */
-export function watchPosts(cb: (posts: Post[]) => void): Unsubscribe {
+/** 최신 글 스트림 — 반환값으로 구독 해제. onErr 없으면 실패가 조용히 무한 로딩이 된다. */
+export function watchPosts(cb: (posts: Post[]) => void, onErr?: (e: unknown) => void): Unsubscribe {
   const q = query(collection(firestore(), 'posts'), orderBy('ts', 'desc'), limit(50));
   return onSnapshot(q, (snap) => {
     cb(snap.docs.map((d) => {
@@ -88,10 +98,14 @@ export function watchPosts(cb: (posts: Post[]) => void): Unsubscribe {
         ts: (v.ts?.toMillis?.() ?? Date.now()) as number,
       };
     }));
-  });
+  }, onErr);
 }
 
-export function watchComments(postId: string, cb: (comments: Comment[]) => void): Unsubscribe {
+export function watchComments(
+  postId: string,
+  cb: (comments: Comment[]) => void,
+  onErr?: (e: unknown) => void,
+): Unsubscribe {
   const q = query(
     collection(firestore(), 'posts', postId, 'comments'),
     orderBy('ts', 'asc'), limit(100),
@@ -107,7 +121,7 @@ export function watchComments(postId: string, cb: (comments: Comment[]) => void)
         ts: (v.ts?.toMillis?.() ?? Date.now()) as number,
       };
     }));
-  });
+  }, onErr);
 }
 
 // ── 쓰기 ──
@@ -158,6 +172,6 @@ export async function startPresence(): Promise<void> {
   window.addEventListener('beforeunload', () => void remove(me));
 }
 
-export function watchPresence(cb: (count: number) => void): Unsubscribe {
-  return onValue(ref(realtimeDb(), 'presence'), (snap) => cb(snap.size));
+export function watchPresence(cb: (count: number) => void, onErr?: (e: unknown) => void): Unsubscribe {
+  return onValue(ref(realtimeDb(), 'presence'), (snap) => cb(snap.size), onErr);
 }
