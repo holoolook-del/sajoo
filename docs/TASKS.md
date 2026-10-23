@@ -25,7 +25,7 @@
 - [x] T8 이미지 전량 생성+적용, 한국 전통 디자인 마감 (Gemini → Replicate flux-schnell로 교체)
 - [x] T-last 마감: 빈/에러/로딩 상태, AC12(360px), 오프라인 최종(AC7), README, 실기기 체크리스트
 - [x] T32 운영 도구+확장 — 관리자 삭제(admins/{uid})·OG 결과별 정적 미리보기(gen-og-pages)·30일 글 조회 제한·TWA 스캐폴딩(twa/)·심리테스트 2종(money·friend)
-- [ ] H4 관리자 등록: 콘솔→Firestore→admins 컬렉션→문서ID=자기 uid(첫 글의 uid 필드, 예: Jd4XwPNmUFYabQg3dwPS6rLv5AI2)→필드 role:"admin"
+- [x] H4 관리자 등록: 콘솔→Firestore→admins 컬렉션→문서ID=자기 uid — 완료(`admins/Jd4XwPNmUFYabQg3dwPS6rLv5AI2`, role:"admin", 첫 글 작성 기기)
 - [ ] H5 TTL 물리 삭제(선택): Blaze 플랜 전환 후 Cloud 콘솔→Firestore→TTL→posts/comments·ts·30일 — 지금은 쿼리가 30일 글을 숨기므로 동일 효과
 - [ ] H6 TWA/Play 배포(선택): 개발자 계정($25) + `npx @bubblewrap/cli init --manifest=twa/twa-manifest.json` → build → 업로드
 

@@ -616,7 +616,7 @@
 - 규칙 게시 후 확인: 버전 목록 16:36 신버전 스타 표시
 
 ### 남은 사람 작업
-- 관리자 등록: 콘솔 → Firestore → `admins` 컬렉션 → 문서 ID = 자기 uid(게시글 문서의 uid 필드에서 확인, 현재 첫 글 작성자 `Jd4XwPNmUFYabQg3dwPS6rLv5AI2`) → 필드 아무거나(role:"admin")
+- ~~관리자 등록~~ 완료: `admins/Jd4XwPNmUFYabQg3dwPS6rLv5AI2`(role:"admin") 콘솔 생성됨 — 첫 글 작성 기기가 관리자. 다른 기기는 그 기기로 글 작성 후 uid로 동일하게 등록
 - TTL 물리 삭제: Blaze 플랜 전환 후 Cloud 콘솔 Firestore → TTL → posts/comments·ts·30일(콘솔 UI는 확인해 뒀고 billing만 필요)
 - TWA 배포: Play 개발자 계정 + bubblewrap build
 - Aside 브라우저 종료로 admins 문서는 미생성 — 위 수동 단계로 대체
