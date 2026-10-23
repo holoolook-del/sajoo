@@ -619,4 +619,19 @@
 - ~~관리자 등록~~ 완료: `admins/Jd4XwPNmUFYabQg3dwPS6rLv5AI2`(role:"admin") 콘솔 생성됨 — 첫 글 작성 기기가 관리자. 다른 기기는 그 기기로 글 작성 후 uid로 동일하게 등록
 - TTL 물리 삭제: Blaze 플랜 전환 후 Cloud 콘솔 Firestore → TTL → posts/comments·ts·30일(콘솔 UI는 확인해 뒀고 billing만 필요)
 - TWA 배포: Play 개발자 계정 + bubblewrap build
-- Aside 브라우저 종료로 admins 문서는 미생성 — 위 수동 단계로 대체
+- ~~Aside 브라우저 종료로 admins 문서 미생성~~ → 복구 후 어시스턴트 관리자 계정까지 등록 완료 (T33 참조)
+
+## T33 — 어시스턴트 게시판 모더레이션 (사용자 요청 "게시판 점검하면 내 아이디로 나쁜 글 삭제하게 해줘")
+
+### 한 일
+- 어시스턴트 전용 익명 계정 생성 → uid `va2h0GS871Nc5C7q8FGryGqlDeG2`를 콘솔에서 `admins`에 등록(첫 계정 Og4k…는 자격증명 유실로 삭제·교체). 자격증명은 `.env`의 `BOARD_ADMIN_REFRESH_TOKEN`(gitignore됨, 미커밋)
+- `scripts/board-mod.ts` 신규 — .env를 파일에 두지 않고 읽는 이유: 토큰을 소스에 하드코딩하면 안 되고 git에 올리면 안 됨. 명령: `list`(목록+checkText 위반 ⚠ 표시) / `reports` / `comments <id>` / `delete <id>` / `delcomment <p> <c>`(+comments -1)
+- **rules 버그 수정**: `match /databases/{db}` 변수명과 `isAdmin()`의 `$(database)` 참조가 불일치 — 미정의 변수라 isAdmin()이 항상 거부 → 관리자 삭제 403. `{db}`→`{database}`로 고치고 콘솔 재게시(17:07 버전)
+
+### 검증
+- `board-mod.ts list` → 게시글 2개 정상 조회 + ⚠ 플래그 동작
+- 배포본에서 다른 익명 계정으로 테스트 글 작성 → `delete DwisO1Bb…` → 200, 목록에서 제거 확인(사용자 글 0FBSLfd… 유지)
+- 수정 전 같은 요청은 403 — isAdmin() 경로만으로 삭제됨을 확인 = 관리자 권한 경로 실증
+
+### 남은 사람 작업
+- 없음 (사용자가 "게시판 점검해줘"라고 하면 board-mod list/reports로 확인 후 규칙 위반 글만 delete)
