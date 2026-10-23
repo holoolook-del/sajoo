@@ -85,7 +85,9 @@
 | ogUrl / STEM_OG / GRADE_OG | src/lib/og.ts | 공유 링크용 정적 OG 페이지 경로 — hash 라우트는 크롤러 미리보기 불가라 결과별 /sajoo/og/{route}/…/ 정적 HTML로 연결. 슬러그는 scripts/gen-og-pages.ts가 빌드 시 생성 | path → 절대 URL |
 | TestHubPage | src/pages/test.tsx | 심리테스트 허브 — QUIZZES 전체 목록(썸네일·문항수·지난결과 칩), 프로필 불필요. 라우트 /test | — |
 | TestPage | src/pages/test.tsx | 설문형 테스트 공용 러너 (인트로→진행바→양택일·이전문항→결과+공유, 프로필 불필요). 라우트 /test/:id | — |
-| QUIZZES / QuizDef | src/content/tests.ts | 테스트 콘텐츠 DB — mbti(축당10문 40문→16타입)·job(RIASEC 24문→6형+보조)·love·animal·money·friend(축당8문 24문→6유형)·color(색당8문 24문)·stress(20문→4단계 지수). QuizDef.neutral로 문항별 "모르겠다" 선택지(N, 득점 없음). 축별 문항 균등·선택지 방향 혼합(위치 편향 제거). 유형은 strong·scenes·note 포함, QuizDef.confidence로 결과 확신도 산출 | score → code → QuizResultType |
+| QUIZZES / QuizDef | src/content/tests.ts | 테스트 콘텐츠 DB — mbti(축당10문 40문→16타입)·job(RIASEC 24문→6형+보조)·love·animal·money·friend·dino·game(축당8문 24문→6유형)·color(색당8문 24문)·stress(20문→4단계 지수). QuizDef.neutral로 문항별 "모르겠다" 선택지(N, 득점 없음). 축별 문항 균등·선택지 방향 혼합(위치 편향 제거). 유형은 strong·scenes·note 포함, QuizDef.confidence로 결과 확신도 산출 | score → code → QuizResultType |
+| schoolFortune / schoolSummary / SCHOOL_CATS | src/content/school-fortune.ts | 오늘의 학교 운세 — 날짜+항목 FNV-1a 시드로 급식·숙제·친구·게임 4개 장난 운세(Grade·별점·문구). 같은 날 모두 같은 결과라 친구 비교용, 결정적이라 저장 불필요 | 'YYYY-MM-DD' → SchoolLuck[] |
+| SchoolPage | src/pages/school.tsx | 학교 운세 페이지 — 프로필 불필요, 결과 이미지 공유+OG 랜딩(/og/school/). 라우트 /school | — |
 | borderlineAxes | src/content/tests.ts | 경계선 축 판정 — \|a-b\|≤1인 대립 축 라벨 목록. confidence와 결과 바「거의 비슷」표시에 사용 | bars,score → string[] |
 | LotsPage | src/pages/lots.tsx | 제비뽑기 — 인원·당첨 수 설정→섞인 제비를 탭으로 공개·결과 공유 (미저장). 라우트 /lots | — |
 | playCardPick / playCardCharge / playCardReveal / playKnock / isSoundEnabled / setSoundEnabled / setBgm / syncBgm | src/lib/sound.ts | WAV 효과음·배경음악 재생 (HTMLAudioElement, 인앱 브라우저 대응 제스처 언락 — 나중에 자동 재생될 사운드만 프라임; BGM은 pointerdown 재시도) + 음소거 설정 (키 sajoo:sound) | track? → void |

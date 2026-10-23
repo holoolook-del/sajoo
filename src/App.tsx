@@ -14,6 +14,7 @@ import { LuckPage } from './pages/luck.tsx';
 import { MoktakPage } from './pages/moktak.tsx';
 import { OnboardingPage } from './pages/onboarding.tsx';
 import { SajuPage } from './pages/saju.tsx';
+import { SchoolPage } from './pages/school.tsx';
 import { SleepPage } from './pages/sleep.tsx';
 import { TestHubPage, TestPage } from './pages/test.tsx';
 
@@ -77,9 +78,10 @@ export function App() {
           path="/compat"
           element={<CompatPage />}
         />
-        {/* 테스트·게시판은 프로필 없이도 가능 — 공유 링크로 친구가 바로 들어오는 입구 */}
+        {/* 테스트·게시판·학교운세는 프로필 없이도 가능 — 공유 링크로 친구가 바로 들어오는 입구 */}
         <Route path="/test" element={<TestHubPage />} />
         <Route path="/test/:id" element={<TestPage />} />
+        <Route path="/school" element={<SchoolPage />} />
         <Route
           path="/board"
           element={

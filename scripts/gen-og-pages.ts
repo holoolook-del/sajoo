@@ -125,5 +125,14 @@ pages.push({
   route: '/board',
 });
 
+// 오늘의 학교 운세 — 날짜 시드라 결과가 매일 달라지므로 공유 미리보기는 랜딩만
+pages.push({
+  path: 'school',
+  title: '오늘의 학교 운세 — SAJOO',
+  desc: '급식·숙제·친구·게임 — 오늘 학교 운은? 너도 확인해 봐!',
+  image: 'assets/illust/menu-lots.webp',
+  route: '/school',
+});
+
 for (const p of pages) emit(p);
 console.log(`OG pages: ${pages.length}개 생성 → dist/og/`);
