@@ -36,7 +36,8 @@ describe('buildDeepReport', () => {
   it('신강신약은 세 판정 중 하나이고 가중 합이 양수다', () => {
     const r = reportFor();
     expect(['신강', '중화', '신약']).toContain(r.strength.verdict);
-    expect(r.strength.support + r.strength.drain).toBe(12); // 천간4 + 지지(2+3+2+2) - 일간 제외
+    // 천간4 + 지지(2+3+2+2) - 일간 제외 = 12 + 얕은 뿌리 보정 0.5 (연지 신금 속 임수)
+    expect(r.strength.support + r.strength.drain).toBe(12.5);
   });
 
   it('용신은 유효한 오행이고 판정에 맞는 근거를 준다', () => {
@@ -81,11 +82,14 @@ describe('buildDeepReport', () => {
     expect(r.seun.branchGod).toBeTruthy();
   });
 
-  it('생시가 없어도 리포트를 만들되 대운 장은 비운다', () => {
+  it('생시가 없어도 리포트를 만든다 — 시주 자리만 비운다', () => {
     const noHour = reportFor({ ...birth, hour: null, minute: null }, { ...profile, hour: null, minute: null });
     expect(noHour.summary.length).toBeGreaterThan(200);
-    expect(noHour.strength.support + noHour.strength.drain).toBe(9); // 시주 가중치 3 제외
+    expect(noHour.strength.support + noHour.strength.drain).toBe(9.5); // 시주 제외 9 + 얕은 뿌리 0.5
     expect(noHour.seun.stemGod).toBeTruthy();
+    expect(noHour.stages).toHaveLength(3); // 시지 십이운성 없음
+    // 대운은 연간·성별로 방향을 정해 생시 없이도 계산됨
+    expect(noHour.wolun).toHaveLength(12);
   });
 
   it('격국·득령·통근·십이운성을 판정한다', () => {
@@ -123,6 +127,38 @@ describe('buildDeepReport', () => {
     const clash = adj.stemRelations.find((s) => s.kind === '충');
     expect(clash).toMatchObject({ name: '갑경충', adjacent: false });
     for (const s of adj.stemRelations) expect(s.text.length).toBeGreaterThan(30);
+  });
+
+  it('삼합·방합 3자 완성과 투간 격국을 판정한다', () => {
+    // 을축 무인 갑술 경오 — 월지 인(무·병·갑) 중 여기 戊가 월간에 투간 → 편재격 / 인오술 화국 완성
+    const r = reportFor(
+      { year: 1985, month: 2, day: 4, hour: 11, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1985, month: 2, day: 4, hour: 11, minute: 0 },
+    );
+    expect(r.gyeokguk.name).toBe('편재격');
+    expect(r.gyeokguk.source).toContain('투간');
+    const guk = r.formations.find((f) => f.kind === '삼합');
+    expect(guk?.name).toContain('인오술');
+    expect(guk?.element).toBe('화');
+    expect(guk?.god).toBe('상관'); // 화국의 왕지 오(정화) — 갑일간 기준 상관
+    expect(['용신운', '기신운', '중립운']).toContain(guk?.favor);
+    // 여기 투간 — 갑자 병자 경자 임오: 월지 자(임·계)의 여기 壬이 시간에 투간 → 식신격
+    const t = reportFor(
+      { year: 1985, month: 1, day: 1, hour: 11, minute: 0, calendar: 'solar', isLeapMonth: false, gender: 'male' },
+      { ...profile, year: 1985, month: 1, day: 1, hour: 11, minute: 0 },
+    );
+    expect(t.gyeokguk.name).toBe('식신격');
+    expect(t.gyeokguk.source).toContain('시간');
+  });
+
+  it('올해 월운 12개월의 흐름과 길흉을 붙인다', () => {
+    const r = reportFor();
+    expect(r.wolun).toHaveLength(12);
+    expect(r.wolun!.some((w) => w.current)).toBe(true); // 2026-10-23 → 10월
+    for (const w of r.wolun!) {
+      expect(['용신운', '기신운', '중립운']).toContain(w.favor);
+      expect(w.stemGod).toBeTruthy();
+    }
   });
 
   it('용신 보완법에 유리한 달·생활 습관·실전 개운법이 들어있다', () => {

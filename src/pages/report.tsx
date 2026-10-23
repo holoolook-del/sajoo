@@ -67,7 +67,7 @@ export function ReportPage() {
         <p className={body}>{report.summary}</p>
         <div className="mt-4 rounded-lg bg-night p-4">
           <p className="text-xs font-bold text-gold-bright">
-            격국(格局) — {report.gyeokguk.name} · {report.gyeokguk.god}
+            격국(格局) — {report.gyeokguk.name} · {report.gyeokguk.god} · {report.gyeokguk.source}
           </p>
           <p className="mt-1 text-sm leading-6 text-hanji/85">{report.gyeokguk.text}</p>
         </div>
@@ -169,10 +169,37 @@ export function ReportPage() {
       {/* 제5장 — 원국의 관계망: 천간 합충 + 지지 합형 */}
       <section className={chapterCls}>
         <h2 className={chapterH}><span className={chapterNo}>제5장</span> 원국의 관계망 — 천간의 합충·지지의 합형</h2>
-        {report.stemRelations.length === 0 && report.relations.length === 0 ? (
+        {report.stemRelations.length === 0 && report.relations.length === 0 && report.formations.length === 0 ? (
           <p className={body}>사주 글자 사이에 뚜렷한 합·충 관계가 없습니다 — 자리 간의 긴장이 적은 편이라, 흐름이 온전히 오행의 균형에 달려 있습니다.</p>
         ) : (
           <>
+            {report.formations.length > 0 && (
+              <div className="mt-3">
+                <p className="text-xs font-bold text-hanji/60">국(局) — 지지가 모여 이루는 큰 기운</p>
+                <ul className="mt-2 space-y-3">
+                  {report.formations.map((f) => (
+                    <li key={f.name} className="rounded-lg border border-gold/30 bg-night p-3.5">
+                      <p className="text-sm font-bold text-hanji">
+                        {f.kind} — <span className="text-gold-bright">{f.name}</span>
+                        <span
+                          className={`ml-2 rounded-full border px-2 py-0.5 text-[10px] font-normal ${
+                            f.favor === '용신운'
+                              ? 'border-gold bg-gold/15 text-gold-bright'
+                              : f.favor === '기신운'
+                                ? 'border-hanji/30 text-hanji/60'
+                                : 'border-hanji/15 text-hanji/50'
+                          }`}
+                        >
+                          {f.favor}
+                        </span>
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-hanji/50">{f.members} → {f.god}의 기운으로 결집</p>
+                      <p className="mt-1.5 text-sm leading-6 text-hanji/85">{f.text}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {report.stemRelations.length > 0 && (
               <div className="mt-3">
                 <p className="text-xs font-bold text-hanji/60">천간(天干) — 하늘의 글자끼리 맺는 결</p>
@@ -335,6 +362,46 @@ export function ReportPage() {
             <p className="mt-1 text-xs leading-5 text-hanji/55">{s.favorText}</p>
           </div>
         ))}
+        {report.wolun && (
+          <div className="mt-4">
+            <p className="text-xs font-bold text-hanji/60">올해의 달별 흐름 — {seun.year}년 월운(月運)</p>
+            {(() => {
+              const best = report.wolun!.filter((w) => w.favor === '용신운').map((w) => `${w.month}월`);
+              return best.length > 0 ? (
+                <p className="mt-1.5 text-xs leading-5 text-gold-bright">가장 유리한 달 — {best.join('·')}</p>
+              ) : (
+                <p className="mt-1.5 text-xs leading-5 text-hanji/50">올해는 뚜렷한 용신운의 달이 없습니다 — 중립운의 달이 오히려 내 뜻대로 움직이기 좋은 시기입니다.</p>
+              );
+            })()}
+            <div className="mt-2 grid grid-cols-4 gap-1.5">
+              {report.wolun.map((m) => (
+                <div
+                  key={m.month}
+                  className={`rounded-lg border px-1.5 py-2 text-center ${
+                    m.current
+                      ? 'border-gold bg-gold/15'
+                      : 'border-hanji/15 bg-night'
+                  }`}
+                >
+                  <p className="text-[10px] text-hanji/50">{m.month}월</p>
+                  <p className="mt-0.5 text-sm font-bold text-hanji">{m.hanja}</p>
+                  <p className="text-[10px] text-gold-bright">{m.stemGod}</p>
+                  <p
+                    className={`mt-0.5 text-[10px] ${
+                      m.favor === '용신운'
+                        ? 'font-bold text-gold-bright'
+                        : m.favor === '기신운'
+                          ? 'text-hanji/60'
+                          : 'text-hanji/40'
+                    }`}
+                  >
+                    {m.favor}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* 제9장 — 고민별 상담소 */}

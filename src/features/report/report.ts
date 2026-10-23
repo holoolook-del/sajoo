@@ -23,6 +23,7 @@ import {
   STAGE_TEXT,
   STEM_CLASH_CHART_TEXT,
   STEM_HAP_CHART_TEXT,
+  FORMATION_TEXT,
   STRENGTH_TEXT,
   VOID_GOD_TEXT,
   YONGSIN_TIPS,
@@ -83,6 +84,17 @@ export interface ReportStemRelation {
   text: string;
 }
 
+/** 삼합국·방합 — 지지 3자가 모두 모여 이루는 오행 결집 */
+export interface ReportFormation {
+  kind: '삼합' | '방합';
+  name: string; // '인오술 화국' / '신유술 금방'
+  members: string; // '월지 인·일지 오·시지 술'
+  element: ElementKey;
+  god: TenGodKey; // 완성 오행의 십신 (왕지 정기 기준)
+  favor: LuckFavor;
+  text: string;
+}
+
 /** 운의 오행이 내 사주에 유리한지 — 용신(필요한 기운) / 기신(불균형을 키우는 기운) / 중립 */
 export type LuckFavor = '용신운' | '기신운' | '중립운';
 
@@ -117,7 +129,7 @@ export interface StageEntry {
 export interface DeepReport {
   headline: string; // 한 줄 총평 제목
   summary: string; // 종합 총평 단락
-  gyeokguk: { name: string; god: TenGodKey; text: string };
+  gyeokguk: { name: string; god: TenGodKey; source: string; text: string };
   deukryeong: { verdict: '득령' | '상령' | '실령'; text: string };
   rooted: { strong: number; weak: number; count: number; text: string };
   strength: { verdict: Verdict; support: number; drain: number; title: string; text: string };
@@ -137,12 +149,18 @@ export interface DeepReport {
   missingGodGroups: { group: string; text: string }[];
   stages: StageEntry[]; // 십이운성 — 지지 자리별
   stemRelations: ReportStemRelation[]; // 천간 합충
+  formations: ReportFormation[]; // 삼합국·방합 완성
   relations: ReportRelation[];
   voids: ReportVoid[];
   sinsal: Sinsal[];
   daewoon: LuckChapter | null;
   seun: YearLuck;
   nextYear: YearLuck;
+  wolun: {
+    month: number; korean: string; hanja: string;
+    stemGod: TenGodKey; branchGod: TenGodKey;
+    favor: LuckFavor; current: boolean;
+  }[] | null;
   advice: string[];
 }
 
@@ -155,8 +173,8 @@ function controllingElement(my: ElementKey): ElementKey {
   return ELEMENT_KEYS.find((e) => ELEMENT_CONTROLS[e] === my) ?? my;
 }
 
-/** 신강·중화·신약 — 비겁·인성의 가중 합 ÷ 전체 가중 합 */
-function calcStrength(saju: SajuResult): { verdict: Verdict; support: number; drain: number } {
+/** 신강·중화·신약 — 비겁·인성의 가중 합 ÷ 전체 가중 합. 지장간 얕은 뿌리는 가중치에 안 잡히는 추가 지원으로 보정 */
+function calcStrength(saju: SajuResult, weakRoots: number): { verdict: Verdict; support: number; drain: number } {
   const positions = [saju.pillars.year, saju.pillars.month, saju.pillars.day, saju.pillars.hour]
     .filter((p): p is NonNullable<typeof p> => p !== null);
   let support = 0;
@@ -173,6 +191,8 @@ function calcStrength(saju: SajuResult): { verdict: Verdict; support: number; dr
       else drain += w;
     }
   });
+  // 본기 뿌리는 tenGodBranch 가중치에 이미 반영됨 — 여기·중기 뿌리만 0.5씩 보정 (중복 계산 방지)
+  support += weakRoots * 0.5;
   const ratio = support / (support + drain || 1);
   return { verdict: ratio >= 0.58 ? '신강' : ratio <= 0.42 ? '신약' : '중화', support, drain };
 }
@@ -243,14 +263,40 @@ function stageOf(dayStemKorean: string, branchKorean: string): StageName {
   return STAGE_NAMES[(((yang ? at - start : start - at) % 12) + 12) % 12] ?? '장생';
 }
 
-/** 격국 — 월지 정기(지장간 본기)의 십신 */
+/**
+ * 격국 — 월지 지장간으로 격을 세운다 (자평진전 관법).
+ * 월지 속 인원이 다른 천간 자리에 드러나면(透干) 그것이 격 — 정기→중기→여기 순 우선.
+ * 아무것도 투간하지 않으면 월지 정기로 격을 잡는다.
+ */
 function calcGyeokguk(saju: SajuResult): DeepReport['gyeokguk'] {
   const monthBranch = saju.pillars.month.korean.charAt(1);
   const hidden = HIDDEN_STEMS[monthBranch] ?? [];
+  const dayStem = saju.dayMaster.korean as HeavenlyStem;
+  const stemSlots: { label: string; stem: string }[] = [];
+  for (const [key, label] of [['year', '연간'], ['month', '월간'], ['hour', '시간']] as const) {
+    const p = saju.pillars[key];
+    if (p) stemSlots.push({ label, stem: p.korean.charAt(0) });
+  }
+  const depthNames = ['정기', '중기', '여기'] as const;
+  // 이/가 조사 — 받침 있는 천간(갑·을·병·정·경·신·임)은 "이", 없으면 "가"
+  const iga = (s: string) => (['갑', '을', '병', '정', '경', '신', '임'].includes(s) ? `${s}이` : `${s}가`);
+  for (let i = 0; i < hidden.length; i++) {
+    const h = hidden[hidden.length - 1 - i]!;
+    const hit = stemSlots.find((s) => s.stem === h);
+    if (!hit) continue;
+    const god = getTenGod(dayStem, h as HeavenlyStem) as TenGodKey;
+    const g = GYEOKGUK_TEXT[god];
+    return {
+      name: g.name,
+      god,
+      source: `월지 ${depthNames[i]} ${h}의 ${hit.label} 투간`,
+      text: `${g.text} (월지 속 ${depthNames[i]} ${iga(h)} ${hit.label}에 드러나 격을 이룸 — 이것이 이 사주의 실제 주인공입니다.)`,
+    };
+  }
   const mainStem = hidden[hidden.length - 1];
-  const god = (mainStem ? getTenGod(saju.dayMaster.korean as HeavenlyStem, mainStem as HeavenlyStem) : saju.pillars.month.tenGodBranch) as TenGodKey;
+  const god = (mainStem ? getTenGod(dayStem, mainStem as HeavenlyStem) : saju.pillars.month.tenGodBranch) as TenGodKey;
   const g = GYEOKGUK_TEXT[god];
-  return { name: g.name, god, text: g.text };
+  return { name: g.name, god, source: '월지 정기', text: g.text };
 }
 
 /** 득령 — 일간이 월지(계절)의 힘을 받는가 */
@@ -302,6 +348,13 @@ function gisinElements(verdict: Verdict, myEl: ElementKey): ElementKey[] {
   return [];
 }
 
+/** 어떤 오행이 이 사주에 유리한지 — 용신이면 길, 기신이면 흉, 아니면 중립 */
+function favorOfElement(el: ElementKey, yongsin: ElementKey, gisin: ElementKey[]): LuckFavor {
+  if (el === yongsin) return '용신운';
+  if (gisin.includes(el)) return '기신운';
+  return '중립운';
+}
+
 /** 운의 기운이 내 사주에 유리한지 — 대운·세운은 지지를 주심으로 봄 */
 function luckFavor(
   branchKorean: string,
@@ -310,9 +363,7 @@ function luckFavor(
   myEl: ElementKey,
 ): LuckFavor {
   const branchEl = getEarthlyBranchElement(branchKorean as EarthlyBranch) as ElementKey;
-  if (branchEl === yongsin) return '용신운';
-  if (gisinElements(verdict, myEl).includes(branchEl)) return '기신운';
-  return '중립운';
+  return favorOfElement(branchEl, yongsin, gisinElements(verdict, myEl));
 }
 
 /** 사주 안 천간 관계 — 간합(合絆)·천간충. 이웃한 글자일수록 힘이 강하다 */
@@ -371,6 +422,63 @@ function findStemRelations(saju: SajuResult, yongsin: ElementKey, gisin: Element
           ].join(' '),
         });
       }
+    }
+  }
+  return found;
+}
+
+/** 삼합국(三合局) — 생지·왕지·묘지 3자 / 방합(方合) — 같은 계절 3자 */
+const SAMHAP_GUK: { set: [string, string, string]; element: ElementKey; name: string }[] = [
+  { set: ['인', '오', '술'], element: '화', name: '인오술 화국(火局)' },
+  { set: ['사', '유', '축'], element: '금', name: '사유축 금국(金局)' },
+  { set: ['신', '자', '진'], element: '수', name: '신자진 수국(水局)' },
+  { set: ['해', '묘', '미'], element: '목', name: '해묘미 목국(木局)' },
+];
+const BANGHAP: { set: [string, string, string]; element: ElementKey; name: string }[] = [
+  { set: ['인', '묘', '진'], element: '목', name: '인묘진 목방(木方)' },
+  { set: ['사', '오', '미'], element: '화', name: '사오미 화방(火方)' },
+  { set: ['신', '유', '술'], element: '금', name: '신유술 금방(金方)' },
+  { set: ['해', '자', '축'], element: '수', name: '해자축 수방(水方)' },
+];
+
+/** 사주 안 삼합국·방합 완성 — 지지 3자가 모두 모이면 개별 합보다 훨씬 강한 오행 결집 */
+function findFormations(saju: SajuResult, yongsin: ElementKey, gisin: ElementKey[]): ReportFormation[] {
+  const positions: { label: string; branch: string }[] = [];
+  for (const [key, label] of [
+    ['year', '연지'], ['month', '월지'], ['day', '일지'], ['hour', '시지'],
+  ] as const) {
+    const p = saju.pillars[key];
+    if (p) positions.push({ label, branch: p.korean.charAt(1) });
+  }
+
+  const found: ReportFormation[] = [];
+  for (const [kind, table, tpl] of [
+    ['삼합', SAMHAP_GUK, FORMATION_TEXT.samhap],
+    ['방합', BANGHAP, FORMATION_TEXT.banghap],
+  ] as const) {
+    for (const g of table) {
+      const members = positions.filter((p) => g.set.includes(p.branch as (typeof g.set)[number]));
+      const unique = new Set(members.map((m) => m.branch));
+      if (!g.set.every((b) => unique.has(b))) continue;
+      const god = getBranchTenGod(saju.dayMaster.korean as HeavenlyStem, g.set[1] as EarthlyBranch) as TenGodKey;
+      const favor = favorOfElement(g.element, yongsin, gisin);
+      const memberStr = members.map((m) => `${m.label} ${m.branch}`).join('·');
+      found.push({
+        kind,
+        name: g.name,
+        members: memberStr,
+        element: g.element,
+        god,
+        favor,
+        text: [
+          tpl
+            .replace('{members}', memberStr)
+            .replace('{name}', g.name)
+            .replace('{element}', g.element)
+            .replace('{god}', god),
+          favor === '용신운' ? FORMATION_TEXT.good : favor === '기신운' ? FORMATION_TEXT.bad : '',
+        ].filter(Boolean).join(' '),
+      });
     }
   }
   return found;
@@ -461,7 +569,8 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
   const [y] = today.split('-').map(Number);
   const year = y ?? new Date().getFullYear();
 
-  const { verdict, support, drain } = calcStrength(saju);
+  const rooted = calcRoot(saju);
+  const { verdict, support, drain } = calcStrength(saju, rooted.weak);
   const strengthText = STRENGTH_TEXT[verdict];
   const yongsinPick = pickYongsin(saju, verdict);
   const yongsinTip = YONGSIN_TIPS[yongsinPick.element];
@@ -469,10 +578,10 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
 
   const gyeokguk = calcGyeokguk(saju);
   const deukryeong = calcDeukryeong(saju);
-  const rooted = calcRoot(saju);
   const stages = calcStages(saju);
   const gisin = gisinElements(verdict, myEl);
   const stemRelations = findStemRelations(saju, yongsinPick.element, gisin);
+  const formations = findFormations(saju, yongsinPick.element, gisin);
   const relations = findRelations(saju);
   const voids = findVoids(saju);
   const sinsal = findSinsal(saju);
@@ -514,6 +623,16 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
 
   const seun = yearLuck(saju.dayMaster.korean, year, yongsinPick.element, verdict, myEl);
   const nextYear = yearLuck(saju.dayMaster.korean, year + 1, yongsinPick.element, verdict, myEl);
+  const wolun = luck
+    ? luck.wolun.map((w) => ({
+        ...w,
+        favor: favorOfElement(
+          getEarthlyBranchElement(w.korean.charAt(1) as EarthlyBranch) as ElementKey,
+          yongsinPick.element,
+          gisin,
+        ),
+      }))
+    : null;
 
   const headline = `${gyeokguk.name} — ${saju.dayMaster.hanja}(${saju.dayMaster.korean}) ${reading.dayMaster.title}, ${verdict}의 사주`;
 
@@ -559,12 +678,14 @@ export function buildDeepReport(saju: SajuResult, profile: Profile, today: strin
     yongsin: { element: yongsinPick.element, reason: yongsinPick.reason, ...yongsinTip },
     missingGodGroups,
     stemRelations,
+    formations,
     relations,
     voids,
     sinsal,
     daewoon,
     seun,
     nextYear,
+    wolun,
     advice,
   };
 }
