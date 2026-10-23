@@ -1,0 +1,26 @@
+{
+  "packageId": "app.sajoo.twa",
+  "host": "holoolook-del.github.io",
+  "name": "SAJOO - 나의 사주",
+  "launcherName": "SAJOO",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#141210",
+  "navigationColor": "#141210",
+  "backgroundColor": "#141210",
+  "startUrl": "/sajoo/",
+  "iconUrl": "https://holoolook-del.github.io/sajoo/assets/icon.png",
+  "webManifestUrl": "https://holoolook-del.github.io/sajoo/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "signingKey": {
+    "path": "./sajoo-upload.p12",
+    "alias": "sajoo"
+  },
+  "generatorApp": "bubblewrap-cli",
+  "splashScreenFadeOutDuration": 300,
+  "enableNotifications": false,
+  "isChromeOSOnly": false
+}

@@ -12,6 +12,14 @@ service cloud.firestore {
       && !s.matches('.*(대출|투자|코인|수익률|부업|재테크).*(문의|상담|링크|연락).*');
   }
   match /databases/{db}/documents {
+    // 관리자 — 콘솔에서만 admins/{uid} 문서를 만든다. 클라이언트는 자기 문서만 읽어 관리자 여부 확인.
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    match /admins/{adminUid} {
+      allow get: if request.auth != null && request.auth.uid == adminUid;
+      allow list, write: if false;
+    }
     match /posts/{postId} {
       allow read: if true;
       allow create: if request.auth != null
@@ -27,16 +35,18 @@ service cloud.firestore {
         && request.resource.data.get('reports', 0) == 0
         && request.resource.data.get('comments', 0) == 0
         && request.resource.data.ts == request.time;
-      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
-      // 좋아요·신고·댓글수 카운터만 +1 증분 허용 — 다른 필드 수정 불가
+      allow delete: if request.auth != null && (resource.data.uid == request.auth.uid || isAdmin());
+      // 좋아요·신고·댓글수 카운터만 +1 증분 허용 — 다른 필드 수정 불가. 관리자는 댓글 삭제 시 comments -1 감분 허용.
       allow update: if request.auth != null
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'reports', 'comments'])
         && request.resource.data.get('likes', 0) >= resource.data.get('likes', 0)
         && request.resource.data.get('reports', 0) >= resource.data.get('reports', 0)
-        && request.resource.data.get('comments', 0) >= resource.data.get('comments', 0)
+        && request.resource.data.get('comments', 0) >= 0
         && request.resource.data.get('likes', 0) <= resource.data.get('likes', 0) + 1
         && request.resource.data.get('reports', 0) <= resource.data.get('reports', 0) + 1
-        && request.resource.data.get('comments', 0) <= resource.data.get('comments', 0) + 1;
+        && request.resource.data.get('comments', 0) <= resource.data.get('comments', 0) + 1
+        && (request.resource.data.get('comments', 0) >= resource.data.get('comments', 0)
+          || (isAdmin() && request.resource.data.get('comments', 0) >= resource.data.get('comments', 0) - 1));
 
       match /comments/{commentId} {
         allow read: if true;
@@ -50,7 +60,8 @@ service cloud.firestore {
           && cleanText(request.resource.data.nick)
           && cleanText(request.resource.data.text)
           && request.resource.data.ts == request.time;
-        allow update, delete: if false;
+        allow update: if false;
+        allow delete: if request.auth != null && isAdmin();
       }
     }
   }

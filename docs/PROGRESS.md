@@ -599,3 +599,24 @@
 - 모바일 브라우저의 뷰포트 확장 동작 때문에 콘텐츠가 innerWidth를 오염시킴 → 폭을 읽어 반응형 계산할 때는 clientWidth를 함께 봐야 함
 - framer-motion `animate`는 마운트 시 값으로 애니메이션될 수 있음 → 첫 페인트부터 필요한 값은 `initial={false}`로 즉시 고정
 - 스크롤 너비에는 opacity:0 요소도 포함 — 페이드아웃 꼬리까지 범위 계산에 넣어야 함
+
+## T32 — 운영 도구 + OG 미리보기 + TTL + TWA + 신규 테스트 (사용자 요청 "추가로 다 해줘")
+
+### 한 일
+- **관리자 삭제 경로**: `firestore.rules`에 `isAdmin()` + `admins/{uid}` 컬렉션 추가 — 콘솔에서만 문서 생성(클라이언트 읽기 자기 것만·list·write 전면 거부). 관리자는 모든 글·댓글 삭제 가능, 댓글 삭제 시 comments -1 감분 허용. 일반 사용자는 자기 글만 삭제 — `posts.ts`의 `isAdmin()`·`removeComment()`, `board.tsx` 관리자 삭제 버튼+확인 다이얼로그. **규칙 콘솔 게시 완료(16:36 버전)**
+- **OG 결과별 미리보기**: hash 라우트(`#/saju`)는 카톡·소셜 크롤러가 못 읽음 → `src/lib/og.ts` 슬러그 맵 + `scripts/gen-og-pages.ts`가 빌드 시 결과별 정적 HTML 101개 생성(`dist/og/`). 사주 10간·운세 등급·카드·궁합·테스트 결과·게시판 각각 title/desc/image/url 메타 + 즉시 리다이렉트. 모든 공유 버튼 URL을 `ogUrl(...)`로 교체
+- **오래된 글 정리**: Firestore TTL 콘솔 설정 시도 → `403: billing disabled` (TTL은 Blaze 결제 계정 필요). 대안으로 `watchPosts` 쿼리에 `where('ts','>',30일전)` 추가 — 30일 지난 글은 목록에서 자동 제외(동일한 사용자 효과, 물리 삭제는 Blaze 등록 후 콘솔 TTL로 가능)
+- **TWA 스캐폴딩**: `twa/` — openssl 자체서명 PKCS12 키스토어(업로드키)·SHA256 지문 → `public/.well-known/assetlinks.json` 실제 지문 기입·`twa-manifest.json`(bubblewrap 설정, packageId app.sajoo.twa). 키·비번은 gitignore + .env(TWA_KEYSTORE_PW). 남은 수작업: `npx @bubblewrap/cli init/build` → Play 업로드(개발자 계정 $25 필요)
+- **신규 테스트 2종**: `money`(금전 스타일 — 수성/공격·계획/즉흥·경험/안정 3축 24문→6유형) + `friend`(인간관계 유형 — 소수/넓이·주도/경청·가까움/적당함 3축 24문→6유형). 기존 QuizDef 패턴 그대로 — 축당 8문 균등·선택지 위치 편향 제거·confidence·bars·scenes·strong 포함. 허브는 QUIZZES 데이터 주도라 자동 노출, OG 페이지도 자동 생성
+
+### 검증
+- pnpm verify 통과 — typecheck·lint(기존 warning 2)·vitest 13파일 82/82·build+SW 67·OG 101개 생성 확인
+- dist/og/saju/gi·test/money/* 샘플 확인 — 결과별 메타 정상
+- audit:code — 기존 LOVE_QUIZ 등과 동일한 knip registry 미사용 경고(선행 이슈, stash로 무관 확인)
+- 규칙 게시 후 확인: 버전 목록 16:36 신버전 스타 표시
+
+### 남은 사람 작업
+- 관리자 등록: 콘솔 → Firestore → `admins` 컬렉션 → 문서 ID = 자기 uid(게시글 문서의 uid 필드에서 확인, 현재 첫 글 작성자 `Jd4XwPNmUFYabQg3dwPS6rLv5AI2`) → 필드 아무거나(role:"admin")
+- TTL 물리 삭제: Blaze 플랜 전환 후 Cloud 콘솔 Firestore → TTL → posts/comments·ts·30일(콘솔 UI는 확인해 뒀고 billing만 필요)
+- TWA 배포: Play 개발자 계정 + bubblewrap build
+- Aside 브라우저 종료로 admins 문서는 미생성 — 위 수동 단계로 대체

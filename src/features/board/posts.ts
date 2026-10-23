@@ -1,8 +1,8 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 import {
-  addDoc, collection, deleteDoc, doc, getFirestore, increment, limit, onSnapshot, orderBy,
-  query, serverTimestamp, updateDoc, type Firestore, type Unsubscribe,
+  addDoc, collection, deleteDoc, doc, getDoc, getFirestore, increment, limit, onSnapshot, orderBy,
+  query, serverTimestamp, Timestamp, updateDoc, where, type Firestore, type Unsubscribe,
 } from 'firebase/firestore';
 import {
   getDatabase, onDisconnect, onValue, ref, remove, set, serverTimestamp as rtdbTs,
@@ -89,9 +89,15 @@ function throttle(kind: 'post' | 'comment'): void {
 
 // ── 읽기 ──
 
-/** 최신 글 스트림 — 반환값으로 구독 해제. onErr 없으면 실패가 조용히 무한 로딩이 된다. */
+/** 최신 글 스트림 — 반환값으로 구독 해제. onErr 없으면 실패가 조용히 무한 로딩이 된다.
+ *  30일 지난 글은 쿼리에서 제외(TTL은 결제 계정 필요 — Blaze 등록 시 콘솔 TTL로 물리 삭제 가능). */
 export function watchPosts(cb: (posts: Post[]) => void, onErr?: (e: unknown) => void): Unsubscribe {
-  const q = query(collection(firestore(), 'posts'), orderBy('ts', 'desc'), limit(50));
+  const cutoff = Timestamp.fromMillis(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const q = query(
+    collection(firestore(), 'posts'),
+    where('ts', '>', cutoff),
+    orderBy('ts', 'desc'), limit(50),
+  );
   return onSnapshot(q, (snap) => {
     cb(snap.docs.map((d) => {
       const v = d.data();
@@ -175,9 +181,22 @@ export async function reportPost(postId: string): Promise<void> {
   boardMarkFlag('report', postId);
 }
 
-/** 내 기기에서 쓴 글만 삭제 가능 — 서버 측은 rules가 uid를 검증 */
+/** 내 기기에서 쓴 글만 삭제 가능 — 서버 측은 rules가 uid를 검증 (관리자는 전부 가능) */
 export async function removePost(postId: string): Promise<void> {
   await deleteDoc(doc(firestore(), 'posts', postId));
+}
+
+/** 관리자 여부 — admins/{uid} 문서는 콘솔에서만 추가, 클라이언트는 본인 문서 get만 허용 */
+export async function isAdmin(): Promise<boolean> {
+  const uid = await deviceUid();
+  return (await getDoc(doc(firestore(), 'admins', uid))).exists();
+}
+
+/** 댓글 삭제 — 관리자 전용(rules). comments 카운터 -1 감분은 rules가 관리자에만 허용 */
+export async function removeComment(postId: string, commentId: string): Promise<void> {
+  const fs = firestore();
+  await deleteDoc(doc(fs, 'posts', postId, 'comments', commentId));
+  await updateDoc(doc(fs, 'posts', postId), { comments: increment(-1) });
 }
 
 // ── 동시접속자 (Realtime DB presence) ──

@@ -4,6 +4,7 @@ import { getCardById } from '../content/cards.ts';
 import { CardFront, GRADE_COLOR } from '../features/card/card-frame.tsx';
 import { ShareButton } from '../components/share-button.tsx';
 import { ShareImageButton } from '../components/share-image-button.tsx';
+import { ogUrl } from '../lib/og.ts';
 import { ELEMENT_COLOR, type ElementKey } from '../content/meta.ts';
 import { SoundToggle } from '../components/sound-toggle.tsx';
 
@@ -58,6 +59,7 @@ export function CardPage() {
               <ShareButton
                 label="오늘의 카드 공유하기"
                 text={cardShareText}
+                url={ogUrl(`card/${card.id}`)}
               />
               <ShareImageButton
                 data={{
@@ -69,6 +71,7 @@ export function CardPage() {
                   lines: [card.message, `조언 — ${card.advice}`],
                 }}
                 text={cardShareText}
+                url={ogUrl(`card/${card.id}`)}
               />
             </div>
             <p className="mt-3 text-xs text-hanji/40">카드는 매일 자정(한국 시간)에 새로 뽑을 수 있습니다.</p>

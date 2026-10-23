@@ -8,6 +8,7 @@ import { useSaju } from '../features/saju/use-saju.ts';
 import { StateView } from '../components/state-view.tsx';
 import { ShareButton } from '../components/share-button.tsx';
 import { ShareImageButton } from '../components/share-image-button.tsx';
+import { GRADE_OG, ogUrl } from '../lib/og.ts';
 import { calcSaju } from '../lib/engine.ts';
 import { decodeInvite, encodeInvite, sajuFromHanjaPillars } from '../lib/invite.ts';
 import { COMPAT_SOURCE_NOTE } from '../content/compat.ts';
@@ -157,6 +158,7 @@ export function CompatPage() {
             <ShareButton
               label="궁합 결과 공유하기"
               text={resultShareText}
+              url={ogUrl(`compat/${GRADE_OG[result.grade] ?? 'pyeong'}`)}
             />
             <ShareImageButton
               data={{
@@ -174,6 +176,7 @@ export function CompatPage() {
                 ],
               }}
               text={resultShareText}
+              url={ogUrl(`compat/${GRADE_OG[result.grade] ?? 'pyeong'}`)}
             />
           </div>
 

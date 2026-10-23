@@ -9,6 +9,7 @@ import { useSaju } from '../features/saju/use-saju.ts';
 import { StateView } from '../components/state-view.tsx';
 import { ShareButton } from '../components/share-button.tsx';
 import { ShareImageButton } from '../components/share-image-button.tsx';
+import { ogUrl, STEM_OG } from '../lib/og.ts';
 import { useMemo } from 'react';
 
 export function SajuPage() {
@@ -95,6 +96,7 @@ export function SajuPage() {
           <ShareButton
             label="내 사주 캐릭터 공유하기"
             text={charShareText}
+            url={ogUrl(`saju/${STEM_OG[dayMaster.hanja] ?? ''}`)}
           />
           <ShareImageButton
             data={{
@@ -113,6 +115,7 @@ export function SajuPage() {
               ],
             }}
             text={charShareText}
+            url={ogUrl(`saju/${STEM_OG[dayMaster.hanja] ?? ''}`)}
           />
         </div>
       </section>

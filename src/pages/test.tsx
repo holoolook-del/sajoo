@@ -8,6 +8,7 @@ import { StateView } from '../components/state-view.tsx';
 import { QUIZZES, type QuizDef } from '../content/tests.ts';
 import { playCardPick, playCardReveal } from '../lib/sound.ts';
 import { hasProfile, loadTestResult, saveTestResult } from '../lib/storage.ts';
+import { ogUrl } from '../lib/og.ts';
 
 const A = import.meta.env.BASE_URL;
 
@@ -427,7 +428,7 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
             <ShareButton
               label="결과 공유하기"
               text={shareText}
-              url={`${location.origin}${A}#/test/${quiz.id}`}
+              url={ogUrl(`test/${quiz.id}/${result.code}`)}
             />
             <ShareImageButton
               data={{
@@ -442,7 +443,7 @@ function QuizRunner({ quiz }: { quiz: QuizDef }) {
                 ],
               }}
               text={shareText}
-              url={`${location.origin}${A}#/test/${quiz.id}`}
+              url={ogUrl(`test/${quiz.id}/${result.code}`)}
             />
           </div>
           <button

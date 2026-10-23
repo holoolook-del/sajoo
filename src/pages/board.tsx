@@ -10,12 +10,12 @@ import {
   boardFlag, loadCardDraw, loadFortune, loadTestResult,
 } from '../lib/storage.ts';
 import { todayKST, timeAgo } from '../lib/date.ts';
-import { APP_URL } from '../lib/share.ts';
+import { ogUrl } from '../lib/og.ts';
 import { useSaju } from '../features/saju/use-saju.ts';
 import { interpretSaju } from '../lib/interpret.ts';
 import { boardNickname, saveNickname } from '../features/board/nickname.ts';
 import {
-  addComment, addPost, deviceUid, likePost, removePost, reportPost,
+  addComment, addPost, deviceUid, isAdmin, likePost, removeComment, removePost, reportPost,
   watchComments, watchPosts, watchPresence,
   BoardError, HIDE_AT_REPORTS, type Comment, type Post, type ResultCard,
 } from '../features/board/posts.ts';
@@ -30,6 +30,7 @@ export function BoardPage() {
   const [posts, setPosts] = useState<Post[] | null>(null);
   const [online, setOnline] = useState(0);
   const [myUid, setMyUid] = useState('');
+  const [admin, setAdmin] = useState(false);
   const [error, setError] = useState('');
   const [loadErr, setLoadErr] = useState('');
   const [retryKey, setRetryKey] = useState(0);
@@ -45,6 +46,7 @@ export function BoardPage() {
     );
     const un2 = watchPresence(setOnline, () => {});
     void deviceUid().then(setMyUid).catch(() => setError('연결에 실패했어요 — 잠시 후 다시 열어주세요'));
+    void isAdmin().then(setAdmin).catch(() => {});
     const slow = setTimeout(() => {
       if (!gotData.current) setLoadErr('연결이 느려요 — 네트워크를 확인하거나 다시 시도해주세요');
     }, 12_000);
@@ -149,7 +151,7 @@ export function BoardPage() {
                     신고로 가려진 글이에요
                   </li>
                 ) : (
-                  <PostItem key={p.id} post={p} mine={p.uid !== '' && p.uid === myUid} onError={setError} />
+                  <PostItem key={p.id} post={p} mine={p.uid !== '' && p.uid === myUid} admin={admin} onError={setError} />
                 ),
               )}
             </AnimatePresence>
@@ -311,7 +313,7 @@ function WriteBox({ onError }: { onError: (m: string) => void }) {
 
 // ── 글 아이템 + 댓글 ──
 
-function PostItem({ post, mine, onError }: { post: Post; mine: boolean; onError: (m: string) => void }) {
+function PostItem({ post, mine, admin, onError }: { post: Post; mine: boolean; admin: boolean; onError: (m: string) => void }) {
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [cText, setCText] = useState('');
@@ -353,10 +355,13 @@ function PostItem({ post, mine, onError }: { post: Post; mine: boolean; onError:
         <p className="text-xs font-bold text-gold-bright">{post.nick}</p>
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-hanji/40">{timeAgo(post.ts)}</span>
-          {mine && (
+          {(mine || admin) && (
             <button
               type="button"
-              onClick={() => void removePost(post.id).catch(() => onError('지우지 못했어요'))}
+              onClick={() => {
+                if (!mine && !window.confirm('관리자로 이 글을 지울까요?')) return;
+                void removePost(post.id).catch(() => onError('지우지 못했어요'));
+              }}
               className="text-[10px] text-hanji/40 underline"
             >
               삭제
@@ -415,7 +420,7 @@ function PostItem({ post, mine, onError }: { post: Post; mine: boolean; onError:
         </div>
         <ShareButton
           label="공유"
-          url={`${APP_URL()}#/board`}
+          url={ogUrl('board')}
           text={`${post.nick}: ${post.text}${post.card ? `\n${post.card.label} ${post.card.big} ${post.card.title}` : ''}\n— 사주 게시판에서`}
         />
       </div>
@@ -440,6 +445,18 @@ function PostItem({ post, mine, onError }: { post: Post; mine: boolean; onError:
                       <span className="font-bold text-gold-bright/80">{c.nick}</span>
                       <span className="ml-1.5 text-hanji/80">{c.text}</span>
                       <span className="ml-1.5 text-[9px] text-hanji/30">{timeAgo(c.ts)}</span>
+                      {admin && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!window.confirm('관리자로 이 댓글을 지울까요?')) return;
+                            void removeComment(post.id, c.id).catch(() => onError('댓글을 지우지 못했어요'));
+                          }}
+                          className="ml-1.5 text-[9px] text-[#e0705a]/60 underline"
+                        >
+                          삭제
+                        </button>
+                      )}
                     </li>
                   ))}
                 </ul>

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.sajoo.twa",
+      "sha256_cert_fingerprints": [
+        "1B:73:BC:C4:EF:ED:E1:AF:2C:E0:FF:62:B8:00:8B:10:20:72:C4:88:38:5B:D4:C3:44:B1:10:CC:0F:50:D1:C1"
+      ]
+    }
+  }
+]

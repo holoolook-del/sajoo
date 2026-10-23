@@ -9,6 +9,7 @@ import { dailyFortune, saveTodaysFortune } from '../features/fortune/today.ts';
 import { useSaju } from '../features/saju/use-saju.ts';
 import { StateView } from '../components/state-view.tsx';
 import { ShareButton } from '../components/share-button.tsx';
+import { GRADE_OG, ogUrl } from '../lib/og.ts';
 import { todayKST } from '../lib/date.ts';
 
 export function FortunePage() {
@@ -106,6 +107,7 @@ export function FortunePage() {
               ? [`좋은 시간 ${fortune.luckyHours.map((h) => `${h.branch}시 ${h.hours}`).join(' · ')}`]
               : []),
           ].join('\n')}
+          url={ogUrl(`fortune/${GRADE_OG[fortune.grade] ?? 'pyeong'}`)}
         />
       </div>
 
